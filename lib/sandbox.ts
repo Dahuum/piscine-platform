@@ -1,17 +1,13 @@
 const WANDBOX = "https://wandbox.org/api/compile.json";
 
 export async function executeCode(code: string, type: "c" | "shell"): Promise<string> {
-  const compiler = type === "shell" ? "bash" : "gcc-head";
+  const compiler = type === "shell" ? "bash" : "gcc-head-c";
 
   try {
     const res = await fetch(WANDBOX, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        compiler,
-        code,
-        "compiler-option-raw": type === "c" ? "-Wall -Wextra -Werror" : "",
-      }),
+      body: JSON.stringify({ compiler, code }),
       signal: AbortSignal.timeout(25000),
     });
 
