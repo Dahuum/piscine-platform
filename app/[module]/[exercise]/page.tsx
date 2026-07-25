@@ -4,7 +4,7 @@ import { modules } from "@/lib/modules";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Badge } from "@heroui/react";
-import { ChevronRight, ChevronLeft, Play, RotateCcw, PanelBottomOpen, PanelBottomClose } from "lucide-react";
+import { ChevronRight, ChevronLeft, Play, RotateCcw, PanelBottomOpen, PanelBottomClose, Sparkles } from "lucide-react";
 import { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
 import { Skeleton } from "@heroui/react";
 
@@ -32,6 +32,7 @@ function ExercisePageInner({
   const ex = mod.exercises[exerciseIndex];
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
+  const [verdict, setVerdict] = useState("");
   const [running, setRunning] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [consoleOpen, setConsoleOpen] = useState(true);
@@ -60,6 +61,7 @@ function ExercisePageInner({
     if (!code.trim()) return;
     setRunning(true);
     setConsoleOpen(true);
+    setVerdict("");
     setOutput("Running...");
     try {
       const res = await fetch("/api/execute", {
@@ -72,8 +74,28 @@ function ExercisePageInner({
     } catch (e: unknown) {
       setOutput("Failed to execute code");
     }
+
+    try {
+      const aiRes = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "user",
+              content: `Exercise: ${mod.title} - ${ex.title}\nDescription: ${ex.description}\n${"prototype" in ex ? `Prototype: ${ex.prototype}\n` : ""}Student code:\n\`\`\`${mod.type === "shell" ? "sh" : "c"}\n${code}\n\`\`\`\n\nEvaluate if this code correctly implements the exercise. Reply with EXACTLY ONE LINE: start with ✅ if correct or ❌ if not, then a short reason (max 15 words). No extra text.`,
+            },
+          ],
+        }),
+      });
+      const aiData = await aiRes.json();
+      setVerdict(aiData.text || "");
+    } catch {
+      setVerdict("");
+    }
+
     setRunning(false);
-  }, [code, ex.id, mod.id]);
+  }, [code, ex.id, mod.id, ex.title, ex.description, mod.title, mod.type]);
 
   const handleCodeChange = useCallback(
     (value: string | undefined) => {
@@ -270,6 +292,11 @@ function ExercisePageInner({
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Console</span>
                 {running && (
                   <span className="text-[10px] text-amber-400 animate-pulse">executing...</span>
+                )}
+                {verdict && (
+                  <span className={`text-[11px] ml-2 truncate ${verdict.startsWith("✅") ? "text-emerald-400" : "text-red-400"}`}>
+                    {verdict}
+                  </span>
                 )}
               </div>
               <pre
