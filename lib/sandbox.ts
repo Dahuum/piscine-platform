@@ -5,14 +5,19 @@ interface SandboxInfo {
   envdAccessToken: string;
 }
 
+function headers(token?: string): Record<string, string> {
+  const h: Record<string, string> = {
+    "X-API-KEY": process.env.E2B_API_KEY!,
+    "Content-Type": "application/json",
+  };
+  if (token) h["X-Access-Token"] = token;
+  return h;
+}
+
 async function createSandbox(): Promise<SandboxInfo> {
-  const key = process.env.E2B_API_KEY!;
   const res = await fetch(`${E2B_API}/sandboxes`, {
     method: "POST",
-    headers: {
-      Authorization: `ApiKey ${key}`,
-      "Content-Type": "application/json",
-    },
+    headers: headers(),
     body: JSON.stringify({ template: "base", timeout: 60000 }),
     signal: AbortSignal.timeout(15000),
   });
@@ -23,7 +28,7 @@ async function createSandbox(): Promise<SandboxInfo> {
   }
 
   const data = await res.json();
-  return { sandboxId: data.sandboxId, envdAccessToken: data.envdAccessToken };
+  return { sandboxId: data.sandboxID || data.sandboxId, envdAccessToken: data.envdAccessToken };
 }
 
 async function runCommand(
@@ -32,20 +37,12 @@ async function runCommand(
   cmd: string,
   timeoutMs = 20000,
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const key = process.env.E2B_API_KEY!;
-  const res = await fetch(
-    `${E2B_API}/sandboxes/${sandboxId}/commands`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `ApiKey ${key}`,
-        "X-Access-Token": token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ cmd, timeout: timeoutMs }),
-      signal: AbortSignal.timeout(timeoutMs + 10000),
-    },
-  );
+  const res = await fetch(`${E2B_API}/sandboxes/${sandboxId}/commands`, {
+    method: "POST",
+    headers: headers(token),
+    body: JSON.stringify({ cmd, timeout: timeoutMs }),
+    signal: AbortSignal.timeout(timeoutMs + 15000),
+  });
 
   if (!res.ok) {
     const err = await res.text();
@@ -61,16 +58,11 @@ async function runCommand(
 }
 
 async function writeFile(sandboxId: string, token: string, path: string, content: string): Promise<void> {
-  const key = process.env.E2B_API_KEY!;
   const res = await fetch(
     `${E2B_API}/sandboxes/${sandboxId}/files?path=${encodeURIComponent(path)}`,
     {
       method: "POST",
-      headers: {
-        Authorization: `ApiKey ${key}`,
-        "X-Access-Token": token,
-        "Content-Type": "text/plain",
-      },
+      headers: { ...headers(token), "Content-Type": "text/plain" },
       body: content,
       signal: AbortSignal.timeout(10000),
     },
@@ -82,15 +74,11 @@ async function writeFile(sandboxId: string, token: string, path: string, content
   }
 }
 
-async function deleteSandbox(sandboxId: string, token: string): Promise<void> {
-  const key = process.env.E2B_API_KEY!;
+async function deleteSandbox(sandboxId: string): Promise<void> {
   try {
     await fetch(`${E2B_API}/sandboxes/${sandboxId}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `ApiKey ${key}`,
-        "X-Access-Token": token,
-      },
+      headers: headers(),
       signal: AbortSignal.timeout(5000),
     });
   } catch { /* ignore cleanup errors */ }
@@ -110,6 +98,10 @@ export async function executeCode(code: string, type: "c" | "shell"): Promise<st
     const sandbox = await createSandbox();
     sandboxId = sandbox.sandboxId;
     token = sandbox.envdAccessToken;
+
+    if (!token) {
+      return `Execution error: no access token returned from sandbox creation. Response: ${JSON.stringify(sandbox)}`;
+    }
 
     if (type === "shell") {
       const result = await runCommand(sandboxId, token, code, 15000);
@@ -143,8 +135,8 @@ export async function executeCode(code: string, type: "c" | "shell"): Promise<st
     const msg = e instanceof Error ? e.message : String(e);
     return `Execution error: ${msg}`;
   } finally {
-    if (sandboxId && token) {
-      await deleteSandbox(sandboxId, token);
+    if (sandboxId) {
+      await deleteSandbox(sandboxId);
     }
   }
 }
