@@ -5,10 +5,8 @@ import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Badge } from "@heroui/react";
 import { ChevronRight, ChevronLeft, Play, RotateCcw, PanelBottomOpen, PanelBottomClose } from "lucide-react";
-import { useEffect, useState, useRef, lazy, Suspense } from "react";
-import { Skeleton } from "@heroui/react";
-
-const CodeEditor = lazy(() => import("@/components/CodeEditor"));
+import { useEffect, useState, useRef } from "react";
+import CodeEditor from "@/components/CodeEditor";
 
 export default function ExercisePage() {
   const params = useParams<{ module: string; exercise: string }>();
@@ -271,13 +269,11 @@ function ExercisePageInner({
 
           {/* Editor */}
           <div className="flex-1 relative bg-[#1e1e1e] min-h-[200px]">
-            <Suspense fallback={<Skeleton className="h-full w-full rounded-none" />}>
-              <CodeEditor
-                value={code}
-                onChange={handleCodeChange}
-                language={mod.type === "shell" ? "shell" : "c"}
-              />
-            </Suspense>
+            <CodeEditor
+              value={code}
+              onChange={handleCodeChange}
+              language={mod.type === "shell" ? "shell" : "c"}
+            />
           </div>
 
           {/* Resizer handle */}
