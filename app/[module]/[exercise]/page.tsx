@@ -62,7 +62,11 @@ function ExercisePageInner({
 
   const handleRun = async () => {
     const currentCode = codeRef.current;
-    if (!currentCode.trim()) return;
+    if (!currentCode.trim()) {
+      setOutput("// Write some code first, then click Run");
+      setConsoleOpen(true);
+      return;
+    }
     setRunning(true);
     setConsoleOpen(true);
     setVerdict("");
@@ -245,7 +249,7 @@ function ExercisePageInner({
               variant="primary"
               size="sm"
               onPress={handleRun}
-              isDisabled={running || !code.trim()}
+              isDisabled={running}
             >
               {running ? <RotateCcw className="h-3.5 w-3.5 animate-spin mr-1" /> : <Play className="h-3.5 w-3.5 mr-1" />}
               {running ? "Running..." : "Run"}
