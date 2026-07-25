@@ -4,8 +4,8 @@ import { modules } from "@/lib/modules";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Badge } from "@heroui/react";
-import { ChevronRight, ChevronLeft, Play, RotateCcw, PanelBottomOpen, PanelBottomClose, Sparkles } from "lucide-react";
-import { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
+import { ChevronRight, ChevronLeft, Play, RotateCcw, PanelBottomOpen, PanelBottomClose } from "lucide-react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { Skeleton } from "@heroui/react";
 
 const CodeEditor = lazy(() => import("@/components/CodeEditor"));
@@ -57,8 +57,12 @@ function ExercisePageInner({
     }
   }, [output]);
 
-  const handleRun = useCallback(async () => {
-    if (!code.trim()) return;
+  const codeRef = useRef(code);
+  codeRef.current = code;
+
+  const handleRun = async () => {
+    const currentCode = codeRef.current;
+    if (!currentCode.trim()) return;
     setRunning(true);
     setConsoleOpen(true);
     setVerdict("");
@@ -67,11 +71,11 @@ function ExercisePageInner({
       const res = await fetch("/api/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, exerciseId: ex.id, moduleId: mod.id }),
+        body: JSON.stringify({ code: currentCode, exerciseId: ex.id, moduleId: mod.id }),
       });
       const data = await res.json();
       setOutput(data.output || data.error || "(no output)");
-    } catch (e: unknown) {
+    } catch {
       setOutput("Failed to execute code");
     }
 
@@ -83,7 +87,7 @@ function ExercisePageInner({
           messages: [
             {
               role: "user",
-              content: `Exercise: ${mod.title} - ${ex.title}\nDescription: ${ex.description}\n${"prototype" in ex ? `Prototype: ${ex.prototype}\n` : ""}Student code:\n\`\`\`${mod.type === "shell" ? "sh" : "c"}\n${code}\n\`\`\`\n\nEvaluate if this code correctly implements the exercise. Reply with EXACTLY ONE LINE: start with ✅ if correct or ❌ if not, then a short reason (max 15 words). No extra text.`,
+              content: `Exercise: ${mod.title} - ${ex.title}\nDescription: ${ex.description}\n${"prototype" in ex ? `Prototype: ${ex.prototype}\n` : ""}Student code:\n\`\`\`${mod.type === "shell" ? "sh" : "c"}\n${currentCode}\n\`\`\`\n\nEvaluate if this code correctly implements the exercise. Reply with EXACTLY ONE LINE: start with ✅ if correct or ❌ if not, then a short reason (max 15 words). No extra text.`,
             },
           ],
         }),
@@ -95,16 +99,13 @@ function ExercisePageInner({
     }
 
     setRunning(false);
-  }, [code, ex.id, mod.id, ex.title, ex.description, mod.title, mod.type]);
+  };
 
-  const handleCodeChange = useCallback(
-    (value: string | undefined) => {
-      const v = value || "";
-      setCode(v);
-      localStorage.setItem(codeKey, v);
-    },
-    [codeKey],
-  );
+  const handleCodeChange = (value: string | undefined) => {
+    const v = value || "";
+    setCode(v);
+    localStorage.setItem(codeKey, v);
+  };
 
   const handleMarkDone = () => {
     const newState = !isDone;
