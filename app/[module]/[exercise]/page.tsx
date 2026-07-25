@@ -94,8 +94,10 @@ function ExercisePageInner({
           ],
         }),
       });
-      const aiData = await aiRes.json();
-      setVerdict(aiData.text || "");
+      const text = await aiRes.text();
+      const parts = text.split("\n").filter(l => l.startsWith("0:"));
+      const verdictText = parts.map(l => { try { return JSON.parse(l.slice(2)); } catch { return ""; } }).join("");
+      setVerdict(verdictText);
     } catch {
       setVerdict("");
     }
@@ -294,17 +296,17 @@ function ExercisePageInner({
                 {running && (
                   <span className="text-[10px] text-amber-400 animate-pulse">executing...</span>
                 )}
-                {verdict && (
-                  <span className={`text-[11px] ml-2 truncate ${verdict.startsWith("✅") ? "text-emerald-400" : "text-red-400"}`}>
-                    {verdict}
-                  </span>
-                )}
               </div>
               <pre
                 ref={outputRef}
                 className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
                 style={{ height: consoleHeight - 34 }}
               >
+                {verdict && (
+                  <div className={`mb-2 pb-2 border-b border-zinc-800 ${verdict.startsWith("✅") ? "text-emerald-400" : "text-red-400"}`}>
+                    {verdict}
+                  </div>
+                )}
                 {output || (
                   <span className="text-zinc-600">
                     {mod.type === "shell"
