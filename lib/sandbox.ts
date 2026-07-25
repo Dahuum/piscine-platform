@@ -6,8 +6,9 @@ interface SandboxInfo {
 }
 
 function headers(token?: string): Record<string, string> {
+  const key = (process.env.E2B_API_KEY || "").trim();
   const h: Record<string, string> = {
-    "X-API-KEY": process.env.E2B_API_KEY!,
+    "X-API-Key": key,
     "Content-Type": "application/json",
   };
   if (token) h["X-Access-Token"] = token;
