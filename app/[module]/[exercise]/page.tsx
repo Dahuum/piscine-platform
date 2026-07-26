@@ -60,7 +60,7 @@ function ExercisePageInner({
   useEffect(() => {
     setExplanation("");
     setLoadingExplanation(true);
-    const cacheKey = `explanation:${mod.id}:${ex.id}`;
+    const cacheKey = `explanation:v2:${mod.id}:${ex.id}`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       setExplanation(cached);
