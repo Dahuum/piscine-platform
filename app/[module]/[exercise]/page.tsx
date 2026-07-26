@@ -49,7 +49,7 @@ function ExercisePageInner({
 
   const progressKey = `progress:${mod.id}:${ex.id}`;
   const codeKey = `code:${mod.id}:${ex.id}`;
-  const cacheKey = `explanation:v7:${mod.id}:${ex.id}`;
+  const cacheKey = `explanation:v8:${mod.id}:${ex.id}`;
 
   useEffect(() => {
     const savedCode = localStorage.getItem(codeKey);
@@ -379,7 +379,7 @@ function Explanation({ text }: { text: string }) {
   while (i < lines.length) {
     const line = lines[i];
 
-    if (/^(WHAT YOU'RE LEARNING|HOW TO DO IT|THE CODE|HOW IT BEHAVES|KEY RULES|WATCH OUT FOR):?$/i.test(line.trim())) {
+    if (/^(WHAT YOU'RE LEARNING|HOW TO APPROACH|SIMILAR EXAMPLE|HOW IT BEHAVES|WATCH OUT FOR):?$/i.test(line.trim())) {
       els.push(<h4 key={i} className="text-[11px] font-bold text-foreground mt-4 mb-2 uppercase tracking-wide">{line.trim().replace(/:$/, "")}</h4>);
       i++;
     } else if (line.trim().startsWith("```")) {
@@ -431,7 +431,7 @@ function InlineCode({ text }: { text: string }) {
 function promptAI(module: string, exercise: string, description: string, type: string, ex: Record<string, unknown>) {
   const proto = "prototype" in ex ? `Prototype: ${ex.prototype}` : "";
   const allowed = "allowed" in ex && Array.isArray(ex.allowed) ? `Allowed: ${ex.allowed.join(", ")}` : "";
-  return `You are teaching beginners at the 42 School C Piscine. Be simple and direct. Always write real, complete, working code. Never use placeholders like "// your code here".
+  return `You are teaching beginners at the 42 School C Piscine. Be simple and direct. NEVER give the complete solution — students must figure it out themselves. Show SIMILAR examples instead, never the exact answer.
 
 Module: ${module}
 Exercise: ${exercise}
@@ -439,33 +439,31 @@ Description: ${description}
 ${proto}
 ${allowed}
 
-Reply in this exact format using triple backticks for code blocks:
+Reply in this exact format:
 
 WHAT YOU'RE LEARNING:
-1 short sentence.
+1 short sentence about the concept.
 
-HOW TO DO IT:
-- Step with \`inline code\`
-- Step with \`inline code\`
+HOW TO APPROACH:
+- Think about what the function receives as input
+- What should it do with that input
+- What should it output (if anything)
 
-THE CODE:
+SIMILAR EXAMPLE:
 \`\`\`c
-write the complete working function here
+// Show a DIFFERENT but similar function — NOT the solution to this exercise.
+// For example: if the exercise asks to print a char, show how to print a number instead.
+// This helps them understand the pattern without giving away the answer.
 \`\`\`
 
 HOW IT BEHAVES:
 \`\`\`
-Input: call the function with a real argument
-Output: what it prints or returns
+// Show what the SIMILAR example does with real input/output
 \`\`\`
 
-KEY RULES:
-- rule
-- rule
-
 WATCH OUT FOR:
-- mistake
-- mistake`;
+- Common mistake beginners make
+- Another mistake`;
 }
 
 function verdictPrompt(module: string, exercise: string, description: string, type: string, code: string, ex: Record<string, unknown>) {
