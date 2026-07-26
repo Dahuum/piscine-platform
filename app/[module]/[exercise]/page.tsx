@@ -35,6 +35,8 @@ function ExercisePageInner({
   const [isDone, setIsDone] = useState(false);
   const [consoleOpen, setConsoleOpen] = useState(true);
   const [consoleHeight, setConsoleHeight] = useState(200);
+  const [explanation, setExplanation] = useState("");
+  const [loadingExplanation, setLoadingExplanation] = useState(false);
   const outputRef = useRef<HTMLPreElement>(null);
   const resizingRef = useRef(false);
 
@@ -54,6 +56,68 @@ function ExercisePageInner({
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
   }, [output]);
+
+  useEffect(() => {
+    setExplanation("");
+    setLoadingExplanation(true);
+    const cacheKey = `explanation:${mod.id}:${ex.id}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      setExplanation(cached);
+      setLoadingExplanation(false);
+      return;
+    }
+
+    const fetchExplanation = async () => {
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "user",
+                content: `You are teaching the 42 School C Piscine. Explain this exercise to a beginner who knows basic C syntax but not the specific concept.
+
+Module: ${mod.title}
+Exercise: ${ex.title}
+Description: ${ex.description}
+${"prototype" in ex ? `Prototype: ${ex.prototype}` : ""}
+${"allowed" in ex && ex.allowed ? `Allowed: ${ex.allowed.join(", ")}` : ""}
+
+Explain in this format (plain text, no markdown):
+
+WHAT YOU'RE LEARNING:
+(2-3 sentences about the concept this exercise teaches)
+
+HOW IT WORKS:
+(step by step what the function does, mention each allowed function and what it does)
+
+KEY POINTS:
+- bullet point 1
+- bullet point 2
+- bullet point 3
+
+COMMON MISTAKES:
+- mistake 1
+- mistake 2`,
+              },
+            ],
+          }),
+        });
+        const text = await res.text();
+        const parts = text.split("\n").filter(l => l.startsWith("0:"));
+        const content = parts.map(l => { try { return JSON.parse(l.slice(2)); } catch { return ""; } }).join("");
+        setExplanation(content);
+        localStorage.setItem(cacheKey, content);
+      } catch {
+        setExplanation("Failed to load explanation.");
+      }
+      setLoadingExplanation(false);
+    };
+
+    fetchExplanation();
+  }, [mod.id, mod.title, ex.id, ex.title, ex.description, ex.prototype, ex.allowed]);
 
   const codeRef = useRef(code);
   codeRef.current = code;
@@ -209,6 +273,27 @@ function ExercisePageInner({
                 : "Your code will be compiled with gcc and executed.\n\nWrite the function as specified. The test main() will be added automatically for execution."}
             </p>
           </Card>
+
+          <div className="mt-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center">
+                <span className="text-[10px]">📖</span>
+              </div>
+              <h3 className="text-sm font-semibold">AI Explanation</h3>
+            </div>
+            {loadingExplanation ? (
+              <div className="space-y-2">
+                <div className="h-3 w-3/4 rounded bg-muted animate-pulse" />
+                <div className="h-3 w-full rounded bg-muted animate-pulse" />
+                <div className="h-3 w-2/3 rounded bg-muted animate-pulse" />
+                <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground leading-relaxed space-y-2 whitespace-pre-line">
+                {explanation || "Click Run to generate explanation."}
+              </div>
+            )}
+          </div>
 
           <div className="flex gap-2 mt-5">
             {prevEx ? (
