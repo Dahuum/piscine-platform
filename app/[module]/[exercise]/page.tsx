@@ -117,7 +117,7 @@ COMMON MISTAKES:
     };
 
     fetchExplanation();
-  }, [mod.id, mod.title, ex.id, ex.title, ex.description, ex.prototype, ex.allowed]);
+  }, [mod.id, mod.title, ex.id, ex.title, ex.description]);
 
   const codeRef = useRef(code);
   codeRef.current = code;
