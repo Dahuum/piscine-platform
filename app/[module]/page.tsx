@@ -3,71 +3,73 @@
 import { modules, type Exercise } from "@/lib/modules";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
-import { Card, Badge } from "@heroui/react";
-import ProgressTracker from "@/components/ProgressTracker";
-import { ChevronRight, Lock, CheckCircle2, Circle, Terminal, Code2 } from "lucide-react";
+import { ProgressBar } from "@heroui/react";
+import { ChevronRight, ChevronLeft, Lock, CheckCircle2, Circle, Terminal, Code2, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function ModulePage() {
   const params = useParams<{ module: string }>();
   const mod = modules[params.module as keyof typeof modules];
-
   if (!mod) notFound();
-
   return <ModulePageInner mod={mod} />;
 }
 
 function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] }) {
   const [completed, setCompleted] = useState<string[]>([]);
+  const total = mod.exercises.length;
+  const pct = total > 0 ? Math.round((completed.length / total) * 100) : 0;
 
   useEffect(() => {
     const done: string[] = [];
     mod.exercises.forEach((ex: Exercise) => {
-      if (localStorage.getItem(`progress:${mod.id}:${ex.id}`) === "done") {
-        done.push(ex.id);
-      }
+      if (localStorage.getItem(`progress:${mod.id}:${ex.id}`) === "done") done.push(ex.id);
     });
     setCompleted(done);
   }, [mod.id, mod.exercises]);
 
-  const xp = completed.length * 50;
-
   const isUnlocked = (index: number) => {
     if (index === 0) return true;
-    const prev = mod.exercises[index - 1];
-    return completed.includes(prev.id);
+    return completed.includes(mod.exercises[index - 1].id);
   };
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 py-8 sm:py-12">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-1 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground transition-colors no-underline">
-            Modules
-          </Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground">{mod.title}</span>
+    <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
+      {/* Back + Header */}
+      <Link href="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-4">
+        <ChevronLeft className="h-3.5 w-3.5" /> All Modules
+      </Link>
+
+      <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            {mod.type === "shell" ? (
+              <div className="h-7 w-7 rounded flex items-center justify-center text-emerald-500 bg-emerald-500/10">
+                <Terminal className="h-4 w-4" />
+              </div>
+            ) : (
+              <div className="h-7 w-7 rounded flex items-center justify-center text-primary bg-primary/10">
+                <Code2 className="h-4 w-4" />
+              </div>
+            )}
+            <h1 className="text-2xl font-bold">{mod.title}</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1 max-w-lg">{mod.summary}</p>
         </div>
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {mod.type === "shell" ? (
-                <Terminal className="inline h-7 w-7 mr-2 text-emerald-500" />
-              ) : (
-                <Code2 className="inline h-7 w-7 mr-2 text-primary" />
-              )}
-              {mod.title}
-            </h1>
-            <p className="mt-2 text-muted-foreground max-w-2xl">{mod.summary}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Version {mod.version}</p>
+
+        <div className="flex items-center gap-3">
+          <div className="w-32">
+            <ProgressBar value={pct} color={pct === 100 ? "success" : "accent"} size="sm" />
           </div>
-          <div className="w-full sm:w-64">
-            <ProgressTracker completed={completed.length} total={mod.exercises.length} xp={xp} />
+          <div className="text-sm tabular-nums">
+            <span className="font-semibold">{completed.length}</span>
+            <span className="text-muted-foreground">/{total}</span>
           </div>
+          {pct === 100 && <Trophy className="h-5 w-5 text-emerald-500" />}
         </div>
       </div>
 
-      <div className="space-y-3">
+      {/* Exercise list */}
+      <div className="space-y-1">
         {mod.exercises.map((ex: Exercise, index: number) => {
           const isDone = completed.includes(ex.id);
           const unlocked = isUnlocked(index);
@@ -76,43 +78,47 @@ function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] })
             <Link
               key={ex.id}
               href={unlocked ? `/${mod.id}/${ex.id}` : "#"}
-              className={`block no-underline ${!unlocked ? "pointer-events-none" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group no-underline border border-transparent ${
+                unlocked
+                  ? "hover:bg-muted/50 hover:border-border cursor-pointer"
+                  : "opacity-40 pointer-events-none"
+              }`}
             >
-              <Card
-                className={`transition-all ${
-                  unlocked ? "hover:shadow-md cursor-pointer hover:-translate-y-0.5" : "opacity-50"
-                } border`}
-              >
-                <div className="flex items-center gap-4 px-4 py-3">
-                  <div className="flex-shrink-0">
-                    {isDone ? (
-                      <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-                    ) : unlocked ? (
-                      <Circle className="h-6 w-6 text-muted-foreground" />
-                    ) : (
-                      <Lock className="h-6 w-6 text-muted-foreground/50" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Exercise {String(ex.number).padStart(2, "0")}:</span>
-                      <span className="font-semibold">{ex.title}</span>
-                      {isDone && (
-                        <Badge variant="soft" color="success" size="sm">
-                          Done
-                        </Badge>
-                      )}
-                      {"prototype" in ex && (
-                        <code className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono hidden sm:inline">
-                          {ex.prototype}
-                        </code>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">{ex.description}</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                </div>
-              </Card>
+              {/* Status icon */}
+              <div className="flex-shrink-0">
+                {isDone ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                ) : unlocked ? (
+                  <Circle className="h-5 w-5 text-muted-foreground/30" />
+                ) : (
+                  <Lock className="h-5 w-5 text-muted-foreground/20" />
+                )}
+              </div>
+
+              {/* Number + Title */}
+              <div className="w-16 flex-shrink-0">
+                <span className={`text-xs font-semibold tabular-nums ${isDone ? "text-emerald-600" : "text-muted-foreground"}`}>
+                  Ex {String(ex.number).padStart(2, "0")}
+                </span>
+              </div>
+
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <span className={`text-sm font-medium truncate ${isDone ? "text-muted-foreground" : ""}`}>
+                  {ex.title}
+                </span>
+                {"prototype" in ex && (
+                  <code className="text-[11px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono hidden md:inline truncate">
+                    {ex.prototype}
+                  </code>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {isDone && (
+                  <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-wider">Done</span>
+                )}
+                <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-foreground transition-colors" />
+              </div>
             </Link>
           );
         })}
