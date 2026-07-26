@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@heroui/react";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -12,17 +13,28 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string | undefined) => void;
   language: "c" | "shell";
-  theme?: string;
 }
 
-export default function CodeEditor({ value, onChange, language, theme }: CodeEditorProps) {
+export default function CodeEditor({ value, onChange, language }: CodeEditorProps) {
+  const [theme, setTheme] = useState<"vs-dark" | "vs">("vs-dark");
+
+  useEffect(() => {
+    const update = () => {
+      setTheme(document.documentElement.classList.contains("dark") ? "vs-dark" : "vs");
+    };
+    update();
+    const obs = new MutationObserver(update);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
   return (
     <MonacoEditor
       height="100%"
       language={language === "shell" ? "shell" : "c"}
       value={value}
       onChange={onChange}
-      theme={theme || "vs-dark"}
+      theme={theme}
       options={{
         minimap: { enabled: false },
         fontSize: 14,

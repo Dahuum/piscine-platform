@@ -283,7 +283,7 @@ function ExercisePageInner({
           )}
 
           {/* Editor */}
-          <div className="flex-1 relative bg-[#1e1e1e] min-h-[120px]">
+          <div className="flex-1 relative bg-white dark:bg-[#1e1e1e] min-h-[120px]">
             <CodeEditor value={code} onChange={(v) => { const val = v || ""; setCode(val); localStorage.setItem(codeKey, val); }}
               language={mod.type === "shell" ? "shell" : "c"} />
           </div>
@@ -298,13 +298,13 @@ function ExercisePageInner({
 
           {/* Console */}
           {consoleOpen && (
-            <div className="flex-shrink-0 border-t bg-zinc-950" style={{ height: consoleHeight }}>
-              <div className="px-3 py-1.5 border-b border-zinc-800 flex items-center gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Output</span>
-                {running && <span className="text-[10px] text-amber-400 animate-pulse">running...</span>}
+            <div className="flex-shrink-0 border-t bg-white dark:bg-zinc-950" style={{ height: consoleHeight }}>
+              <div className="px-3 py-1.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Output</span>
+                {running && <span className="text-[10px] text-amber-600 dark:text-amber-400 animate-pulse">running...</span>}
                 <div className="flex-1" />
                 {verdict && (
-                  <span className={`text-[11px] truncate max-w-[60%] ${verdict.trim().startsWith("✅") ? "text-emerald-400" : "text-red-400"}`}>
+                  <span className={`text-[11px] truncate max-w-[60%] ${verdict.trim().startsWith("✅") ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                     {verdict}
                   </span>
                 )}
@@ -313,12 +313,12 @@ function ExercisePageInner({
                 className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
                 style={{ height: consoleHeight - 33 }}>
                 {verdict && (
-                  <div className={`mb-2 pb-2 border-b border-zinc-800 font-sans text-xs font-medium ${verdict.trim().startsWith("✅") ? "text-emerald-400" : "text-red-400"}`}>
+                  <div className={`mb-2 pb-2 border-b border-zinc-200 dark:border-zinc-800 font-sans text-xs font-medium ${verdict.trim().startsWith("✅") ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                     {verdict}
                   </div>
                 )}
                 {output || (
-                  <span className="text-zinc-600">// Write code and press Run or Ctrl+Enter</span>
+                  <span className="text-zinc-400 dark:text-zinc-600">// Write code and press Run or Ctrl+Enter</span>
                 )}
               </pre>
             </div>
