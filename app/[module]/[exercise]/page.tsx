@@ -469,16 +469,6 @@ WATCH OUT FOR:
 - mistake
 - mistake`;
 }
-\`\`\`
-
-KEY RULES:
-- Important rule
-- Another rule
-
-WATCH OUT FOR:
-- Common mistake
-- Another mistake`;
-}
 
 function verdictPrompt(module: string, exercise: string, description: string, type: string, code: string, ex: Record<string, unknown>) {
   const proto = "prototype" in ex ? `Prototype: ${ex.prototype}` : "";
