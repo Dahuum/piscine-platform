@@ -289,9 +289,7 @@ COMMON MISTAKES:
                 <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
               </div>
             ) : (
-              <div className="text-sm text-muted-foreground leading-relaxed space-y-2 whitespace-pre-line">
-                {explanation || "Click Run to generate explanation."}
-              </div>
+              <Explanation text={explanation || "Click Run to generate explanation."} />
             )}
           </div>
 
@@ -406,4 +404,50 @@ COMMON MISTAKES:
       </div>
     </div>
   );
+}
+
+function Explanation({ text }: { text: string }) {
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (/^(WHAT YOU'RE LEARNING|HOW IT WORKS|KEY POINTS|COMMON MISTAKES):?$/i.test(line.trim())) {
+      elements.push(
+        <h4 key={i} className="text-xs font-bold text-foreground mt-4 mb-1.5 tracking-wide uppercase">
+          {line.trim().replace(/:$/, "")}
+        </h4>,
+      );
+      i++;
+    } else if (line.trim().startsWith("- ")) {
+      const items: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith("- ")) {
+        items.push(lines[i].trim().slice(2));
+        i++;
+      }
+      elements.push(
+        <ul key={i} className="space-y-1 ml-1">
+          {items.map((item, j) => (
+            <li key={j} className="text-[13px] text-muted-foreground leading-relaxed flex gap-2">
+              <span className="text-primary/50 mt-0.5 flex-shrink-0">•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>,
+      );
+    } else if (line.trim()) {
+      elements.push(
+        <p key={i} className="text-[13px] text-muted-foreground leading-relaxed">
+          {line.trim()}
+        </p>,
+      );
+      i++;
+    } else {
+      i++;
+    }
+  }
+
+  return <div>{elements}</div>;
 }
