@@ -332,8 +332,8 @@ function ExercisePageInner({
 function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
     <button onClick={onClick}
-      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors ${
-        active ? "text-foreground border-b-2 border-primary bg-background" : "text-muted-foreground hover:text-foreground border-b-2 border-transparent"
+      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors border-b-2 ${
+        active ? "text-foreground border-primary bg-background" : "text-muted-foreground hover:text-foreground border-transparent"
       }`}>
       {icon} {label}
     </button>
