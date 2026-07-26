@@ -49,7 +49,7 @@ function ExercisePageInner({
 
   const progressKey = `progress:${mod.id}:${ex.id}`;
   const codeKey = `code:${mod.id}:${ex.id}`;
-  const cacheKey = `explanation:v5:${mod.id}:${ex.id}`;
+  const cacheKey = `explanation:v6:${mod.id}:${ex.id}`;
 
   useEffect(() => {
     const savedCode = localStorage.getItem(codeKey);
@@ -379,7 +379,7 @@ function Explanation({ text }: { text: string }) {
   while (i < lines.length) {
     const line = lines[i];
 
-    if (/^(WHAT YOU'RE LEARNING|HOW TO DO IT|KEY RULES|WATCH OUT FOR|EXAMPLE):?$/i.test(line.trim())) {
+    if (/^(WHAT YOU'RE LEARNING|HOW TO DO IT|THE CODE|HOW IT BEHAVES|KEY RULES|WATCH OUT FOR):?$/i.test(line.trim())) {
       els.push(<h4 key={i} className="text-[11px] font-bold text-foreground mt-4 mb-2 uppercase tracking-wide">{line.trim().replace(/:$/, "")}</h4>);
       i++;
     } else if (line.trim().startsWith("```")) {
@@ -431,7 +431,7 @@ function InlineCode({ text }: { text: string }) {
 function promptAI(module: string, exercise: string, description: string, type: string, ex: Record<string, unknown>) {
   const proto = "prototype" in ex ? `Prototype: ${ex.prototype}` : "";
   const allowed = "allowed" in ex && Array.isArray(ex.allowed) ? `Allowed: ${ex.allowed.join(", ")}` : "";
-  return `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be simple and direct.
+  return `You are teaching complete beginners at the 42 School C Piscine. Be simple and direct.
 
 Module: ${module}
 Exercise: ${exercise}
@@ -439,7 +439,7 @@ Description: ${description}
 ${proto}
 ${allowed}
 
-Reply in this EXACT format. Put all code inside triple backticks with the language. Never skip the EXAMPLE section.
+Reply in this EXACT format. Put code inside triple backticks. Include BOTH sections.
 
 WHAT YOU'RE LEARNING:
 (1 short sentence)
@@ -448,13 +448,26 @@ HOW TO DO IT:
 - Step 1 with \`inline code\`
 - Step 2 with \`inline code\`
 
-EXAMPLE:
+THE CODE:
 \`\`\`c
-// Complete working implementation of ${exercise}
-#include <unistd.h>
+// Complete working implementation
+${proto ? proto + " {\n    // your code here\n}" : "// your implementation here"}
+\`\`\`
 
-void ${ex.title}(...) {
-    // your implementation here
+HOW IT BEHAVES:
+\`\`\`
+// Show what happens when you call the function:
+// Input: example call with real values
+// Output: what it prints/returns
+\`\`\`
+
+KEY RULES:
+- rule
+- rule
+
+WATCH OUT FOR:
+- mistake
+- mistake`;
 }
 \`\`\`
 
