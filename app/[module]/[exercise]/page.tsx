@@ -177,13 +177,9 @@ function ExercisePageInner({
 
       <div className="flex-1 flex lg:flex-row overflow-hidden min-h-0">
         {/* Left panel */}
-        <div className="lg:w-[340px] border-r flex flex-col flex-shrink-0 overflow-hidden">
-          <div className="flex border-b bg-muted/30 flex-shrink-0">
-            <TabButton active={leftTab === "exercise"} onClick={() => setLeftTab("exercise")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Exercise" />
-            <TabButton active={leftTab === "explanation"} onClick={() => setLeftTab("explanation")} icon={<Lightbulb className="h-3.5 w-3.5" />} label="Explanation" />
-          </div>
+        <div className="lg:w-[340px] border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
 
-          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
+          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin min-h-0">
             {leftTab === "exercise" ? (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">{ex.description}</p>
@@ -243,8 +239,13 @@ function ExercisePageInner({
 
         {/* Right panel */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0 relative">
-          {/* Toolbar */}
+          {/* Toolbar with tabs */}
           <div className="border-b px-3 py-1.5 flex items-center gap-2 bg-muted/30 flex-shrink-0">
+            <div className="flex items-center gap-0.5">
+              <TabButton active={leftTab === "exercise"} onClick={() => setLeftTab("exercise")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Exercise" />
+              <TabButton active={leftTab === "explanation"} onClick={() => setLeftTab("explanation")} icon={<Lightbulb className="h-3.5 w-3.5" />} label="Explanation" />
+            </div>
+            <div className="w-px h-5 bg-border mx-1" />
             <Button variant="primary" size="sm" onPress={handleRun} isDisabled={running}
               className="font-medium">
               {running ? <RotateCcw className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Play className="h-3.5 w-3.5 mr-1.5" />}
