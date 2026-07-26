@@ -49,7 +49,7 @@ function ExercisePageInner({
 
   const progressKey = `progress:${mod.id}:${ex.id}`;
   const codeKey = `code:${mod.id}:${ex.id}`;
-  const cacheKey = `explanation:v4:${mod.id}:${ex.id}`;
+  const cacheKey = `explanation:v5:${mod.id}:${ex.id}`;
 
   useEffect(() => {
     const savedCode = localStorage.getItem(codeKey);
@@ -375,31 +375,45 @@ function Explanation({ text }: { text: string }) {
   const lines = text.split("\n");
   const els: React.ReactNode[] = [];
   let i = 0;
+
   while (i < lines.length) {
     const line = lines[i];
 
     if (/^(WHAT YOU'RE LEARNING|HOW TO DO IT|KEY RULES|WATCH OUT FOR|EXAMPLE):?$/i.test(line.trim())) {
-      els.push(<h4 key={i} className="text-xs font-bold text-foreground mt-4 mb-1.5 tracking-wide uppercase">{line.trim().replace(/:$/, "")}</h4>);
+      els.push(<h4 key={i} className="text-[11px] font-bold text-foreground mt-4 mb-2 uppercase tracking-wide">{line.trim().replace(/:$/, "")}</h4>);
       i++;
-    } else if (line.trim().startsWith("- ")) {
-      const items: string[] = [];
-      while (i < lines.length && lines[i].trim().startsWith("- ")) { items.push(lines[i].trim().slice(2)); i++; }
-      els.push(<ul key={i} className="space-y-1.5 ml-0.5">{items.map((it, j) => (
-        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed pl-0.5"><InlineCode text={it} /></li>
-      ))}</ul>);
-    } else if (/^\d+\.\s/.test(line.trim())) {
-      const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
-        items.push(lines[i].trim().replace(/^\d+\.\s/, ""));
+    } else if (line.trim().startsWith("```")) {
+      const lang = line.trim().slice(3).trim();
+      i++;
+      const codeLines: string[] = [];
+      while (i < lines.length && !lines[i].trim().startsWith("```")) {
+        codeLines.push(lines[i]);
         i++;
       }
-      els.push(<ol key={i} className="space-y-1.5 ml-0.5 list-decimal list-inside">{items.map((it, j) => (
-        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed marker:text-muted-foreground/50 marker:text-xs"><InlineCode text={it} /></li>
-      ))}</ol>);
+      i++; // skip closing ```
+      els.push(
+        <pre key={i} className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border text-xs font-mono overflow-x-auto my-2">
+          <code>{codeLines.join("\n")}</code>
+        </pre>
+      );
+    } else if (line.trim().startsWith("- ")) {
+      const items: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith("- ")) {
+        items.push(lines[i].trim().slice(2));
+        i++;
+      }
+      els.push(<ul key={i} className="space-y-1 ml-1">{items.map((it, j) => (
+        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed flex gap-1.5">
+          <span className="text-muted-foreground/40 mt-0.5">-</span>
+          <InlineCode text={it} />
+        </li>
+      ))}</ul>);
     } else if (line.trim()) {
       els.push(<p key={i} className="text-[13px] text-muted-foreground leading-relaxed"><InlineCode text={line.trim()} /></p>);
       i++;
-    } else { i++; }
+    } else {
+      i++;
+    }
   }
   return <div>{els}</div>;
 }
@@ -408,7 +422,7 @@ function InlineCode({ text }: { text: string }) {
   const parts = text.split(/(`[^`]+`)/g);
   return <>{parts.filter(Boolean).map((part, i) => {
     if (part.startsWith("`") && part.endsWith("`")) {
-      return <code key={i} className="inline px-1 py-px rounded bg-muted font-mono text-[12px]">{part.slice(1, -1)}</code>;
+      return <code key={i} className="px-1 py-px rounded bg-muted font-mono text-[11px]">{part.slice(1, -1)}</code>;
     }
     return <span key={i}>{part}</span>;
   })}</>;
@@ -417,7 +431,7 @@ function InlineCode({ text }: { text: string }) {
 function promptAI(module: string, exercise: string, description: string, type: string, ex: Record<string, unknown>) {
   const proto = "prototype" in ex ? `Prototype: ${ex.prototype}` : "";
   const allowed = "allowed" in ex && Array.isArray(ex.allowed) ? `Allowed: ${ex.allowed.join(", ")}` : "";
-  return `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be extremely simple, direct, and practical. Always include concrete code snippets. Use \`backticks\` for code. It is CRITICAL that you include an EXAMPLE section with a complete working implementation.
+  return `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be simple and direct.
 
 Module: ${module}
 Exercise: ${exercise}
@@ -425,26 +439,32 @@ Description: ${description}
 ${proto}
 ${allowed}
 
-Reply in this EXACT format. Do not skip any section:
+Reply in this EXACT format. Put all code inside triple backticks with the language. Never skip the EXAMPLE section.
 
 WHAT YOU'RE LEARNING:
 (1 short sentence)
 
 HOW TO DO IT:
-(2-3 numbered steps. Put code in \`backticks\`.
-1. First step with \`code\`
-2. Second step with \`code\`)
+- Step 1 with \`inline code\`
+- Step 2 with \`inline code\`
 
 EXAMPLE:
-(Write a COMPLETE working implementation of this exercise. Every line of code. This is the most important section. Include the function exactly as it should be submitted.)
+\`\`\`c
+// Complete working implementation of ${exercise}
+#include <unistd.h>
+
+void ${ex.title}(...) {
+    // your implementation here
+}
+\`\`\`
 
 KEY RULES:
-- Important rule with \`code\`
+- Important rule
 - Another rule
 
 WATCH OUT FOR:
-- Common beginner mistake to avoid
-- Another mistake to avoid`;
+- Common mistake
+- Another mistake`;
 }
 
 function verdictPrompt(module: string, exercise: string, description: string, type: string, code: string, ex: Record<string, unknown>) {
