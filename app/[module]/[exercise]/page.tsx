@@ -147,7 +147,7 @@ function ExercisePageInner({
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* Top bar */}
-      <div className="border-b px-4 py-2 flex items-center gap-3 flex-shrink-0 bg-background">
+      <div className="border-b px-4 flex items-center gap-3 flex-shrink-0 bg-background" style={{ height: 38 }}>
         <Link href={`/${mod.id}`} className="text-xs text-muted-foreground hover:text-foreground no-underline flex items-center gap-1">
           <ChevronLeft className="h-3.5 w-3.5" /> {mod.title}
         </Link>
@@ -165,11 +165,13 @@ function ExercisePageInner({
 
         <div className="flex items-center">
           <Button isIconOnly variant="ghost" size="sm" isDisabled={!prevEx}
-            onPress={() => prevEx && router.push(`/${mod.id}/${prevEx.id}`)} aria-label="Previous">
+            onPress={() => prevEx && router.push(`/${mod.id}/${prevEx.id}`)} aria-label="Previous"
+            className="hover:bg-muted transition-colors">
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button isIconOnly variant="ghost" size="sm" isDisabled={!nextEx}
-            onPress={() => nextEx && router.push(`/${mod.id}/${nextEx.id}`)} aria-label="Next">
+            onPress={() => nextEx && router.push(`/${mod.id}/${nextEx.id}`)} aria-label="Next"
+            className="hover:bg-muted transition-colors">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -178,7 +180,7 @@ function ExercisePageInner({
       <div className="flex-1 flex lg:flex-row overflow-hidden min-h-0">
         {/* Left panel */}
         <div className="lg:w-[340px] border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
-          <div className="flex border-b bg-muted/30 flex-shrink-0" style={{ height: 33 }}>
+          <div className="flex border-b bg-muted/30 flex-shrink-0" style={{ height: 40 }}>
             <TabButton active={leftTab === "exercise"} onClick={() => setLeftTab("exercise")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Exercise" />
             <TabButton active={leftTab === "explanation"} onClick={() => setLeftTab("explanation")} icon={<Lightbulb className="h-3.5 w-3.5" />} label="Explanation" />
           </div>
@@ -244,9 +246,14 @@ function ExercisePageInner({
         {/* Right panel */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0 relative">
           {/* Toolbar */}
-          <div className="border-b px-3 flex items-center gap-2 bg-muted/30 flex-shrink-0" style={{ height: 33 }}>
-            <Button variant="primary" size="sm" onPress={handleRun} isDisabled={running}
-              className="font-medium">
+          <div className="border-b px-3 flex items-center gap-2 bg-muted/30 flex-shrink-0" style={{ height: 40 }}>
+            <Button
+              variant="primary"
+              size="sm"
+              onPress={handleRun}
+              isDisabled={running}
+              className="font-semibold shadow-sm hover:shadow-md transition-shadow"
+            >
               {running ? <RotateCcw className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Play className="h-3.5 w-3.5 mr-1.5" />}
               {running ? "Running" : "Run"}
             </Button>
@@ -255,17 +262,26 @@ function ExercisePageInner({
             </span>
             <div className="flex-1" />
 
-            <Button size="sm" variant="ghost"
-              onPress={() => { const s = !isDone; setIsDone(s); localStorage.setItem(progressKey, s ? "done" : ""); }}>
-              {isDone ? <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-emerald-500" /> : <Circle className="h-3.5 w-3.5 mr-1" />}
-              <span className="text-xs">{isDone ? "Done" : "Mark done"}</span>
-            </Button>
+            <button
+              onClick={() => { const s = !isDone; setIsDone(s); localStorage.setItem(progressKey, s ? "done" : ""); }}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                isDone
+                  ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
+              {isDone ? "Done" : "Mark done"}
+            </button>
 
-            <Button isIconOnly variant="ghost" size="sm" onPress={() => setShowShortcuts(!showShortcuts)} aria-label="Shortcuts">
+            <Button isIconOnly variant="ghost" size="sm" onPress={() => setShowShortcuts(!showShortcuts)}
+              aria-label="Shortcuts"
+              className="hover:bg-muted transition-colors">
               <Keyboard className="h-3.5 w-3.5" />
             </Button>
             <Button isIconOnly variant="ghost" size="sm" onPress={() => setConsoleOpen(!consoleOpen)}
-              aria-label={consoleOpen ? "Hide console" : "Show console"}>
+              aria-label={consoleOpen ? "Hide console" : "Show console"}
+              className="hover:bg-muted transition-colors">
               {consoleOpen ? <PanelBottomClose className="h-4 w-4" /> : <PanelBottomOpen className="h-4 w-4" />}
             </Button>
           </div>
@@ -332,8 +348,10 @@ function ExercisePageInner({
 function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
     <button onClick={onClick}
-      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors border-b-2 ${
-        active ? "text-foreground border-primary bg-background" : "text-muted-foreground hover:text-foreground border-transparent"
+      className={`flex-1 flex items-center justify-center gap-1.5 h-full text-xs font-medium transition-all ${
+        active
+          ? "text-foreground border-b-2 border-primary bg-background"
+          : "text-muted-foreground border-b-2 border-transparent hover:text-foreground hover:bg-muted/50"
       }`}>
       {icon} {label}
     </button>
