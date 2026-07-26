@@ -1,47 +1,142 @@
-import { moduleOrder, modules } from "@/lib/modules";
-import ModuleCard from "@/components/ModuleCard";
-import { Terminal, Code2 } from "lucide-react";
+"use client";
+
+import { moduleOrder, modules, type Exercise } from "@/lib/modules";
+import Link from "next/link";
+import { ProgressBar } from "@heroui/react";
+import { Terminal, Code2, ChevronRight, Trophy } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const allModules = moduleOrder.map((id) => modules[id as keyof typeof modules]).filter(Boolean);
+  const [progress, setProgress] = useState<Record<string, number>>({});
+  const [totalCompleted, setTotalCompleted] = useState(0);
+  const [totalExercises, setTotalExercises] = useState(0);
+
+  useEffect(() => {
+    const p: Record<string, number> = {};
+    let done = 0;
+    let total = 0;
+    moduleOrder.forEach((id) => {
+      const mod = modules[id as keyof typeof modules];
+      if (!mod) return;
+      let c = 0;
+      mod.exercises.forEach((ex: Exercise) => {
+        total++;
+        if (localStorage.getItem(`progress:${mod.id}:${ex.id}`) === "done") {
+          c++;
+          done++;
+        }
+      });
+      p[id] = total > 0 ? Math.round((c / mod.exercises.length) * 100) : 0;
+    });
+    setProgress(p);
+    setTotalCompleted(done);
+    setTotalExercises(total);
+  }, []);
+
+  const overallPct = totalExercises > 0 ? Math.round((totalCompleted / totalExercises) * 100) : 0;
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-4 py-8 sm:py-12">
-      <div className="mb-10 text-center sm:text-left">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">42 Piscine Curriculum</h1>
-        <p className="mt-3 text-muted-foreground max-w-2xl">
-          Master C programming through the legendary 42 School Piscine. 13 modules, from shell scripting to
-          advanced memory management. Write code in your browser and run it instantly.
-        </p>
-      </div>
-
+    <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
+      {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Terminal className="h-5 w-5 text-emerald-500" />
-          <h2 className="text-xl font-semibold">Shell Modules</h2>
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">42 Piscine</h1>
+            <p className="text-sm text-muted-foreground mt-1">Master C programming. 13 modules, 95+ exercises.</p>
+          </div>
+          {totalExercises > 0 && (
+            <div className="flex items-center gap-3 bg-muted/50 rounded-xl px-4 py-3">
+              <div className="text-center">
+                <div className="text-2xl font-bold tabular-nums">{totalCompleted}</div>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Done</div>
+              </div>
+              <div className="w-px h-8 bg-border" />
+              <div className="text-center">
+                <div className="text-2xl font-bold tabular-nums">{totalExercises}</div>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</div>
+              </div>
+              <div className="w-px h-8 bg-border" />
+              <div className="text-center">
+                <div className="text-2xl font-bold tabular-nums text-primary">{overallPct}%</div>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Complete</div>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {allModules
-            .filter((m) => m.type === "shell")
-            .map((mod) => (
-              <ModuleCard key={mod.id} moduleId={mod.id} />
-            ))}
-        </div>
+        {totalExercises > 0 && (
+          <ProgressBar value={overallPct} color={overallPct === 100 ? "success" : "accent"} size="sm" className="max-w-md" />
+        )}
       </div>
 
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Code2 className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">C Modules</h2>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {allModules
-            .filter((m) => m.type === "c")
-            .map((mod) => (
-              <ModuleCard key={mod.id} moduleId={mod.id} />
-            ))}
-        </div>
-      </div>
+      {/* Shell Section */}
+      <Section title="Shell" icon={<Terminal className="h-4 w-4" />} color="emerald">
+        {moduleOrder
+          .filter((id) => modules[id as keyof typeof modules]?.type === "shell")
+          .map((id) => (
+            <ModuleRow key={id} id={id} progress={progress[id] || 0} />
+          ))}
+      </Section>
+
+      {/* C Section */}
+      <Section title="C Language" icon={<Code2 className="h-4 w-4" />} color="primary">
+        {moduleOrder
+          .filter((id) => modules[id as keyof typeof modules]?.type === "c")
+          .map((id) => (
+            <ModuleRow key={id} id={id} progress={progress[id] || 0} />
+          ))}
+      </Section>
     </div>
+  );
+}
+
+function Section({ title, icon, color, children }: { title: string; icon: React.ReactNode; color: string; children: React.ReactNode }) {
+  const colorMap: Record<string, string> = {
+    emerald: "text-emerald-500 bg-emerald-500/10",
+    primary: "text-primary bg-primary/10",
+  };
+  return (
+    <div className="mb-8">
+      <div className="flex items-center gap-2 mb-3">
+        <div className={`h-6 w-6 rounded flex items-center justify-center ${colorMap[color] || colorMap.primary}`}>
+          {icon}
+        </div>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{title}</h2>
+      </div>
+      <div className="space-y-1.5">{children}</div>
+    </div>
+  );
+}
+
+function ModuleRow({ id, progress }: { id: string; progress: number }) {
+  const mod = modules[id as keyof typeof modules];
+  if (!mod) return null;
+
+  return (
+    <Link
+      href={`/${mod.id}`}
+      className="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-transparent hover:border-border"
+    >
+      <div className="w-20 flex-shrink-0">
+        <span className="text-sm font-semibold tabular-nums">{mod.title}</span>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-muted-foreground truncate">{mod.description}</p>
+      </div>
+
+      <div className="flex items-center gap-3 flex-shrink-0">
+        {progress === 100 ? (
+          <Trophy className="h-4 w-4 text-emerald-500" />
+        ) : (
+          <div className="w-24">
+            <ProgressBar value={progress} color={progress > 0 ? "accent" : "default"} size="sm" />
+          </div>
+        )}
+        <span className="text-xs text-muted-foreground tabular-nums w-8 text-right">
+          {progress}%
+        </span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+      </div>
+    </Link>
   );
 }

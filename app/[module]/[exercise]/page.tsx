@@ -8,7 +8,7 @@ import {
   ChevronRight, ChevronLeft, Play, RotateCcw,
   PanelBottomOpen, PanelBottomClose, ArrowLeft,
   ArrowRight, ArrowUp, BookOpen, Lightbulb,
-  CheckCircle2, Circle,
+  CheckCircle2, Circle, Keyboard,
 } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import CodeEditor from "@/components/CodeEditor";
@@ -44,6 +44,7 @@ function ExercisePageInner({
   const outputRef = useRef<HTMLPreElement>(null);
   const resizingRef = useRef(false);
   const codeRef = useRef(code);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   codeRef.current = code;
 
   const progressKey = `progress:${mod.id}:${ex.id}`;
@@ -294,7 +295,7 @@ WATCH OUT FOR:
         </div>
 
         {/* Right panel */}
-        <div className="flex-1 flex flex-col min-w-0 min-h-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 relative">
           {/* Toolbar */}
           <div className="border-b px-3 py-1.5 flex items-center gap-3 bg-muted/30 flex-shrink-0">
             <Button variant="primary" size="sm" onPress={handleRun} isDisabled={running}>
@@ -302,18 +303,39 @@ WATCH OUT FOR:
               {running ? "Running..." : "Run"}
             </Button>
             <span className="text-[10px] text-muted-foreground hidden sm:inline">
-              {mod.type === "shell" ? "bash" : "gcc"} · Ctrl+Enter
+              {mod.type === "shell" ? "bash" : "gcc"}
+            </span>
+            <span className="text-[10px] text-muted-foreground/50 hidden sm:inline border-l border-border pl-2 ml-1">
+              Ctrl+Enter
             </span>
             <div className="flex-1" />
             <Button size="sm" variant="ghost" onPress={() => { setIsDone(!isDone); localStorage.setItem(progressKey, isDone ? "" : "done"); }}>
               {isDone ? <CheckCircle2 className="h-3.5 w-3.5 mr-1 text-emerald-500" /> : <Circle className="h-3.5 w-3.5 mr-1" />}
               {isDone ? "Done" : "Mark done"}
             </Button>
+            <Button isIconOnly variant="ghost" size="sm" onPress={() => setShowShortcuts(!showShortcuts)}
+              aria-label="Keyboard shortcuts">
+              <Keyboard className="h-3.5 w-3.5" />
+            </Button>
             <Button isIconOnly variant="ghost" size="sm" onPress={() => setConsoleOpen(!consoleOpen)}
               aria-label={consoleOpen ? "Close console" : "Open console"}>
               {consoleOpen ? <PanelBottomClose className="h-4 w-4" /> : <PanelBottomOpen className="h-4 w-4" />}
             </Button>
           </div>
+
+          {showShortcuts && (
+            <div className="absolute top-9 right-3 z-40 bg-background border rounded-lg shadow-xl p-3 text-xs w-52">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold">Shortcuts</span>
+                <button onClick={() => setShowShortcuts(false)} className="text-muted-foreground hover:text-foreground">×</button>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between"><span>Run code</span><kbd className="px-1 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl Enter</kbd></div>
+                <div className="flex justify-between"><span>Next exercise</span><kbd className="px-1 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl →</kbd></div>
+                <div className="flex justify-between"><span>Prev exercise</span><kbd className="px-1 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl ←</kbd></div>
+              </div>
+            </div>
+          )}
 
           {/* Editor */}
           <div className="flex-1 relative bg-[#1e1e1e] min-h-[150px]">
