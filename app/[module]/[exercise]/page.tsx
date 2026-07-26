@@ -49,7 +49,7 @@ function ExercisePageInner({
 
   const progressKey = `progress:${mod.id}:${ex.id}`;
   const codeKey = `code:${mod.id}:${ex.id}`;
-  const cacheKey = `explanation:v2:${mod.id}:${ex.id}`;
+  const cacheKey = `explanation:v3:${mod.id}:${ex.id}`;
 
   useEffect(() => {
     const savedCode = localStorage.getItem(codeKey);
@@ -377,7 +377,8 @@ function Explanation({ text }: { text: string }) {
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
-    if (/^(WHAT YOU'RE LEARNING|HOW TO DO IT|KEY RULES|WATCH OUT FOR):?$/i.test(line.trim())) {
+
+    if (/^(WHAT YOU'RE LEARNING|HOW TO DO IT|KEY RULES|WATCH OUT FOR|EXAMPLE):?$/i.test(line.trim())) {
       els.push(<h4 key={i} className="text-xs font-bold text-foreground mt-4 mb-1.5 tracking-wide uppercase">{line.trim().replace(/:$/, "")}</h4>);
       i++;
     } else if (line.trim().startsWith("- ")) {
@@ -385,7 +386,8 @@ function Explanation({ text }: { text: string }) {
       while (i < lines.length && lines[i].trim().startsWith("- ")) { items.push(lines[i].trim().slice(2)); i++; }
       els.push(<ul key={i} className="space-y-1.5 ml-0.5">{items.map((it, j) => (
         <li key={j} className="text-[13px] text-muted-foreground leading-relaxed flex gap-2">
-          <span className="text-primary/40 mt-0.5 flex-shrink-0">•</span><span>{it}</span>
+          <span className="text-primary/40 mt-0.5 flex-shrink-0">•</span>
+          <RichText text={it} />
         </li>
       ))}</ul>);
     } else if (/^\d+\.\s/.test(line.trim())) {
@@ -395,20 +397,32 @@ function Explanation({ text }: { text: string }) {
         i++;
       }
       els.push(<ol key={i} className="space-y-1.5 ml-0.5 list-decimal list-inside">{items.map((it, j) => (
-        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed marker:text-muted-foreground/50 marker:text-xs">{it}</li>
+        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed marker:text-muted-foreground/50 marker:text-xs">
+          <RichText text={it} />
+        </li>
       ))}</ol>);
     } else if (line.trim()) {
-      els.push(<p key={i} className="text-[13px] text-muted-foreground leading-relaxed">{line.trim()}</p>);
+      els.push(<p key={i} className="text-[13px] text-muted-foreground leading-relaxed"><RichText text={line.trim()} /></p>);
       i++;
     } else { i++; }
   }
   return <div>{els}</div>;
 }
 
+function RichText({ text }: { text: string }) {
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return <code key={i} className="px-1.5 py-0.5 rounded bg-muted font-mono text-[12px] text-foreground/80">{part.slice(1, -1)}</code>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function promptAI(module: string, exercise: string, description: string, type: string, ex: Record<string, unknown>) {
   const proto = "prototype" in ex ? `Prototype: ${ex.prototype}` : "";
   const allowed = "allowed" in ex && Array.isArray(ex.allowed) ? `Allowed: ${ex.allowed.join(", ")}` : "";
-  return `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be extremely simple, direct, and practical. No fluff. Use short sentences. Avoid jargon or explain it immediately.
+  return `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be extremely simple, direct, and practical. Use short sentences. Always include concrete code examples using \`backticks\`. Avoid jargon or explain it immediately.
 
 Module: ${module}
 Exercise: ${exercise}
@@ -416,20 +430,23 @@ Description: ${description}
 ${proto}
 ${allowed}
 
-Reply in this exact format (plain text):
+Reply in this exact format (plain text, use \`backticks\` for any code):
 
 WHAT YOU'RE LEARNING:
 (1-2 very short sentences — what skill this exercise builds)
 
 HOW TO DO IT:
-(numbered steps — the exact things to write, in order.
-1. Include <unistd.h> at the top
-2. Write the function with the given prototype
-3. Use write(1, &c, 1) to output the char
-Keep each step one line, very short.)
+(numbered steps with code examples. Each step one line. Example:
+1. Include \`<unistd.h>\` at the top of your file
+2. Write the function: \`void ft_putchar(char c)\`
+3. Output the character: \`write(1, &c, 1)\`
+Keep code in \`backticks\`)
+
+EXAMPLE:
+(show a complete, correct implementation of the exercise. Include the full function.)
 
 KEY RULES:
-- rule 1 (something you MUST do)
+- rule 1 (something you MUST do, include code in \`backticks\` where relevant)
 - rule 2 (something you MUST NOT do)
 - max 3 rules, each one line only
 
