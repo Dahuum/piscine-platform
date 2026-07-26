@@ -49,7 +49,7 @@ function ExercisePageInner({
 
   const progressKey = `progress:${mod.id}:${ex.id}`;
   const codeKey = `code:${mod.id}:${ex.id}`;
-  const cacheKey = `explanation:v3:${mod.id}:${ex.id}`;
+  const cacheKey = `explanation:v4:${mod.id}:${ex.id}`;
 
   useEffect(() => {
     const savedCode = localStorage.getItem(codeKey);
@@ -385,10 +385,7 @@ function Explanation({ text }: { text: string }) {
       const items: string[] = [];
       while (i < lines.length && lines[i].trim().startsWith("- ")) { items.push(lines[i].trim().slice(2)); i++; }
       els.push(<ul key={i} className="space-y-1.5 ml-0.5">{items.map((it, j) => (
-        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed flex gap-2">
-          <span className="text-primary/40 mt-0.5 flex-shrink-0">•</span>
-          <RichText text={it} />
-        </li>
+        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed pl-0.5"><InlineCode text={it} /></li>
       ))}</ul>);
     } else if (/^\d+\.\s/.test(line.trim())) {
       const items: string[] = [];
@@ -397,32 +394,30 @@ function Explanation({ text }: { text: string }) {
         i++;
       }
       els.push(<ol key={i} className="space-y-1.5 ml-0.5 list-decimal list-inside">{items.map((it, j) => (
-        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed marker:text-muted-foreground/50 marker:text-xs">
-          <RichText text={it} />
-        </li>
+        <li key={j} className="text-[13px] text-muted-foreground leading-relaxed marker:text-muted-foreground/50 marker:text-xs"><InlineCode text={it} /></li>
       ))}</ol>);
     } else if (line.trim()) {
-      els.push(<p key={i} className="text-[13px] text-muted-foreground leading-relaxed"><RichText text={line.trim()} /></p>);
+      els.push(<p key={i} className="text-[13px] text-muted-foreground leading-relaxed"><InlineCode text={line.trim()} /></p>);
       i++;
     } else { i++; }
   }
   return <div>{els}</div>;
 }
 
-function RichText({ text }: { text: string }) {
+function InlineCode({ text }: { text: string }) {
   const parts = text.split(/(`[^`]+`)/g);
-  return parts.map((part, i) => {
+  return <>{parts.filter(Boolean).map((part, i) => {
     if (part.startsWith("`") && part.endsWith("`")) {
-      return <code key={i} className="px-1.5 py-0.5 rounded bg-muted font-mono text-[12px] text-foreground/80">{part.slice(1, -1)}</code>;
+      return <code key={i} className="inline px-1 py-px rounded bg-muted font-mono text-[12px]">{part.slice(1, -1)}</code>;
     }
     return <span key={i}>{part}</span>;
-  });
+  })}</>;
 }
 
 function promptAI(module: string, exercise: string, description: string, type: string, ex: Record<string, unknown>) {
   const proto = "prototype" in ex ? `Prototype: ${ex.prototype}` : "";
   const allowed = "allowed" in ex && Array.isArray(ex.allowed) ? `Allowed: ${ex.allowed.join(", ")}` : "";
-  return `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be extremely simple, direct, and practical. Use short sentences. Always include concrete code examples using \`backticks\`. Avoid jargon or explain it immediately.
+  return `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be extremely simple, direct, and practical. Always include concrete code snippets. Use \`backticks\` for code. It is CRITICAL that you include an EXAMPLE section with a complete working implementation.
 
 Module: ${module}
 Exercise: ${exercise}
@@ -430,30 +425,26 @@ Description: ${description}
 ${proto}
 ${allowed}
 
-Reply in this exact format (plain text, use \`backticks\` for any code):
+Reply in this EXACT format. Do not skip any section:
 
 WHAT YOU'RE LEARNING:
-(1-2 very short sentences — what skill this exercise builds)
+(1 short sentence)
 
 HOW TO DO IT:
-(numbered steps with code examples. Each step one line. Example:
-1. Include \`<unistd.h>\` at the top of your file
-2. Write the function: \`void ft_putchar(char c)\`
-3. Output the character: \`write(1, &c, 1)\`
-Keep code in \`backticks\`)
+(2-3 numbered steps. Put code in \`backticks\`.
+1. First step with \`code\`
+2. Second step with \`code\`)
 
 EXAMPLE:
-(show a complete, correct implementation of the exercise. Include the full function.)
+(Write a COMPLETE working implementation of this exercise. Every line of code. This is the most important section. Include the function exactly as it should be submitted.)
 
 KEY RULES:
-- rule 1 (something you MUST do, include code in \`backticks\` where relevant)
-- rule 2 (something you MUST NOT do)
-- max 3 rules, each one line only
+- Important rule with \`code\`
+- Another rule
 
 WATCH OUT FOR:
-- mistake 1 (most common error beginners make)
-- mistake 2
-- max 3, each one line only`;
+- Common beginner mistake to avoid
+- Another mistake to avoid`;
 }
 
 function verdictPrompt(module: string, exercise: string, description: string, type: string, code: string, ex: Record<string, unknown>) {
