@@ -77,7 +77,7 @@ function ExercisePageInner({
             messages: [
               {
                 role: "user",
-                content: `You are teaching the 42 School C Piscine. Explain this exercise to a beginner who knows basic C syntax but not the specific concept.
+                content: `You are teaching complete beginners at the 42 School C Piscine. They barely know C. Be extremely simple, direct, and practical. No fluff. Use short sentences. Avoid jargon or explain it immediately.
 
 Module: ${mod.title}
 Exercise: ${ex.title}
@@ -85,22 +85,27 @@ Description: ${ex.description}
 ${"prototype" in ex ? `Prototype: ${ex.prototype}` : ""}
 ${"allowed" in ex && ex.allowed ? `Allowed: ${ex.allowed.join(", ")}` : ""}
 
-Explain in this format (plain text, no markdown):
+Reply in this exact format (plain text):
 
 WHAT YOU'RE LEARNING:
-(2-3 sentences about the concept this exercise teaches)
+(1-2 very short sentences — what skill this exercise builds)
 
-HOW IT WORKS:
-(step by step what the function does, mention each allowed function and what it does)
+HOW TO DO IT:
+(numbered steps — the exact things to write, in order. Example:
+1. Include <unistd.h> at the top
+2. Write the function with the given prototype
+3. Use write(1, &c, 1) to output the char
+Keep each step one line, very short.)
 
-KEY POINTS:
-- bullet point 1
-- bullet point 2
-- bullet point 3
+KEY RULES:
+- rule 1 (something you MUST do)
+- rule 2 (something you MUST NOT do)
+- max 3 rules, each one line only
 
-COMMON MISTAKES:
-- mistake 1
-- mistake 2`,
+WATCH OUT FOR:
+- mistake 1 (most common error beginners make)
+- mistake 2
+- max 3, each one line only`,
               },
             ],
           }),
@@ -414,7 +419,7 @@ function Explanation({ text }: { text: string }) {
   while (i < lines.length) {
     const line = lines[i];
 
-    if (/^(WHAT YOU'RE LEARNING|HOW IT WORKS|KEY POINTS|COMMON MISTAKES):?$/i.test(line.trim())) {
+    if (/^(WHAT YOU'RE LEARNING|HOW TO DO IT|KEY RULES|WATCH OUT FOR):?$/i.test(line.trim())) {
       elements.push(
         <h4 key={i} className="text-xs font-bold text-foreground mt-4 mb-1.5 tracking-wide uppercase">
           {line.trim().replace(/:$/, "")}
