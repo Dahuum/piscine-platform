@@ -49,7 +49,7 @@ function ExercisePageInner({
 
   const progressKey = `progress:${mod.id}:${ex.id}`;
   const codeKey = `code:${mod.id}:${ex.id}`;
-  const cacheKey = `explanation:v6:${mod.id}:${ex.id}`;
+  const cacheKey = `explanation:v7:${mod.id}:${ex.id}`;
 
   useEffect(() => {
     const savedCode = localStorage.getItem(codeKey);
@@ -431,7 +431,7 @@ function InlineCode({ text }: { text: string }) {
 function promptAI(module: string, exercise: string, description: string, type: string, ex: Record<string, unknown>) {
   const proto = "prototype" in ex ? `Prototype: ${ex.prototype}` : "";
   const allowed = "allowed" in ex && Array.isArray(ex.allowed) ? `Allowed: ${ex.allowed.join(", ")}` : "";
-  return `You are teaching complete beginners at the 42 School C Piscine. Be simple and direct.
+  return `You are teaching beginners at the 42 School C Piscine. Be simple and direct. Always write real, complete, working code. Never use placeholders like "// your code here".
 
 Module: ${module}
 Exercise: ${exercise}
@@ -439,26 +439,24 @@ Description: ${description}
 ${proto}
 ${allowed}
 
-Reply in this EXACT format. Put code inside triple backticks. Include BOTH sections.
+Reply in this exact format using triple backticks for code blocks:
 
 WHAT YOU'RE LEARNING:
-(1 short sentence)
+1 short sentence.
 
 HOW TO DO IT:
-- Step 1 with \`inline code\`
-- Step 2 with \`inline code\`
+- Step with \`inline code\`
+- Step with \`inline code\`
 
 THE CODE:
 \`\`\`c
-// Complete working implementation
-${proto ? proto + " {\n    // your code here\n}" : "// your implementation here"}
+write the complete working function here
 \`\`\`
 
 HOW IT BEHAVES:
 \`\`\`
-// Show what happens when you call the function:
-// Input: example call with real values
-// Output: what it prints/returns
+Input: call the function with a real argument
+Output: what it prints or returns
 \`\`\`
 
 KEY RULES:
