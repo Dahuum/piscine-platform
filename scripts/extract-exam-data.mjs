@@ -45,9 +45,11 @@ function parseSubject(text) {
   const bodyStart = headerEnd > 0 ? headerEnd + 1 : 4;
   result.description = lines
     .slice(bodyStart)
-    .filter((l) => l !== "" || lines.indexOf(l) > bodyStart)
+    .map((l) => l.trimEnd())
     .join("\n")
-    .trim();
+    .trim()
+    .replace(/\t/g, "    ")
+    .replace(/\r/g, "");
 
   return result;
 }

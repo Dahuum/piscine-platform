@@ -43,18 +43,57 @@ export default function ExamTakePage() {
   return <ExamInner weekId={weekId} />;
 }
 
-function formatSubject(text: string) {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(
-      /(\$>.*)/g,
-      '<code class="text-[11px] px-1.5 py-0.5 rounded bg-muted font-mono text-foreground/80">$1</code>',
-    )
-    .replace(/`([^`]+)`/g, '<code class="text-[12px] px-1 rounded bg-muted font-mono text-foreground/80">$1</code>')
-    .replace(/\n\n/g, "<br/><br/>")
-    .replace(/\n/g, "<br/>");
+function SubjectText({ text }: { text: string }) {
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (line.trim().startsWith("$>")) {
+      const codeLines: string[] = [];
+      while (i < lines.length && lines[i].trim().startsWith("$>")) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      elements.push(
+        <pre
+          key={`code-${i}`}
+          className="my-2 p-2.5 rounded-md bg-muted font-mono text-xs text-foreground/80 overflow-x-auto whitespace-pre-wrap"
+        >
+          {codeLines.join("\n")}
+        </pre>,
+      );
+    } else if (line.trim() === "") {
+      if (
+        elements.length > 0 &&
+        typeof elements[elements.length - 1] !== "string"
+      ) {
+        elements.push(
+          <div key={`spacer-${i}`} className="h-2" />,
+        );
+      }
+      i++;
+    } else {
+      const paraLines: string[] = [];
+      while (
+        i < lines.length &&
+        lines[i].trim() !== "" &&
+        !lines[i].trim().startsWith("$>")
+      ) {
+        paraLines.push(lines[i]);
+        i++;
+      }
+      elements.push(
+        <p key={`p-${i}`} className="whitespace-pre-wrap">
+          {paraLines.join("\n")}
+        </p>,
+      );
+    }
+  }
+
+  return <>{elements}</>;
 }
 
 function ExamInner({ weekId }: { weekId: string }) {
@@ -627,12 +666,9 @@ function ExamInner({ weekId }: { weekId: string }) {
               <h2 className="text-base font-semibold mb-2">
                 {exercise.name}
               </h2>
-              <div
-                className="text-sm text-muted-foreground leading-relaxed [&_code]:whitespace-nowrap"
-                dangerouslySetInnerHTML={{
-                  __html: formatSubject(exercise.subject.description),
-                }}
-              />
+              <div className="text-sm text-muted-foreground leading-relaxed">
+                <SubjectText text={exercise.subject.description} />
+              </div>
               {(exercise.subject.files.length > 0 ||
                 exercise.subject.allowed.length > 0) && (
                 <div className="flex flex-wrap gap-4 mt-3 text-xs text-muted-foreground">
