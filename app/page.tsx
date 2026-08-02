@@ -78,7 +78,7 @@ export default function Home() {
       </Section>
 
       {/* C Section */}
-      <Section title="C Language" icon={<Code2 className="h-4 w-4" />} color="primary">
+      <Section title="C Language" icon={<Code2 className="h-4 w-4" />} color="accent">
         {moduleOrder
           .filter((id) => modules[id as keyof typeof modules]?.type === "c")
           .map((id) => (

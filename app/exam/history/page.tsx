@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronDown, Trophy, Clock, XCircle, Terminal, Monitor } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronDown,
+  Trophy,
+  Clock,
+  XCircle,
+  Terminal as TerminalIcon,
+  Monitor,
+} from "lucide-react";
 
 type LevelEntry = {
   level: number;
@@ -29,6 +38,16 @@ const WEEK_LABELS: Record<string, string> = {
   exam_02: "Exam Week 02",
   exam_03: "Exam Week 03",
 };
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+} as const;
+
+const rowAnim = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+} as const;
 
 export default function ExamHistoryPage() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -73,34 +92,59 @@ export default function ExamHistoryPage() {
   };
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
+    <motion.div
+      className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <Link
         href="/exam"
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-6"
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-6 transition-colors"
       >
         <ChevronLeft className="h-3.5 w-3.5" /> Exam Gate
       </Link>
 
-      <h1 className="text-2xl font-bold mb-2">Exam History</h1>
+      <motion.h1
+        className="text-2xl font-bold mb-2"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        Exam History
+      </motion.h1>
       <p className="text-sm text-muted-foreground mb-6">
         All your past exam attempts.
       </p>
 
       {history.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
+        <motion.div
+          className="text-center py-16 text-muted-foreground"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
           <p className="text-lg mb-2">No attempts yet</p>
           <p className="text-sm">
-            <Link href="/exam" className="text-primary hover:underline">
+            <Link
+              href="/exam"
+              className="text-primary hover:underline"
+            >
               Take your first exam
             </Link>
           </p>
-        </div>
+        </motion.div>
       ) : (
         <>
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-xs text-muted-foreground mr-1">Filter:</span>
+          <motion.div
+            className="flex items-center gap-2 mb-6 flex-wrap"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <span className="text-xs text-muted-foreground mr-1">
+              Filter:
+            </span>
             {["all", ...weekIds].map((w) => (
-              <button
+              <motion.button
                 key={w}
                 onClick={() => setFilter(w)}
                 className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
@@ -108,26 +152,42 @@ export default function ExamHistoryPage() {
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted hover:bg-muted/70 text-muted-foreground"
                 }`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
-                {w === "all" ? "All" : WEEK_LABELS[w] || w}
-              </button>
+                {w === "all"
+                  ? "All"
+                  : (WEEK_LABELS[w] || w)}
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="space-y-3">
+          <motion.div
+            className="space-y-3"
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
             {filtered.map((entry) => {
               const isExpanded = expandedId === entry.id;
-              const passedCount = entry.levels.filter((l) => l.passed).length;
-              const totalAttempts = entry.levels.reduce((s, l) => s + l.attempts, 0);
+              const passedCount = entry.levels.filter(
+                (l) => l.passed,
+              ).length;
+              const totalAttempts = entry.levels.reduce(
+                (s, l) => s + l.attempts,
+                0,
+              );
 
               return (
-                <div
+                <motion.div
                   key={entry.id}
-                  className="border rounded-lg overflow-hidden"
+                  className="border rounded-lg overflow-hidden transition-shadow hover:border-primary/20"
+                  variants={rowAnim}
                 >
-                  <button
+                  <motion.button
                     onClick={() => toggleExpand(entry.id)}
                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left"
+                    whileHover={{ backgroundColor: "var(--muted)" }}
                   >
                     <div className="flex-shrink-0">
                       {entry.result === "completed" ? (
@@ -146,72 +206,112 @@ export default function ExamHistoryPage() {
                         {entry.mode === "editor" ? (
                           <Monitor className="h-3 w-3 inline mr-1" />
                         ) : (
-                          <Terminal className="h-3 w-3 inline mr-1" />
+                          <TerminalIcon className="h-3 w-3 inline mr-1" />
                         )}
-                        {formatDate(entry.startedAt)} · {formatTime(entry.duration)} · {passedCount}/{entry.levels.length} levels
+                        {formatDate(entry.startedAt)} ·{" "}
+                        {formatTime(entry.duration)} · {passedCount}/
+                        {entry.levels.length} levels
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <div className="text-lg font-bold tabular-nums">
                         {entry.finalGrade}/100
                       </div>
-                      <div className="text-[10px] text-muted-foreground uppercase">
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
                         {entry.result}
                       </div>
                     </div>
-                    <ChevronDown
-                      className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                    />
-                  </button>
+                    <motion.span
+                      animate={{
+                        rotate: isExpanded ? 180 : 0,
+                      }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </motion.span>
+                  </motion.button>
 
-                  {isExpanded && (
-                    <div className="border-t px-4 py-3 bg-muted/10">
-                      <div className="grid grid-cols-3 gap-3 mb-3">
-                        <div className="text-center">
-                          <div className="text-sm font-bold">{passedCount}</div>
-                          <div className="text-[10px] text-muted-foreground">Passed</div>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        className="border-t px-4 py-3 bg-muted/10"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="grid grid-cols-3 gap-3 mb-3">
+                          {[
+                            {
+                              label: "Passed",
+                              value: String(passedCount),
+                            },
+                            {
+                              label: "Attempts",
+                              value: String(totalAttempts),
+                            },
+                            {
+                              label: "Rate",
+                              value: `${
+                                entry.levels.length
+                                  ? Math.round(
+                                      (passedCount /
+                                        entry.levels.length) *
+                                        100,
+                                    )
+                                  : 0
+                              }%`,
+                            },
+                          ].map((s) => (
+                            <div
+                              key={s.label}
+                              className="text-center"
+                            >
+                              <div className="text-sm font-bold">
+                                {s.value}
+                              </div>
+                              <div className="text-[10px] text-muted-foreground">
+                                {s.label}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div className="text-center">
-                          <div className="text-sm font-bold">{totalAttempts}</div>
-                          <div className="text-[10px] text-muted-foreground">Attempts</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-sm font-bold">
-                            {entry.levels.length ? Math.round((passedCount / entry.levels.length) * 100) : 0}%
-                          </div>
-                          <div className="text-[10px] text-muted-foreground">Rate</div>
-                        </div>
-                      </div>
 
-                      <div className="space-y-1">
-                        {entry.levels.map((lvl) => (
-                          <div
-                            key={lvl.level}
-                            className="flex items-center gap-2 text-xs"
-                          >
-                            <span
-                              className={`h-2 w-2 rounded-full flex-shrink-0 ${
-                                lvl.passed ? "bg-emerald-500" : "bg-red-500"
-                              }`}
-                            />
-                            <span className="text-muted-foreground w-10 tabular-nums">
-                              L{lvl.level}
-                            </span>
-                            <span className="font-mono">{lvl.exercise}</span>
-                            <span className="text-muted-foreground ml-auto">
-                              {lvl.attempts} attempt{lvl.attempts > 1 ? "s" : ""}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                        <div className="space-y-1">
+                          {entry.levels.map((lvl) => (
+                            <div
+                              key={lvl.level}
+                              className="flex items-center gap-2 text-xs"
+                            >
+                              <span
+                                className={`h-2 w-2 rounded-full flex-shrink-0 ${
+                                  lvl.passed
+                                    ? "bg-emerald-500"
+                                    : "bg-red-500"
+                                }`}
+                              />
+                              <span className="text-muted-foreground w-10 tabular-nums">
+                                L{lvl.level}
+                              </span>
+                              <span className="font-mono text-foreground/80">
+                                {lvl.exercise}
+                              </span>
+                              <span className="text-muted-foreground ml-auto">
+                                {lvl.attempts} attempt
+                                {lvl.attempts > 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -3,10 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button, ProgressBar } from "@heroui/react";
+import { motion } from "framer-motion";
 import { Terminal, BookOpen, Lock, ChevronRight } from "lucide-react";
 import { examWeeks, lockedWeeks } from "@/lib/exam-data";
 
 type Stat = { label: string; value: string };
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+} as const;
+
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+} as const;
 
 export default function ExamGateDashboard() {
   const [reviewed, setReviewed] = useState<Record<string, boolean>>({});
@@ -20,7 +31,8 @@ export default function ExamGateDashboard() {
   useEffect(() => {
     const r: Record<string, boolean> = {};
     for (const id of Object.keys(examWeeks)) {
-      r[id] = localStorage.getItem(`exam:prep:reviewed:${id}`) === "true";
+      r[id] =
+        localStorage.getItem(`exam:prep:reviewed:${id}`) === "true";
     }
     setReviewed(r);
 
@@ -60,49 +72,84 @@ export default function ExamGateDashboard() {
   }, []);
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
-      <div className="mb-8">
+    <motion.div
+      className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div
+        className="mb-8"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-primary/10">
-            <Terminal className="h-4 w-4 text-primary" />
-          </div>
+          <motion.div
+            className="h-9 w-9 rounded-lg flex items-center justify-center bg-primary/10"
+            whileHover={{ scale: 1.05 }}
+          >
+            <Terminal className="h-5 w-5 text-primary" />
+          </motion.div>
           <h1 className="text-2xl font-bold">Exam Gate</h1>
         </div>
         <p className="text-sm text-muted-foreground">
           Practice and take the 42 piscine exams. 3 exam weeks available.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      {/* Stats */}
+      <motion.div
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         {stats.map((s) => (
-          <div
+          <motion.div
             key={s.label}
-            className="rounded-xl border bg-muted/20 p-3 text-center"
+            variants={item}
+            className="rounded-xl border bg-muted/20 p-4 text-center hover:bg-muted/30 transition-colors"
           >
-            <div className="text-xl font-bold tabular-nums">{s.value}</div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
+            <div className="text-xl font-bold tabular-nums">
+              {s.value}
+            </div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
               {s.label}
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      <div className="space-y-4">
+      {/* Week cards */}
+      <motion.div
+        className="space-y-4"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         {[...Object.values(examWeeks), ...Object.values(lockedWeeks)].map(
           (week) => {
             const isLocked = "comingSoon" in week;
             const isReviewed = reviewed[week.id] || false;
-            const exCount = "exercises" in week ? week.exercises.length : 0;
+            const exCount =
+              "exercises" in week ? week.exercises.length : 0;
 
             return (
-              <div
+              <motion.div
                 key={week.id}
-                className={`rounded-xl border p-5 ${isLocked ? "opacity-50" : ""}`}
+                variants={item}
+                className={`rounded-xl border p-5 transition-all duration-200 ${
+                  isLocked
+                    ? "opacity-50"
+                    : "hover:border-primary/30 hover:shadow-sm"
+                }`}
               >
                 <div className="flex items-start justify-between flex-wrap gap-3 mb-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="font-semibold text-lg">{week.title}</h2>
+                      <h2 className="font-semibold text-lg">
+                        {week.title}
+                      </h2>
                       {isLocked && (
                         <Lock className="h-4 w-4 text-muted-foreground" />
                       )}
@@ -113,7 +160,9 @@ export default function ExamGateDashboard() {
                   </div>
                   {!isLocked && (
                     <div className="text-sm text-muted-foreground tabular-nums">
-                      {exCount} exercises · {"levelCount" in week ? week.levelCount : 0} levels · 240 min
+                      {exCount} exercises ·{" "}
+                      {"levelCount" in week ? week.levelCount : 0} levels · 240
+                      min
                     </div>
                   )}
                 </div>
@@ -128,7 +177,7 @@ export default function ExamGateDashboard() {
                 ) : (
                   <>
                     <div className="flex items-center gap-3 mb-4">
-                      <span className="text-xs text-muted-foreground w-16">
+                      <span className="text-xs text-muted-foreground w-16 font-medium">
                         Prep
                       </span>
                       <ProgressBar
@@ -172,21 +221,26 @@ export default function ExamGateDashboard() {
                     </div>
                   </>
                 )}
-              </div>
+              </motion.div>
             );
           },
         )}
-      </div>
+      </motion.div>
 
-      <div className="mt-6 text-center">
+      <motion.div
+        className="mt-8 text-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+      >
         <Link
           href="/exam/history"
-          className="text-sm text-muted-foreground hover:text-foreground no-underline inline-flex items-center gap-1"
+          className="text-sm text-muted-foreground hover:text-foreground no-underline inline-flex items-center gap-1 transition-colors"
         >
           View exam history
           <ChevronRight className="h-3.5 w-3.5" />
         </Link>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
