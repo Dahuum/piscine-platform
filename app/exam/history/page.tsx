@@ -46,7 +46,7 @@ const container = {
 
 const rowAnim = {
   hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.1 } },
 } as const;
 
 export default function ExamHistoryPage() {
@@ -96,7 +96,7 @@ export default function ExamHistoryPage() {
       className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.12 }}
     >
       <Link
         href="/exam"
@@ -138,7 +138,7 @@ export default function ExamHistoryPage() {
             className="flex items-center gap-2 mb-6 flex-wrap"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.05 }}
           >
             <span className="text-xs text-muted-foreground mr-1">
               Filter:
@@ -225,7 +225,7 @@ export default function ExamHistoryPage() {
                       animate={{
                         rotate: isExpanded ? 180 : 0,
                       }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.1 }}
                     >
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </motion.span>
@@ -238,7 +238,7 @@ export default function ExamHistoryPage() {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: 0.1 }}
                       >
                         <div className="grid grid-cols-3 gap-3 mb-3">
                           {[

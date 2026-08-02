@@ -16,7 +16,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.12 } },
 } as const;
 
 export default function ExamGateDashboard() {
@@ -76,7 +76,7 @@ export default function ExamGateDashboard() {
       className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.12 }}
     >
       <motion.div
         className="mb-8"
@@ -231,7 +231,7 @@ export default function ExamGateDashboard() {
         className="mt-8 text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
+        transition={{ delay: 0.08 }}
       >
         <Link
           href="/exam/history"

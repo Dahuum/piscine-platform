@@ -350,13 +350,13 @@ function ExamInner({ weekId }: { weekId: string }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: [0, 0, 0.2, 1] }}
+        transition={{ duration: 0.15, ease: [0, 0, 0.2, 1] }}
         className="max-w-lg mx-auto px-4 py-16 text-center"
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          transition={{ delay: 0.08, type: "spring", stiffness: 200 }}
         >
           <Trophy className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
         </motion.div>
@@ -364,7 +364,7 @@ function ExamInner({ weekId }: { weekId: string }) {
           className="text-2xl font-bold mb-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.06 }}
         >
           Exam Complete!
         </motion.h1>
@@ -372,7 +372,7 @@ function ExamInner({ weekId }: { weekId: string }) {
           className="text-muted-foreground mb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.07 }}
         >
           {status === "timeout" ? "Time ran out" : "All levels completed"}
         </motion.p>
@@ -380,7 +380,7 @@ function ExamInner({ weekId }: { weekId: string }) {
           className="text-5xl font-bold tabular-nums mb-3"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.08 }}
         >
           {currentGrade}/100
         </motion.div>
@@ -388,7 +388,7 @@ function ExamInner({ weekId }: { weekId: string }) {
           className="text-sm text-muted-foreground mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.09 }}
         >
           {levelHistory.filter((h) => h.passed).length} of {week.levelCount}{" "}
           levels passed
@@ -397,7 +397,7 @@ function ExamInner({ weekId }: { weekId: string }) {
           className="flex justify-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 0.1 }}
         >
           <Button
             variant="primary"
@@ -421,7 +421,7 @@ function ExamInner({ weekId }: { weekId: string }) {
         className="max-w-lg mx-auto px-4 py-12"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.12 }}
       >
         <Link
           href="/exam"
@@ -446,7 +446,7 @@ function ExamInner({ weekId }: { weekId: string }) {
               className="rounded-lg border p-3 text-center"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.03 }}
             >
               {item.icon && <item.icon className="h-4 w-4 text-muted-foreground mx-auto mb-1" />}
               <div className="text-sm font-semibold">{item.label}</div>
@@ -506,12 +506,12 @@ function ExamInner({ weekId }: { weekId: string }) {
         className="max-w-lg mx-auto px-4 py-12 text-center"
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.1 }}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+          transition={{ type: "spring", stiffness: 200, delay: 0.05 }}
         >
           <Clock className="h-12 w-12 text-amber-500 mx-auto mb-4" />
         </motion.div>
@@ -586,7 +586,7 @@ function ExamInner({ weekId }: { weekId: string }) {
                 }`}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: i * 0.05, type: "spring", stiffness: 300 }}
+                transition={{ delay: i * 0.02, type: "spring", stiffness: 300 }}
               />
             );
           })}
@@ -622,7 +622,7 @@ function ExamInner({ weekId }: { weekId: string }) {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.1 }}
             >
               <h2 className="text-base font-semibold mb-2">
                 {exercise.name}
@@ -743,7 +743,7 @@ function ExamInner({ weekId }: { weekId: string }) {
               initial={{ opacity: 0, y: 20, height: 0 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
               exit={{ opacity: 0, y: 20, height: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.1 }}
             >
               <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
                 <motion.div
@@ -765,7 +765,7 @@ function ExamInner({ weekId }: { weekId: string }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.1 }}
             >
               <motion.div
                 className="text-red-600 text-sm font-semibold mb-2"

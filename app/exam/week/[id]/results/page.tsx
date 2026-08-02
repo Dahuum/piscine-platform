@@ -41,7 +41,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 6 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.1 } },
 } as const;
 
 export default function ExamResultsPage() {
@@ -116,7 +116,7 @@ export default function ExamResultsPage() {
       className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.12 }}
     >
       <Link
         href="/exam"
@@ -136,12 +136,12 @@ export default function ExamResultsPage() {
         }`}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.35, ease: [0, 0, 0.2, 1] }}
+        transition={{ duration: 0.15, ease: [0, 0, 0.2, 1] }}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+          transition={{ delay: 0.05, type: "spring", stiffness: 200 }}
         >
           {attempt.result === "completed" ? (
             <Trophy className="h-12 w-12 text-emerald-500 mx-auto mb-3" />
@@ -163,7 +163,7 @@ export default function ExamResultsPage() {
           className="text-5xl font-bold tabular-nums mt-3 mb-2"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.08 }}
         >
           {attempt.finalGrade}/100
         </motion.div>
@@ -210,7 +210,7 @@ export default function ExamResultsPage() {
         className="text-sm font-semibold mb-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.08 }}
       >
         Level Breakdown
       </motion.h2>
@@ -260,7 +260,7 @@ export default function ExamResultsPage() {
                     ? 90
                     : 0,
                 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.1 }}
               >
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </motion.span>
@@ -273,7 +273,7 @@ export default function ExamResultsPage() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.1 }}
                 >
                   <div className="text-xs text-muted-foreground space-y-1">
                     <p>
@@ -316,7 +316,7 @@ export default function ExamResultsPage() {
         className="flex justify-center gap-3 mt-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.055 }}
       >
         <Link href={`/exam/week/${weekId}/take`}>
           <Button variant="primary">Retake Exam</Button>

@@ -6,48 +6,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-accent: var(--primary);
-  --color-accent-foreground: var(--primary-foreground);
-  --color-success: var(--emerald);
-  --color-success-foreground: var(--emerald-foreground);
-  --color-danger: var(--red);
-  --color-danger-foreground: var(--red-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
-  --radius: var(--radius-value);
-  --animate-fade-in: fade-in 0.3s ease-out;
-  --animate-slide-up: slide-up 0.3s ease-out;
-  --animate-slide-down: slide-down 0.2s ease-out;
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-down {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
 }
 
 :root {
@@ -58,11 +18,7 @@
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
   --border: #e4e4e7;
-  --radius-value: 0.625rem;
-  --emerald: #10b981;
-  --emerald-foreground: #fafafa;
-  --red: #ef4444;
-  --red-foreground: #fafafa;
+  --radius: 0.625rem;
 }
 
 .dark {
@@ -73,10 +29,6 @@
   --muted: #27272a;
   --muted-foreground: #a1a1aa;
   --border: #27272a;
-  --emerald: #10b981;
-  --emerald-foreground: #fafafa;
-  --red: #ef4444;
-  --red-foreground: #fafafa;
 }
 
 * {
@@ -87,9 +39,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -101,20 +50,4 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-
-.animate-slide-down {
-  animation: slide-down 0.2s ease-out;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.2s ease-out;
 }

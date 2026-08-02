@@ -40,7 +40,7 @@ function PrepInner({ weekId }: { weekId: string }) {
   const levels = getAvailableLevels(week);
   const [done, setDone] = useState<Set<string>>(new Set());
   const [expandedLevels, setExpandedLevels] = useState<Set<number>>(
-    new Set(levels),
+    new Set([0]),
   );
   const [reviewed, setReviewed] = useState(false);
 
@@ -93,7 +93,7 @@ function PrepInner({ weekId }: { weekId: string }) {
       className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.12 }}
     >
       <Link
         href="/exam"
@@ -138,7 +138,7 @@ function PrepInner({ weekId }: { weekId: string }) {
         className="mb-6"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: 0.05 }}
       >
         <Button
           variant={reviewed ? "primary" : "outline"}
@@ -179,7 +179,7 @@ function PrepInner({ weekId }: { weekId: string }) {
               className="border rounded-lg overflow-hidden transition-shadow duration-200 hover:border-primary/20"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: lvl * 0.04 }}
+              transition={{ delay: lvl * 0.02 }}
             >
               <motion.button
                 onClick={() => toggleLevel(lvl)}
@@ -188,7 +188,7 @@ function PrepInner({ weekId }: { weekId: string }) {
               >
                 <motion.span
                   animate={{ rotate: isExpanded ? 90 : 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.1 }}
                 >
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </motion.span>
@@ -218,7 +218,7 @@ function PrepInner({ weekId }: { weekId: string }) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.1 }}
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                       {exercises.map((ex) => {
@@ -246,7 +246,7 @@ function PrepInner({ weekId }: { weekId: string }) {
                                 animate={{
                                   scale: isDone ? [1, 1.2, 1] : 1,
                                 }}
-                                transition={{ duration: 0.3 }}
+                                transition={{ duration: 0.12 }}
                               >
                                 {isDone ? (
                                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />

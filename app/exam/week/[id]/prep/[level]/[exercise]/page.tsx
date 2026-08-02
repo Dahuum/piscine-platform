@@ -95,7 +95,7 @@ function PrepPracticeInner({
       className="flex flex-col h-[calc(100vh-3.5rem)]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.1 }}
     >
       <div
         className="border-b px-4 flex items-center gap-3 flex-shrink-0 bg-background"
