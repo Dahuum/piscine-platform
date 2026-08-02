@@ -1,34 +1,65 @@
-const WANDBOX = "https://wandbox.org/api/compile.json";
+import { Sandbox, CommandExitError } from "e2b";
 
 export async function executeCode(code: string, type: "c" | "shell"): Promise<string> {
-  const compiler = type === "shell" ? "bash" : "gcc-head-c";
+  const apiKey = process.env.E2B_API_KEY;
+  if (!apiKey) {
+    return "Error: E2B_API_KEY not configured";
+  }
+
+  const sandbox = await Sandbox.create({ timeoutMs: 60000 });
 
   try {
-    const res = await fetch(WANDBOX, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ compiler, code }),
-      signal: AbortSignal.timeout(25000),
-    });
+    await sandbox.files.write("/tmp/code.c", code);
 
-    if (!res.ok) {
-      return `Error: API returned ${res.status}`;
+    if (type === "shell") {
+      try {
+        const result = await sandbox.commands.run("bash /tmp/code.c", {
+          timeoutMs: 10000,
+          onStdout: () => {},
+          onStderr: () => {},
+        });
+        return (result.stdout || "") + (result.stderr || "") || "(no output)";
+      } catch (e: unknown) {
+        if (e instanceof CommandExitError) {
+          return `Runtime error (exit ${e.exitCode}):\n${e.stderr || e.stdout || ""}`;
+        }
+        throw e;
+      }
     }
 
-    const data = await res.json();
-
-    if (data.compiler_error || data.compiler_output) {
-      return `Compilation failed:\n${data.compiler_error || ""}${data.compiler_output || ""}`;
+    try {
+      await sandbox.commands.run(
+        "gcc -o /tmp/a.out /tmp/code.c -Wall -Wextra -Werror",
+        { timeoutMs: 20000, onStdout: () => {}, onStderr: () => {} },
+      );
+    } catch (e: unknown) {
+      if (e instanceof CommandExitError) {
+        return `Compilation failed:\n${e.stderr || e.stdout || "unknown error"}`;
+      }
+      throw e;
     }
 
-    if (data.program_error) {
-      return `Runtime error:\n${data.program_error}`;
+    try {
+      const run = await sandbox.commands.run("/tmp/a.out", {
+        timeoutMs: 10000,
+        onStdout: () => {},
+        onStderr: () => {},
+      });
+      return (run.stdout || "") + (run.stderr || "") || "(no output)";
+    } catch (e: unknown) {
+      if (e instanceof CommandExitError) {
+        return `Runtime error:\n${e.stderr || e.stdout || ""}`;
+      }
+      throw e;
     }
-
-    const output = data.program_output || data.program_message || "";
-    return output || "(no output)";
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     return `Execution error: ${msg}`;
+  } finally {
+    try {
+      await sandbox.kill();
+    } catch {
+      // sandbox may already be dead
+    }
   }
 }

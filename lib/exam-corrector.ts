@@ -1,4 +1,4 @@
-import { Sandbox } from "e2b";
+import { Sandbox, CommandExitError } from "e2b";
 import type { ExamExercise } from "./exam-data";
 
 type TestResult = {
@@ -22,16 +22,27 @@ async function runInSandbox(
   cmd: string,
   timeoutMs = 5000,
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
-  const result = await sandbox.commands.run(cmd, {
-    timeoutMs,
-    onStdout: () => {},
-    onStderr: () => {},
-  });
-  return {
-    stdout: result.stdout || "",
-    stderr: result.stderr || "",
-    exitCode: result.exitCode ?? 0,
-  };
+  try {
+    const result = await sandbox.commands.run(cmd, {
+      timeoutMs,
+      onStdout: () => {},
+      onStderr: () => {},
+    });
+    return {
+      stdout: result.stdout || "",
+      stderr: result.stderr || "",
+      exitCode: result.exitCode ?? 0,
+    };
+  } catch (e: unknown) {
+    if (e instanceof CommandExitError) {
+      return {
+        stdout: e.stdout || "",
+        stderr: e.stderr || "",
+        exitCode: e.exitCode,
+      };
+    }
+    throw e;
+  }
 }
 
 export async function gradeSubmission(
@@ -51,16 +62,16 @@ export async function gradeSubmission(
   const sandbox = await Sandbox.create({ timeoutMs: 120000 });
 
   try {
-    await sandbox.files.write("/ref.c", exercise.referenceCode);
-    await sandbox.files.write("/student.c", studentCode);
+    await sandbox.files.write("/tmp/ref.c", exercise.referenceCode);
+    await sandbox.files.write("/tmp/student.c", studentCode);
     if (exercise.mainCode) {
-      await sandbox.files.write("/main.c", exercise.mainCode);
+      await sandbox.files.write("/tmp/main.c", exercise.mainCode);
     }
 
     const refCompileCmd =
       exercise.type === "function"
-        ? "gcc -o /ref /ref.c /main.c -Wall -Wextra -Werror 2>&1"
-        : "gcc -o /ref /ref.c -Wall -Wextra -Werror 2>&1";
+        ? "gcc -o /tmp/ref /tmp/ref.c /tmp/main.c -Wall -Wextra -Werror 2>&1"
+        : "gcc -o /tmp/ref /tmp/ref.c -Wall -Wextra -Werror 2>&1";
 
     const refCompile = await runInSandbox(sandbox, refCompileCmd);
     if (refCompile.exitCode !== 0) {
@@ -74,8 +85,8 @@ export async function gradeSubmission(
 
     const stuCompileCmd =
       exercise.type === "function"
-        ? "gcc -o /student /student.c /main.c -Wall -Wextra -Werror 2>&1"
-        : "gcc -o /student /student.c -Wall -Wextra -Werror 2>&1";
+        ? "gcc -o /tmp/student /tmp/student.c /tmp/main.c -Wall -Wextra -Werror 2>&1"
+        : "gcc -o /tmp/student /tmp/student.c -Wall -Wextra -Werror 2>&1";
 
     const stuCompile = await runInSandbox(sandbox, stuCompileCmd);
     if (stuCompile.exitCode !== 0) {
@@ -91,8 +102,8 @@ export async function gradeSubmission(
     const results: TestResult[] = [];
     for (const tc of exercise.testCases) {
       const args = tc.args.map((a) => `"${a.replace(/"/g, '\\"')}"`).join(" ");
-      const cmdRef = `/ref ${args}`;
-      const cmdStudent = `/student ${args}`;
+      const cmdRef = `/tmp/ref ${args}`;
+      const cmdStudent = `/tmp/student ${args}`;
 
       try {
         const refRun = await runInSandbox(sandbox, cmdRef, 5000);
