@@ -1,0 +1,1228 @@
+[
+  {
+    "name": "ft_strcpy",
+    "level": 0,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_strcpy",
+      "files": [
+        "ft_strcpy.c"
+      ],
+      "allowed": [],
+      "description": "Reproduce the behavior of the function strcpy (man strcpy).\nYour function must be declared as follows:\nchar    *ft_strcpy(char *s1, char *s2);"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   ft_strcpy.c                                        :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/02/26 12:48:30 by angavrel          #+#    #+#             */\n/*   Updated: 2021/06/20 18:15:02 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\nchar    *ft_strcpy(char *s1, char *s2)\n{\n\tint i;\n\n\ti = 0;\n\twhile (s2[i])\n\t{\n\t\ts1[i] = s2[i];\n\t\ti++;\n\t}\n\ts1[i] = s2[i];\n\treturn (s1);\n}\n",
+    "mainCode": "#include <stdio.h>\n\nchar    *ft_strcpy(char *s1, char *s2);\n\nint main(int argc, char **argv)\n{\n\t(void)argc;\n\tprintf(\"%s\\n\", argv[1]);\n\tft_strcpy(argv[1], argv[2]);\n\tprintf(\"%s\\n\", argv[2]);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "",
+          ""
+        ]
+      },
+      {
+        "args": [
+          "abc",
+          "mag"
+        ]
+      },
+      {
+        "args": [
+          "   c0",
+          "   f0"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_strlen",
+    "level": 0,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_strlen",
+      "files": [
+        "ft_strlen.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that returns the length of a string.\nYour function must be declared as follows:\nint\tft_strlen(char *str);"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   ft_strlen.c                                        :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/07/14 14:51:14 by fwuensch          #+#    #+#             */\n/*   Updated: 2021/06/20 18:26:46 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\nint\t\tft_strlen(char *str)\n{\n\tint i;\n\n\ti = 0;\n\twhile(str[i])\n\t\ti++;\n\treturn (i);\n}\n",
+    "mainCode": "#include <stdio.h>\n\nint\t\tft_strlen(char *str);\n\nint main (int argc, char **argv)\n{\n\t(void)argc;\n\tprintf(\"%d\\n\", ft_strlen(argv[1]));\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "abc"
+        ]
+      },
+      {
+        "args": [
+          "   c0vdsjnodgfiodgfiudgjfduigjfduigjfdiugjfdugjfdugjfduigjfdgjufdugfdgfd0f"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "repeat_alpha",
+    "level": 0,
+    "type": "program",
+    "subject": {
+      "assignment": "repeat_alpha",
+      "files": [
+        "repeat_alpha.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program called repeat_alpha that takes a string and display it\nrepeating each alphabetical character as many times as its alphabetical index,\nfollowed by a newline.\n'a' becomes 'a', 'b' becomes 'bb', 'e' becomes 'eeeee', etc...\nCase remains unchanged.\nIf the number of arguments is not 1, just display a newline.\nExamples:\n$>./repeat_alpha \"abc\"\nabbccc\n$>./repeat_alpha \"Alex.\" | cat -e\nAlllllllllllleeeeexxxxxxxxxxxxxxxxxxxxxxxx.$\n$>./repeat_alpha 'abacadaba 42!' | cat -e\nabbacccaddddabba 42!$\n$>./repeat_alpha | cat -e\n$\n$>\n$>./repeat_alpha \"\" | cat -e\n$\n$>"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   repeat_alpha.c                                     :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/07/14 14:55:21 by fwuensch          #+#    #+#             */\n/*   Updated: 2021/07/02 22:34:01 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nint\t\tft_putchar(char c);\n\nint\t\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n\treturn(0);\n}\n\nint\t\tletter_count(char c)\n{\n\tint\trepeat;\n\n\tif (c >= 'A' && c <= 'Z')\n\t\trepeat = c - 'A' + 1;\n\telse if (c >= 'a' && c <= 'z')\n\t\trepeat = c - 'a' + 1;\n\telse\n\t\trepeat = 1;\n\treturn (repeat);\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tint\trepeat;\n\n\tif (ac == 2)\n\t{\n\t\twhile (*av[1])\n\t\t{\n\t\t\trepeat = letter_count(*av[1]);\n\t\t\twhile (repeat--)\n\t\t\t\twrite(1, av[1], 1);\n\t\t\tav[1]++;\n\t\t}\n\t}\n\tft_putchar('\\n');\n\treturn(0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "abc"
+        ]
+      },
+      {
+        "args": [
+          "Alex."
+        ]
+      },
+      {
+        "args": [
+          "abacadaba 42!"
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "search_and_replace",
+    "level": 1,
+    "type": "program",
+    "subject": {
+      "assignment": "search_and_replace",
+      "files": [
+        "search_and_replace.c"
+      ],
+      "allowed": [
+        "write",
+        "exit"
+      ],
+      "description": "Write a program called search_and_replace that takes 3 arguments, the first\narguments is a string in which to replace a letter (2nd argument) by\nanother one (3rd argument).\nIf the number of arguments is not 3, just display a newline.\nIf the second argument is not contained in the first one (the string)\nthen the program simply rewrites the string followed by a newline.\nExamples:\n$>./search_and_replace \"Papache est un sabre\" \"a\" \"o\"\nPopoche est un sobre\n$>./search_and_replace \"zaz\" \"art\" \"zul\" | cat -e\n$\n$>./search_and_replace \"zaz\" \"r\" \"u\" | cat -e\nzaz$\n$>./search_and_replace \"jacob\" \"a\" \"b\" \"c\" \"e\" | cat -e\n$\n$>./search_and_replace \"ZoZ eT Dovid oiME le METol.\" \"o\" \"a\" | cat -e\nZaZ eT David aiME le METal.$\n$>./search_and_replace \"wNcOre Un ExEmPle Pas Facilw a Ecrirw \" \"w\" \"e\" | cat -e\neNcOre Un ExEmPle Pas Facile a Ecrire $"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   search_and_replace.c                               :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: fwuensch <fwuensch@student.42.fr>          +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/07/14 15:09:23 by fwuensch          #+#    #+#             */\n/*   Updated: 2017/07/14 15:09:24 by fwuensch         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nint main(int argc, char **argv) {\n\tint i;\n\n\t// we only need three parameters\n\tif (argc != 4) {\n\t\twrite(1, \"\\n\", 1);\n\t\treturn 0;\n\t}\n\n\t// the second and third arguments must be letters\n\tif (argv[2][1] != '\\0' || argv[3][1] != '\\0') {\n\t\twrite(1, \"\\n\", 1);\n\t\treturn 0;\n\t}\n\n\t// find and replace\n\ti = 0;\n\twhile (argv[1][i] != '\\0') {\n\t\tif (argv[1][i] == argv[2][0])\n\t\t\targv[1][i] = argv[3][0];\n\t\twrite(1, &argv[1][i], 1);\n\t\ti++;\n\t}\n\n\twrite(1, \"\\n\", 1);\n\treturn 0;\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "Papache est un sabre",
+          "a",
+          "o"
+        ]
+      },
+      {
+        "args": [
+          "zaz",
+          "art",
+          "zul"
+        ]
+      },
+      {
+        "args": [
+          "zaz",
+          "r",
+          "u"
+        ]
+      },
+      {
+        "args": [
+          "jacob",
+          "a",
+          "b",
+          "c",
+          "e"
+        ]
+      },
+      {
+        "args": [
+          "ZoZ eT Dovid oiME le METol.",
+          "o",
+          "a"
+        ]
+      },
+      {
+        "args": [
+          "wNcOre Un ExEmPle Pas Facilw a Ecrirw ",
+          "w",
+          "e"
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ulstr",
+    "level": 1,
+    "type": "program",
+    "subject": {
+      "assignment": "ulstr",
+      "files": [
+        "ulstr.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string and reverses the case of all its letters.\nOther characters remain unchanged.\nYou must display the result followed by a '\\n'.\nIf the number of arguments is not 1, the program displays '\\n'.\nExamples :\n$>./ulstr \"L'eSPrit nE peUt plUs pRogResSer s'Il staGne et sI peRsIsTent VAnIte et auto-justification.\" | cat -e\nl'EspRIT Ne PEuT PLuS PrOGrESsER S'iL STAgNE ET Si PErSiStENT vaNiTE ET AUTO-JUSTIFICATION.$\n$>./ulstr \"S'enTOuRer dE sECreT eSt uN sIGnE De mAnQuE De coNNaiSSanCe.  \" | cat -e\ns'ENtoUrER De SecREt EsT Un SigNe dE MaNqUe dE COnnAIssANcE.  $\n$>./ulstr \"3:21 Ba  tOut  moUn ki Ka di KE m'en Ka fe fot\" | cat -e\n3:21 bA  ToUT  MOuN KI kA DI ke M'EN kA FE FOT$\n$>./ulstr | cat -e\n$"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   ulstr.c                                            :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/03 15:11:26 by angavrel          #+#    #+#             */\n/*   Updated: 2021/07/02 22:47:29 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tint\t\tindex;\n\n\tindex = 0;\n\tif (ac == 2)\n\t{\n\t\twhile (av[1][index] != '\\0')\n\t\t{\n\t\t\tif (av[1][index] >= 'A' && av[1][index] <= 'Z')\n\t\t\t\tft_putchar(av[1][index] - 'A' + 'a');\n\t\t\telse if (av[1][index] >= 'a' && av[1][index] <= 'z')\n\t\t\t\tft_putchar(av[1][index] - 'a' + 'A');\n\t\t\telse\n\t\t\t\tft_putchar(av[1][index]);\n\t\t\tindex++;\n\t\t}\n\t}\n\tft_putchar('\\n');\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "L'eSPrit nE peUt plUs pRogResSer s'Il staGne et sI peRsIsTent VAnIte et auto-justification."
+        ]
+      },
+      {
+        "args": [
+          "S'enTOuRer dE sECreT eSt uN sIGnE De mAnQuE De coNNaiSSanCe.  "
+        ]
+      },
+      {
+        "args": [
+          "3:21 Ba  tOut  moUn ki Ka di KE m'en Ka fe fot"
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "nn"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "first_word",
+    "level": 2,
+    "type": "program",
+    "subject": {
+      "assignment": "first_word",
+      "files": [
+        "first_word.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string and displays its first word, followed by a\nnewline.\nA word is a section of string delimited by spaces/tabs or by the start/end of\nthe string.\nIf the number of parameters is not 1, or if there are no words, simply display\na newline.\nExamples:\n$> ./first_word \"FOR PONY\" | cat -e\nFOR$\n$> ./first_word \"this        ...       is sparta, then again, maybe    not\" | cat -e\nthis$\n$> ./first_word \"   \" | cat -e\n$\n$> ./first_word \"a\" \"b\" | cat -e\n$\n$> ./first_word \"  lorem,ipsum  \" | cat -e\nlorem,ipsum$\n$>"
+    },
+    "referenceCode": "#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tint i;\n\n\ti = 0;\n\tif (ac == 2)\n\t{\n\t\twhile (av[1][i] && (av[1][i] == ' ' || av[1][i] == '\\t'))\n\t\t\ti++;\n\t\twhile (av[1][i] && (av[1][i] != ' ' && av[1][i] != '\\t'))\n\t\t{\n\t\t\tft_putchar(av[1][i]);\n\t\t\ti++;\n\t\t}\n\t}\n\tft_putchar('\\n');\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "FOR PONY"
+        ]
+      },
+      {
+        "args": [
+          "this        ...       is sparta, then again, maybe    not"
+        ]
+      },
+      {
+        "args": [
+          "AkjhZ zLKIJz , 23y "
+        ]
+      },
+      {
+        "args": [
+          "   "
+        ]
+      },
+      {
+        "args": [
+          "a",
+          "b"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_putstr",
+    "level": 2,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_putstr",
+      "files": [
+        "ft_putstr.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a function that displays a string on the standard output.\nThe pointer passed to the function contains the address of the string's first\ncharacter.\nYour function must be declared as follows:\nvoid\tft_putstr(char *str);"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   ft_putstr.c                                        :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <marvin@42.fr>                    +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/03 20:56:36 by angavrel          #+#    #+#             */\n/*   Updated: 2016/12/03 20:57:04 by angavrel         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\tft_putstr(char *str)\n{\n\twhile (*str)\n\t\twrite(1, str++, 1);\n}\n",
+    "mainCode": "#include <stdio.h>\n\nvoid\tft_putstr(char *str);\n\nint main (int argc, char **argv)\n{\n\t(void)argc;\n\tft_putstr(argv[1]);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "abc"
+        ]
+      },
+      {
+        "args": [
+          "   c0vdsjnodgfiodgfiudgjfduigjfduigjfdiugjfdugjfdugjfduigjfdgjufdugfdgfd0f"
+        ]
+      },
+      {
+        "args": [
+          "   c0vdsjnodg0fiodgfiudgjfduigjfduigjfdiugjfdugjfdugjfduigjfdgjufdugfdgfd0f"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_swap",
+    "level": 2,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_swap",
+      "files": [
+        "ft_swap.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that swaps the contents of two integers the adresses of which\nare passed as parameters.\nYour function must be declared as follows:\nvoid\tft_swap(int *a, int *b);"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   ft_swap.c                                          :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <marvin@42.fr>                    +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/07 16:31:30 by angavrel          #+#    #+#             */\n/*   Updated: 2016/12/08 17:22:35 by angavrel         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\nvoid\tft_swap(int\t*a, int *b)\n{\n\tint temp;\n\n\ttemp = *a;\n\t*a = *b;\n\t*b = temp;\n}\n",
+    "mainCode": "#include <stdio.h>\n\nvoid\tft_swap(int\t*a, int *b);\n\nint main (int argc, char **argv)\n{\n\t(void)argc;\n\tint *a;\n\tint *b;\n\n\t*a = atoi(argv[1]);\n\t*b = atoi(argv[2]);\n\tprintf(\"%d\\n%d\", a, b);\n\tft_swap(&a, &b);\n\tprintf(\"%d\\n%d\", a, b);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "1",
+          "3"
+        ]
+      },
+      {
+        "args": [
+          "   c0vdsjnodgfiodgfiudgjfduigjfduigjfdiugjfdugjfdugjfduigjfdgjufdugfdgfd0f"
+        ]
+      },
+      {
+        "args": [
+          "42",
+          "24"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "rev_print",
+    "level": 3,
+    "type": "program",
+    "subject": {
+      "assignment": "rev_print",
+      "files": [
+        "rev_print.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string, and displays the string in reverse\nfollowed by a newline.\nIf the number of parameters is not 1, the program displays a newline.\nExamples:\n$> ./rev_print \"zaz\" | cat -e\nzaz$\n$> ./rev_print \"dub0 a POIL\" | cat -e\nLIOP a 0bud$\n$> ./rev_print | cat -e\n$"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   rev_print.c                                        :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <angavrel@student.42.fr>          +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/27 10:47:34 by angavrel          #+#    #+#             */\n/*   Updated: 2017/07/14 15:38:39 by fwuensch         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\n\nint\t\tft_strlen(char *s)\n{\n\tint i;\n\n\ti = 0;\n\twhile (s[i])\n\t\ti++;\n\treturn (i);\n}\n\n\nint\t\tmain(int ac, char **av)\n{\n\tint len;\n\n\tif (ac == 2)\n\t{\n\t\tlen = ft_strlen(av[1]);\n\t\twhile (len--)\n\t\t\twrite(1, &av[1][len], 1);\n\t}\n\tft_putchar('\\n');\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "FOR PONY"
+        ]
+      },
+      {
+        "args": [
+          "this        ...       is sparta, then again, maybe    not"
+        ]
+      },
+      {
+        "args": [
+          "zaz"
+        ]
+      },
+      {
+        "args": [
+          "   "
+        ]
+      },
+      {
+        "args": [
+          "a",
+          "b"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "rot_13",
+    "level": 3,
+    "type": "program",
+    "subject": {
+      "assignment": "rot_13",
+      "files": [
+        "rot_13.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string and displays it, replacing each of its\nletters by the letter 13 spaces ahead in alphabetical order.\n'z' becomes 'm' and 'Z' becomes 'M'. Case remains unaffected.\nThe output will be followed by a newline.\nIf the number of arguments is not 1, the program displays a newline.\nExample:\n$>./rot_13 \"abc\"\nnop\n$>./rot_13 \"My horse is Amazing.\" | cat -e\nZl ubefr vf Nznmvat.$\n$>./rot_13 \"AkjhZ zLKIJz , 23y \" | cat -e\nNxwuM mYXVWm , 23l $\n$>./rot_13 | cat -e\n$\n$>\n$>./rot_13 \"\" | cat -e\n$\n$>"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   rot_13.c                                           :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <marvin@42.fr>                    +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/06 15:24:57 by angavrel          #+#    #+#             */\n/*   Updated: 2016/12/06 15:28:19 by angavrel         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\n\nint\t\trot_13(char c)\n{\n\tif ((c >= 'A' && c <= 'M') || (c >= 'a' && c <= 'm'))\n\t\tc += 13;\n\telse if ((c >= 'N' && c <= 'Z') || (c >= 'n' && c <= 'z'))\n\t\tc -= 13;\n\treturn (c);\n}\n\n\n\nint\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t\twhile (*av[1])\n\t\t\tft_putchar(rot_13(*av[1]++));\n\tft_putchar('\\n');\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "abc"
+        ]
+      },
+      {
+        "args": [
+          "My horse is Amazing."
+        ]
+      },
+      {
+        "args": [
+          "AkjhZ zLKIJz , 23y "
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "rotone",
+    "level": 3,
+    "type": "program",
+    "subject": {
+      "assignment": "rotone",
+      "files": [
+        "rotone.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string and displays it, replacing each of its\nletters by the next one in alphabetical order.\n'z' becomes 'a' and 'Z' becomes 'A'. Case remains unaffected.\nThe output will be followed by a \\n.\nIf the number of arguments is not 1, the program displays \\n.\nExample:\n$>./rotone \"abc\"\nbcd\n$>./rotone \"Les stagiaires du staff ne sentent pas toujours tres bon.\" | cat -e\nMft tubhjbjsft ev tubgg of tfoufou qbt upvkpvst usft cpo.$\n$>./rotone \"AkjhZ zLKIJz , 23y \" | cat -e\nBlkiA aMLJKa , 23z $\n$>./rotone | cat -e\n$\n$>\n$>./rotone \"\" | cat -e\n$\n$>"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   rotone.c                                           :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <marvin@42.fr>                    +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/01/28 17:42:14 by angavrel          #+#    #+#             */\n/*   Updated: 2017/01/28 17:52:56 by angavrel         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\nvoid\trotone(char *s)\n{\n\twhile (*s)\n\t{\n\t\tif ((*s >= 'A' && *s <= 'Y') || (*s >= 'a' && *s <= 'y'))\n\t\t\tft_putchar(*s + 1);\n\t\telse if (*s == 'Z' || *s == 'z')\n\t\t\tft_putchar(*s - 25);\n\t\telse\n\t\t\tft_putchar(*s);\n\t\t++s;\n\t}\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t\trotone(av[1]);\n\tft_putchar('\\n');\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "abc"
+        ]
+      },
+      {
+        "args": [
+          "Les stagiaires du staff ne sentent pas toujours tres bon."
+        ]
+      },
+      {
+        "args": [
+          "AkjhZ zLKIJz , 23y "
+        ]
+      },
+      {
+        "args": [
+          "   "
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_atoi",
+    "level": 4,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_atoi",
+      "files": [
+        "ft_atoi.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that converts the string argument str to an integer (type int)\nand returns it.\nIt works much like the standard atoi(const char *str) function, see the man.\nYour function must be declared as follows:\nint\tft_atoi(const char *str);"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   ft_atoi.c                                          :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/09/19 18:34:45 by angavrel          #+#    #+#             */\n/*   Updated: 2021/07/02 16:13:54 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <stdio.h> //\n\nint\t\tft_atoi(char *s)\n{\n\tint\t\tsign;\n\tlong\tr;\n\n\tr = 0;\n\tsign = 1;\n\twhile (*s == 32 || (*s >= 9 && *s <= 13))\n\t\ts++;\n\tif (*s == '-' || *s == '+')\n\t{\n\t\tif (*s == '-')\n\t\t\tsign = -1;\n\t\ts++;\n\t}\n\twhile (*s >= '0' && *s <= '9')\n\t{\n\t\tr = r * 10 + *s - '0';\n\t\ts++;\n\t}\n\treturn (sign * (int)r);\n}\n",
+    "mainCode": "#include <stdio.h>\n\nint\t\tft_atoi(char *s);\n\nint\t\tmain(int argc, char **argv)\n{\n\tprintf(\"%d\",ft_atoi(argv[1]));\n\treturn(0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "1"
+        ]
+      },
+      {
+        "args": [
+          "4214143432432432432"
+        ]
+      },
+      {
+        "args": [
+          "-2147483648"
+        ]
+      },
+      {
+        "args": [
+          "2147483647"
+        ]
+      },
+      {
+        "args": [
+          "-- - - +2+2147483642"
+        ]
+      },
+      {
+        "args": [
+          "-0"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_strdup",
+    "level": 4,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_strdup",
+      "files": [
+        "ft_strdup.c"
+      ],
+      "allowed": [
+        "malloc"
+      ],
+      "description": "Reproduce the behavior of the function strdup (man strdup).\nYour function must be declared as follows:\nchar    *ft_strdup(char *src);"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   ft_strdup.c                                        :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <angavrel@student.42.fr>          +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/11/06 18:22:00 by angavrel          #+#    #+#             */\n/*   Updated: 2017/07/14 16:14:13 by fwuensch         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <stdlib.h>\n\nchar\t*ft_strdup(char *src)\n{\n\tchar\t*s;\n\tint\t\tlen;\n\n\twhile (src[len])\n\t\t++len;\n\tif (!(s = (char *)malloc(sizeof(char) * (len + 1))))\n\t\treturn (NULL);\n\ts[len] = '\\0';\n\twhile (len >= 0)\n\t{\n\t\ts[len] = src[len];\n\t\tlen--;\n\t}\n\treturn (s);\n}\n",
+    "mainCode": "#include <unistd.h>\n#include <stdio.h>\n\nchar    *ft_strdup(char *src);\n\nvoid\ttest(char *str)\n{\n\tprintf(\"%s = \", str);\n\tprintf(\"%s | \", ft_strdup(str));\n}\n\nint main(int argc, char *argv[])\n{\n\tint i;\n\n\ti = 1;\n\tif (argc == 1)\n\t\treturn (0);\n\twhile (argv[i])\n\t\ttest(argv[i++]);\n\treturn 0;\n}\n",
+    "testCases": [
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "1"
+        ]
+      },
+      {
+        "args": [
+          "4214143432432432hello432"
+        ]
+      },
+      {
+        "args": [
+          "zut"
+        ]
+      },
+      {
+        "args": [
+          "bienvenue",
+          "chez",
+          "42"
+        ]
+      },
+      {
+        "args": [
+          "?",
+          "0",
+          "n"
+        ]
+      },
+      {
+        "args": [
+          "ok"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "inter",
+    "level": 4,
+    "type": "program",
+    "subject": {
+      "assignment": "inter",
+      "files": [
+        "inter.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes two strings and displays, without doubles, the\ncharacters that appear in both strings, in the order they appear in the first\none.\nThe display will be followed by a \\n.\nIf the number of arguments is not 2, the program displays \\n.\nExamples:\n$>./inter \"padinton\" \"paqefwtdjetyiytjneytjoeyjnejeyj\" | cat -e\npadinto$\n$>./inter ddf6vewg64f gtwthgdwthdwfteewhrtag6h4ffdhsd | cat -e\ndf6ewg4$\n$>./inter \"rien\" \"cette phrase ne cache rien\" | cat -e\nrien$\n$>./inter | cat -e\n$"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   inter.c                                            :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: fwuensch <fwuensch@student.42.fr>          +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/07/14 16:28:43 by fwuensch          #+#    #+#             */\n/*   Updated: 2017/07/14 16:47:09 by fwuensch         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid solve(char *str1, char *str2) {\n    int i;\n    int j;\n    int ascii[256] = {0};\n\n    i = 0;\n    while (str2[i])\n    {\n        if (ascii[(int)str2[i]] == 0)\n            ascii[(int)str2[i]] = 1;\n        i++;\n    }\n\n    i = 0;\n    j = 0;\n    while (str1[i])\n    {\n        if (ascii[(int)str1[i]] == 1)\n        {\n            ascii[(int)str1[i]] = 2;\n            write(1, &str1[i], 1);\n        }\n        i++;\n    }\n\n}\n\nint\tmain(int argc, char **argv) {\n\tif (argc == 3)\n\t\tsolve(argv[1], argv[2]);\n\twrite(1, \"\\n\", 1);\n\treturn 0;\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "FOR PONY"
+        ]
+      },
+      {
+        "args": [
+          "padinton",
+          "paqefwtdjetyiytjneytjoeyjnejeyj"
+        ]
+      },
+      {
+        "args": [
+          "   "
+        ]
+      },
+      {
+        "args": [
+          "ddf6vewg64f",
+          "gtwthgdwthdwfteewhrtag6h4ffdhsd"
+        ]
+      },
+      {
+        "args": [
+          "rien",
+          "cette phrase ne cache rien"
+        ]
+      },
+      {
+        "args": [
+          "  lorem,ipsum  "
+        ]
+      },
+      {
+        "args": [
+          "  lorem,ipsnum  00"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "last_word",
+    "level": 5,
+    "type": "program",
+    "subject": {
+      "assignment": "last_word",
+      "files": [
+        "last_word.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string and displays its last word followed by a \\n.\nA word is a section of string delimited by spaces/tabs or by the start/end of\nthe string.\nIf the number of parameters is not 1, or there are no words, display a newline.\nExample:\n$> ./last_word \"FOR PONY\" | cat -e\nPONY$\n$> ./last_word \"this        ...       is sparta, then again, maybe    not\" | cat -e\nnot$\n$> ./last_word \"   \" | cat -e\n$\n$> ./last_word \"a\" \"b\" | cat -e\n$\n$> ./last_word \"  lorem,ipsum  \" | cat -e\nlorem,ipsum$\n$>"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   last_word.c                                        :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <angavrel@student.42.fr>          +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/03 15:32:04 by angavrel          #+#    #+#             */\n/*   Updated: 2017/07/14 16:53:34 by fwuensch         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nint\t\tft_isblank(char c)\n{\n\tif (c == ' ' || c == '\\t')\n\t\treturn (1);\n\treturn (0);\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t{\n\t\twhile (*av[1])\n\t\t\tav[1]++;\n\t\tav[1]--;\n\t\twhile (ft_isblank(*av[1]))\n\t\t\tav[1]--;\n\t\twhile (*av[1] && !ft_isblank(*av[1]))\n\t\t\tav[1]--;\n\t\tav[1]++;\n\t\twhile (*av[1] && !ft_isblank(*av[1]))\n\t\t\twrite(1, av[1]++, 1);\n\t}\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "FOR PONY"
+        ]
+      },
+      {
+        "args": [
+          "padinton",
+          "paqefwtdjetyiytjneytjoeyjnejeyj"
+        ]
+      },
+      {
+        "args": [
+          "   "
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "args": [
+          "  lorem,ipsum  "
+        ]
+      },
+      {
+        "args": [
+          "this        ...       is sparta, then again, maybe    not"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "reverse_bits",
+    "level": 5,
+    "type": "function",
+    "subject": {
+      "assignment": "reverse_bits",
+      "files": [
+        "reverse_bits.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that takes a byte, reverses it, bit by bit (like the\nexample) and returns the result.\nYour function must be declared as follows:\nunsigned char\treverse_bits(unsigned char octet);\nExample:\n1 byte\n_____________\n0010  0110\n||\n\\/\n0110  0100"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   reverse_bits.c                                     :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/01/12 20:19:07 by angavrel          #+#    #+#             */\n/*   Updated: 2021/07/02 16:24:17 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nunsigned char reverse_bits(unsigned char b)\n{\n\tb = (b & 0xF0) >> 4 | (b & 0x0F) << 4;\n\tb = (b & 0xCC) >> 2 | (b & 0x33) << 2;\n\tb = (b & 0xAA) >> 1 | (b & 0x55) << 1;\n\treturn b;\n}\n\nunsigned char reverse_bits2(unsigned char b)\n{\n\tunsigned char\tr = 0;\n\tunsigned\t\tchar_len = 8;\n\n\twhile (char_len--)\n\t{\n\t\tr = (r << 1) | (b & 1);\n\t\tb >>= 1;\n\t}\n\treturn (r);\n}\n\nunsigned char reverse_bits3(unsigned char b)\n{\n\tb = (b * 0x0202020202ULL & 0x010884422010ULL) % 0x3ff;\n\treturn (b);\n}\n",
+    "mainCode": "#include <unistd.h>\n\nunsigned char reverse_bits(unsigned char b);\n\nint\tmain(int argc, char **argv)\n{\n\tunsigned char c;\n\n\tc = argv[1][0];\n\twrite(1, &c, 1);\n\twrite(1, \"\\n\", 1);\n\tc = reverse_bits(c);\n\twrite(1, &c, 1);\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "a"
+        ]
+      },
+      {
+        "args": [
+          "1"
+        ]
+      },
+      {
+        "args": [
+          "3"
+        ]
+      },
+      {
+        "args": [
+          "w"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "swap_bits",
+    "level": 5,
+    "type": "function",
+    "subject": {
+      "assignment": "swap_bits",
+      "files": [
+        "swap_bits.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that takes a byte, swaps its halves (like the example) and\nreturns the result.\nYour function must be declared as follows:\nunsigned char\tswap_bits(unsigned char octet);\nExample:\n1 byte\n_____________\n0100 | 0001\n\\ /\n/ \\\n0001 | 0100"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   swap_bits.c                                        :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2017/07/20 21:01:37 by fwuensch          #+#    #+#             */\n/*   Updated: 2021/07/02 16:27:22 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nunsigned char\tswap_bits(unsigned char octet)\n{\n\treturn ((octet >> 4) | (octet << 4));\n}\n",
+    "mainCode": "#include <unistd.h>\n\nunsigned char\tswap_bits(unsigned char octet);\n\nint\tmain(int argc, char **argv)\n{\n\tunsigned char c;\n\n\tc = argv[1][0];\n\twrite(1, &c, 1);\n\twrite(1, \"\\n\", 1);\n\tc = swap_bits(c);\n\twrite(1, &c, 1);\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "a"
+        ]
+      },
+      {
+        "args": [
+          "1"
+        ]
+      },
+      {
+        "args": [
+          "3"
+        ]
+      },
+      {
+        "args": [
+          "w"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "union",
+    "level": 5,
+    "type": "program",
+    "subject": {
+      "assignment": "union",
+      "files": [
+        "union.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes two strings and displays, without doubles, the\ncharacters that appear in either one of the strings.\nThe display will be in the order characters appear in the command line, and\nwill be followed by a \\n.\nIf the number of arguments is not 2, the program displays \\n.\nExample:\n$>./union zpadinton \"paqefwtdjetyiytjneytjoeyjnejeyj\" | cat -e\nzpadintoqefwjy$\n$>./union ddf6vewg64f gtwthgdwthdwfteewhrtag6h4ffdhsd | cat -e\ndf6vewg4thras$\n$>./union \"rien\" \"cette phrase ne cache rien\" | cat -e\nrienct phas$\n$>./union | cat -e\n$\n$>\n$>./union \"rien\" | cat -e\n$\n$>"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   union.c                                            :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <angavrel@student.42.fr>          +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/09/20 16:16:51 by angavrel          #+#    #+#             */\n/*   Updated: 2017/07/20 22:15:43 by fwuensch         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nint\t\tnot_seen_before(char *s, int max_pos, char c)\n{\n\tint i;\n\n\ti = -1;\n\twhile (++i < max_pos)\n\t\tif (s[i] == c)\n\t\t\treturn (0);\n\treturn (1);\n}\n\nvoid\tft_union(char *s1, char *s2)\n{\n\tint\ti;\n\tint j;\n\n\ti = -1;\n\twhile (s1[++i])\n\t\tif (not_seen_before(s1, i, s1[i]))\n\t\t\twrite(1, &s1[i], 1);\n\tj = -1;\n\twhile (s2[++j])\n\t\tif (not_seen_before(s1, i, s2[j]) && not_seen_before(s2, j, s2[j]))\n\t\t\twrite(1, &s2[j], 1);\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 3)\n\t\tft_union(av[1], av[2]);\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "zpadinton",
+          "paqefwtdjetyiytjneytjoeyjnejeyj"
+        ]
+      },
+      {
+        "args": [
+          "ddf6vewg64f",
+          "gtwthgdwthdwfteewhrtag6h4ffdhsd"
+        ]
+      },
+      {
+        "args": [
+          "rien",
+          "cette phrase ne cache rien"
+        ]
+      },
+      {
+        "args": [
+          "rien"
+        ]
+      },
+      {
+        "args": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "args": [
+          "  lorem,ipsum  ",
+          "oooo"
+        ]
+      },
+      {
+        "args": [
+          "this        ...       is sparta, then again, maybe    not",
+          "lol"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "alpha_mirror",
+    "level": 6,
+    "type": "program",
+    "subject": {
+      "assignment": "alpha_mirror",
+      "files": [
+        "alpha_mirror.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program called alpha_mirror that takes a string and displays this string\nafter replacing each alphabetical character by the opposite alphabetical\ncharacter, followed by a newline.\n'a' becomes 'z', 'Z' becomes 'A'\n'd' becomes 'w', 'M' becomes 'N'\nand so on.\nCase is not changed.\nIf the number of arguments is not 1, display only a newline.\nExamples:\n$>./alpha_mirror \"abc\"\nzyx\n$>./alpha_mirror \"My horse is Amazing.\" | cat -e\nNb slihv rh Znzarmt.$\n$>./alpha_mirror | cat -e\n$\n$>"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   alpha_mirror.c                                     :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <marvin@42.fr>                    +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/03 16:49:32 by angavrel          #+#    #+#             */\n/*   Updated: 2016/12/03 17:49:38 by angavrel         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\nint\t\tft_isalpha(char c)\n{\n\tif ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))\n\t\treturn (1);\n\treturn (0);\n}\n\nint\t\tft_alpha_mirror(int c)\n{\n\treturn (c = (c >= 'A' && c <= 'Z') ? 'Z' - (c - 'A') : 'z' - (c - 'a'));\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t{\n\t\twhile (*av[1])\n\t\t{\n\t\t\tif (ft_isalpha(*av[1]))\n\t\t\t\tft_putchar(ft_alpha_mirror(*(av[1]++)));\n\t\t\telse\n\t\t\t\twrite(1, av[1]++, 1);\n\t\t}\n\t}\n\twrite(1, \"\\n\", 1);\n\treturn (1);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "abc"
+        ]
+      },
+      {
+        "args": [
+          "My horse is Amazing."
+        ]
+      },
+      {
+        "args": [
+          "hello",
+          "bye"
+        ]
+      },
+      {
+        "args": [
+          "abacadaba 42!"
+        ]
+      },
+      {
+        "args": [
+          "{My horse is Amazing.}"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "do_op",
+    "level": 6,
+    "type": "program",
+    "subject": {
+      "assignment": "do_op",
+      "files": [
+        "*.c",
+        "*.h"
+      ],
+      "allowed": [
+        "atoi",
+        "printf",
+        "write"
+      ],
+      "description": "Write a program that takes three strings:\n- The first and the third one are representations of base-10 signed integers\nthat fit in an int.\n- The second one is an arithmetic operator chosen from: + - * / %\nThe program must display the result of the requested arithmetic operation,\nfollowed by a newline. If the number of parameters is not 3, the program\njust displays a newline.\nYou can assume the string have no mistakes or extraneous characters. Negative\nnumbers, in input or output, will have one and only one leading '-'. The\nresult of the operation fits in an int.\nExamples:\n$> ./do_op \"123\" \"*\" 456 | cat -e\n56088$\n$> ./do_op \"9828\" \"/\" 234 | cat -e\n42$\n$> ./do_op \"1\" \"+\" \"-43\" | cat -e\n-42$\n$> ./do_op | cat -e\n$"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   do-op.c                                            :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <marvin@42.fr>                    +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/07 16:33:21 by angavrel          #+#    #+#             */\n/*   Updated: 2016/12/07 16:38:54 by angavrel         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <stdio.h>\n#include <stdlib.h>\n\nint\t\tmain(int argc, char **argv)\n{\n\tif  (argc == 4)\n\t{\n\t\tif (*argv[2] == '+')\n\t\t\tprintf(\"%d\", atoi(argv[1]) + atoi(argv[3]));\n\t\telse if (*argv[2] == '-')\n\t\t\tprintf(\"%d\", atoi(argv[1]) - atoi(argv[3]));\n\t\telse if (*argv[2] == '*')\n\t\t\tprintf(\"%d\", atoi(argv[1]) * atoi(argv[3]));\n\t\telse if (*argv[2] == '/')\n\t\t\tprintf(\"%d\", atoi(argv[1]) / atoi(argv[3]));\n\t\telse if (*argv[2] == '%')\n\t\t\tprintf(\"%d\", atoi(argv[1]) % atoi(argv[3]));\n\t}\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "123",
+          "*",
+          "456"
+        ]
+      },
+      {
+        "args": [
+          "9828",
+          "/",
+          "234"
+        ]
+      },
+      {
+        "args": [
+          "1",
+          "+",
+          "-43"
+        ]
+      },
+      {
+        "args": [
+          "42",
+          "/",
+          "-42"
+        ]
+      },
+      {
+        "args": [
+          "42",
+          "*",
+          "-42"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_strcmp",
+    "level": 6,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_strcmp",
+      "files": [
+        "ft_strcmp.c"
+      ],
+      "allowed": [],
+      "description": "Reproduce the behavior of the function strcmp (man strcmp).\nYour function must be declared as follows:\nint    ft_strcmp(char *s1, char *s2);"
+    },
+    "referenceCode": "int\tft_strcmp(char *s1, char *s2)\n{\n\tint i;\n\n\ti = 0;\n\twhile (s1[i] == s2[i] && s1[i] != '\\0' && s2[i] != '\\0')\n\t\ti++;\n\treturn (s1[i] - s2[i]);\n}\n",
+    "mainCode": "#include <stdio.h>\n\nint\tft_strcmp(char *s1, char *s2);\n\nint\tmain(int ac, char **av)\n{\n\t(void)ac;\n\tprintf(\"%d\", ft_strcmp(av[1], av[2]));\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "hey",
+          "hey"
+        ]
+      },
+      {
+        "args": [
+          "error",
+          "rrerrrfiiljdfxjyuifrrvcoojh"
+        ]
+      },
+      {
+        "args": [
+          "quarante deux",
+          "qfqfsudf arzgsayns tsregfdgs sjytdekuoixq "
+        ]
+      },
+      {
+        "args": [
+          "",
+          ""
+        ]
+      },
+      {
+        "args": [
+          "faya",
+          "fgvvfdxcacpolhyghbreda"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_strrev",
+    "level": 6,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_strrev",
+      "files": [
+        "ft_strrev.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that reverses (in-place) a string.\nIt must return its parameter.\nYour function must be declared as follows:\nchar    *ft_strrev(char *str);"
+    },
+    "referenceCode": "char\t*ft_strrev(char *str)\n{\n\tint\tlen;\n\tint\ti;\n\tchar\ttmp;\n\n\tlen = 0;\n\ti = 0;\n\twhile (str[len])\n\t\tlen++;\n\tlen -= 1;\n\twhile (i < len)\n\t{\n\t\ttmp = str[i];\n\t\tstr[i] = str[len];\n\t\tstr[len] = tmp;\n\t\ti++;\n\t\tlen--;\n\t}\n\treturn (str);\n}\n",
+    "mainCode": "#include <stdio.h>\n\nchar\t*ft_strrev(char *str);\n\nint\tmain(int ac, char **argv)\n{\n\tchar *s = argv[1];\n\tft_strrev(s);\n\tprintf(\"%s\\n\", s);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "string"
+        ]
+      },
+      {
+        "args": [
+          "error"
+        ]
+      },
+      {
+        "args": [
+          "quarante deux"
+        ]
+      },
+      {
+        "args": [
+          "lol"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "is_power_of_2",
+    "level": 7,
+    "type": "function",
+    "subject": {
+      "assignment": "is_power_of_2",
+      "files": [
+        "is_power_of_2.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that determines if a given number is a power of 2.\nThis function returns 1 if the given number is a power of 2, otherwise it returns 0.\nYour function must be declared as follows:\nint\t    is_power_of_2(unsigned int n);"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   is_power_of_2.c                                    :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: angavrel <marvin@42.fr>                    +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/27 06:47:44 by angavrel          #+#    #+#             */\n/*   Updated: 2016/12/27 07:06:53 by angavrel         ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\nint\t\tis_power_of_2(unsigned int n)\n{\n\tif (n == 0)\n\t\treturn (0);\n\twhile (n % 2 == 0) \n\t\tn /= 2;\n\treturn ((n == 1) ? 1 : 0);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nint\t\tis_power_of_2(unsigned int n);\n\nint main(int argc, char **argv)\n{\n\tprintf(\"%d\", is_power_of_2(atoi(argv[1])));\n\treturn(0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "2"
+        ]
+      },
+      {
+        "args": [
+          "4"
+        ]
+      },
+      {
+        "args": [
+          "1073741824"
+        ]
+      },
+      {
+        "args": [
+          "2147483648"
+        ]
+      },
+      {
+        "args": [
+          "2147483647"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "max",
+    "level": 7,
+    "type": "function",
+    "subject": {
+      "assignment": "max",
+      "files": [
+        "max.c"
+      ],
+      "allowed": [],
+      "description": "Write the following function:\nint\t\tmax(int* tab, unsigned int len);\nThe first parameter is an array of int, the second is the number of elements in\nthe array.\nThe function returns the largest number found in the array.\nIf the array is empty, the function returns 0."
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   max.c                                              :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/06 15:30:33 by angavrel          #+#    #+#             */\n/*   Updated: 2021/07/02 19:59:00 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <stdio.h>//\n#include <stdlib.h>//\n\nint\t\tmax(int *tab, unsigned int len)\n{\n\tint\tmax;\n\n\tif (!len)\n\t\treturn (0);\n\tmax = tab[--len];\n\twhile (len--)\n\t\tif (tab[len] > max)\n\t\t\tmax = tab[len];\n\treturn (max);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nint\t\tmax(int *tab, unsigned int len);\n\nint\t\tmain(int argc, char **argv)\n{\n\tint\t*tab;\n\tint i = 0;\n\n\tif (!(tab = (int*)malloc(sizeof(int) * 3)))\n\t\treturn (0);\n\twhile (i < argc-1)\n\t{\n\t\ttab[i] = atoi(argv[i+1]);\n\t\ti++;\n\t}\n\tprintf(\"%d\", max(tab, argc-1));\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "1",
+          "3",
+          "212121"
+        ]
+      },
+      {
+        "args": [
+          "1",
+          "3",
+          "524242432423423432"
+        ]
+      },
+      {
+        "args": [
+          "-2",
+          "-3",
+          "-3"
+        ]
+      },
+      {
+        "args": [
+          "-5",
+          "-3",
+          "-3"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "print_bits",
+    "level": 7,
+    "type": "function",
+    "subject": {
+      "assignment": "print_bits",
+      "files": [
+        "print_bits.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a function that takes a byte, and prints it in binary WITHOUT A NEWLINE\nAT THE END.\nYour function must be declared as follows:\nvoid\tprint_bits(unsigned char octet);\nExample, if you pass 2 to print_bits, it will print \"00000010\""
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   print_bits.c                                       :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/08 15:08:22 by angavrel          #+#    #+#             */\n/*   Updated: 2021/07/02 20:12:53 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\tprint_bits(unsigned char octet)\n{\n\tint\ti;\n\n\ti = 128;\n\twhile (octet >= 0 && i)\n\t{\n\t\t(octet / i) ? write(1, \"1\", 1) : write(1, \"0\", 1);\n\t\t(octet / i) ? octet -= i : 0;\n\t\ti /= 2;\n\t}\n}\n\n// void\tprint_bits2(unsigned char octet)\n// {\n// \tint\ti = 256;\n// \twhile (i >>= 1)\n// \t\t(octet & i) ? write(1, \"1\", 1) : write(1, \"0\", 1);\n// }\n",
+    "mainCode": "# include <unistd.h>\n#include <stdlib.h>\n\nvoid\tprint_bits(unsigned char octet);\n\nint\t\tmain(int argc, char **argv)\n{\n\tint n = atoi(argv[1]);\n\tprint_bits(n);\n\twrite(1, \"\\n\", 1);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "2"
+        ]
+      },
+      {
+        "args": [
+          "432"
+        ]
+      },
+      {
+        "args": [
+          "12"
+        ]
+      },
+      {
+        "args": [
+          "-2"
+        ]
+      },
+      {
+        "args": [
+          "42"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "wdmatch",
+    "level": 7,
+    "type": "function",
+    "subject": {
+      "assignment": "wdmatch",
+      "files": [
+        "wdmatch.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes two strings and checks whether it's possible to\nwrite the first string with characters from the second string, while respecting\nthe order in which these characters appear in the second string.\nIf it's possible, the program displays the string, followed by a \\n, otherwise\nit simply displays a \\n.\nIf the number of arguments is not 2, the program displays a \\n.\nExamples:\n$>./wdmatch \"faya\" \"fgvvfdxcacpolhyghbreda\" | cat -e\nfaya$\n$>./wdmatch \"faya\" \"fgvvfdxcacpolhyghbred\" | cat -e\n$\n$>./wdmatch \"quarante deux\" \"qfqfsudf arzgsayns tsregfdgs sjytdekuoixq \" | cat -e\nquarante deux$\n$>./wdmatch \"error\" rrerrrfiiljdfxjyuifrrvcoojh | cat -e\n$\n$>./wdmatch | cat -e\n$"
+    },
+    "referenceCode": "/* ************************************************************************** */\n/*                                                                            */\n/*                                                        :::      ::::::::   */\n/*   wdmatch.c                                          :+:      :+:    :+:   */\n/*                                                    +:+ +:+         +:+     */\n/*   By: jcluzet <jo@cluzet.fr>                     +#+  +:+       +#+        */\n/*                                                +#+#+#+#+#+   +#+           */\n/*   Created: 2016/12/05 20:21:01 by angavrel          #+#    #+#             */\n/*   Updated: 2021/07/02 20:06:32 by jcluzet          ###   ########.fr       */\n/*                                                                            */\n/* ************************************************************************** */\n\n#include <unistd.h>\n\nvoid\twdmatch(char *s1, char *s2)\n{\n\tint len = 0;\n\tint i = 0;\n\n\twhile (s1[len])\n\t\t++len;\n\twhile (*s2 && i < len)\n\t\t(*s2++ == s1[i]) ? ++i : 0;\n\tif (i == len)\n\t\twrite(1, s1, len);\n}\n",
+    "mainCode": "#include <unistd.h>\n\nvoid\twdmatch(char *s1, char *s2);\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 3)\n\t\twdmatch(av[1], av[2]);\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "error",
+          "rrerrrfiiljdfxjyuifrrvcoojh"
+        ]
+      },
+      {
+        "args": [
+          "quarante deux",
+          "qfqfsudf arzgsayns tsregfdgs sjytdekuoixq "
+        ]
+      },
+      {
+        "args": [
+          "faya",
+          "fgvvfdxcacpolhyghbred"
+        ]
+      },
+      {
+        "args": [
+          "faya",
+          "fgvvfdxcacpolhyghbreda"
+        ]
+      }
+    ]
+  }
+]

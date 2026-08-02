@@ -3,7 +3,7 @@
 import { moduleOrder, modules, type Exercise } from "@/lib/modules";
 import Link from "next/link";
 import { ProgressBar } from "@heroui/react";
-import { Terminal, Code2, ChevronRight, Trophy } from "lucide-react";
+import { Terminal, Code2, ChevronRight, Trophy, GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -85,6 +85,30 @@ export default function Home() {
             <ModuleRow key={id} id={id} progress={progress[id] || 0} />
           ))}
       </Section>
+
+      {/* Exam Gate */}
+      <div className="border-t pt-6 mt-4">
+        <Link
+          href="/exam"
+          className="flex items-center gap-4 px-4 py-4 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-dashed hover:border-border"
+        >
+          <div className="h-10 w-10 rounded-lg flex items-center justify-center text-amber-500 bg-amber-500/10">
+            <GraduationCap className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-semibold">Exam Gate</span>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Take timed exams, practice exam exercises, track your scores.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-[10px] font-medium text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
+              New
+            </span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }

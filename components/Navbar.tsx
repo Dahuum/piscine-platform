@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@heroui/react";
-import { BookOpen, Terminal, Sun, Moon, Users } from "lucide-react";
+import { BookOpen, Terminal, Sun, Moon, Users, GraduationCap } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function Navbar() {
@@ -47,7 +47,8 @@ export default function Navbar() {
     localStorage.setItem("theme", isDark ? "light" : "dark");
   };
 
-  const notHome = pathname !== "/";
+        const notHome = pathname !== "/";
+  const isExamActive = pathname.includes("/exam/week/") && pathname.includes("/take");
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
@@ -58,7 +59,7 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-1">
-          {online > 0 && (
+          {online > 0 && !isExamActive && (
             <span className="flex items-center gap-1 text-[11px] text-muted-foreground mr-1">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -67,10 +68,16 @@ export default function Navbar() {
               {online}
             </span>
           )}
-          {notHome && (
+          {notHome && !isExamActive && (
             <Link href="/" className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors no-underline">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Modules</span>
+            </Link>
+          )}
+          {!isExamActive && (
+            <Link href="/exam" className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors no-underline">
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden sm:inline">Exam Gate</span>
             </Link>
           )}
           <Button isIconOnly variant="ghost" size="sm" onPress={toggleTheme} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}>
