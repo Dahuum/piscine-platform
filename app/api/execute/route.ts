@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeCode } from "@/lib/sandbox";
 import { modules } from "@/lib/modules";
+import { getExamWeekOrNull } from "@/lib/exam-data";
 
 export async function POST(req: NextRequest) {
   try {
     const { code, exerciseId, moduleId } = await req.json();
 
-    if (!code || !moduleId) {
-      return NextResponse.json({ error: "Missing code or moduleId" }, { status: 400 });
+    if (!code) {
+      return NextResponse.json({ error: "Missing code" }, { status: 400 });
+    }
+
+    if (moduleId && moduleId.startsWith("exam_")) {
+      const week = getExamWeekOrNull(moduleId);
+      if (!week) {
+        return NextResponse.json({ error: "Unknown exam week" }, { status: 400 });
+      }
+      const output = await executeCode(code, "c");
+      return NextResponse.json({ output });
+    }
+
+    if (!moduleId) {
+      return NextResponse.json({ error: "Missing moduleId" }, { status: 400 });
     }
 
     const mod = modules[moduleId as keyof typeof modules];
