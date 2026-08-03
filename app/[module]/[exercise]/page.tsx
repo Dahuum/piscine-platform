@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import CodeEditor from "@/components/CodeEditor";
+import { saveModuleProgress } from "@/lib/db";
 
 export default function ExercisePage() {
   const params = useParams<{ module: string; exercise: string }>();
@@ -263,7 +264,7 @@ function ExercisePageInner({
             <div className="flex-1" />
 
             <button
-              onClick={() => { const s = !isDone; setIsDone(s); localStorage.setItem(progressKey, s ? "done" : ""); }}
+              onClick={() => { const s = !isDone; setIsDone(s); localStorage.setItem(progressKey, s ? "done" : ""); saveModuleProgress(mod.id, ex.id, s ? "done" : "", codeRef.current).catch(() => {}); }}
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 isDone
                   ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
