@@ -96,10 +96,45 @@ END $$;
 `;
 
 export async function GET() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
+  const connStr = process.env.DATABASE_URL || "postgresql://postgres.julmcohcipklgseecize:G3fInDxoApsKYEP9@aws-0-eu-west-3.pooler.supabase.co:6543/postgres?sslmode=require";
+  
+  console.log("Trying connection via pooler...");
+  
+  let pool: Pool | null = null;
+  
+  // Try pooler first (works on Vercel), fall back to direct
+  const connStrings = [
+    "postgresql://postgres.julmcohcipklgseecize:G3fInDxoApsKYEP9@aws-0-eu-west-3.pooler.supabase.co:6543/postgres?sslmode=require",
+    connStr,
+  ];
+
+  const results: string[] = [];
+  let connected = false;
+
+  for (const cs of connStrings) {
+    try {
+      pool = new Pool({
+        connectionString: cs,
+        ssl: { rejectUnauthorized: false },
+        connectionTimeoutMillis: 10000,
+      });
+      await pool.query("SELECT 1");
+      connected = true;
+      results.push(`✓ Connected via ${new URL(cs.replace("postgresql://", "https://")).hostname}`);
+      break;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      results.push(`✗ Failed: ${msg.slice(0, 80)}`);
+      if (pool) {
+        await pool.end().catch(() => {});
+        pool = null;
+      }
+    }
+  }
+
+  if (!connected || !pool) {
+    return NextResponse.json({ success: false, results, error: "Could not connect to database" });
+  }
 
   const results: string[] = [];
 
