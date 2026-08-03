@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@heroui/react";
 import { createClient } from "@/lib/supabase/client";
-import { User, LogIn, LogOut } from "lucide-react";
+import { User, LogIn, LogOut, LayoutDashboard } from "lucide-react";
+import Link from "next/link";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 export default function AuthDialog() {
@@ -126,9 +127,17 @@ export default function AuthDialog() {
   }
 
   return (
-    <Button variant="ghost" size="sm" onPress={handleLogout} className="text-xs">
-      <LogOut className="h-3.5 w-3.5 mr-1" />
-      <span className="hidden sm:inline">{user.email?.split("@")[0]}</span>
-    </Button>
+    <div className="flex items-center gap-0.5">
+      <Link
+        href="/profile"
+        className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors no-underline"
+      >
+        <LayoutDashboard className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">{user.email?.split("@")[0]}</span>
+      </Link>
+      <Button variant="ghost" size="sm" onPress={handleLogout} className="text-xs">
+        <LogOut className="h-3.5 w-3.5" />
+      </Button>
+    </div>
   );
 }
