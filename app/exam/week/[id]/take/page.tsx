@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { getExamWeekOrNull, lockedWeeks } from "@/lib/exam-data";
 import type { ExamExercise } from "@/lib/exam-data";
+import { saveExamAttempt } from "@/lib/db";
 import CodeEditor from "@/components/CodeEditor";
 import dynamic from "next/dynamic";
 
@@ -229,6 +230,7 @@ function ExamInner({ weekId }: { weekId: string }) {
         levels: data.levelHistory || levelHistory,
       });
       localStorage.setItem("exam:history", JSON.stringify(history));
+      saveExamAttempt(history[0]).catch(() => {});
     } catch {
       // ignore
     }

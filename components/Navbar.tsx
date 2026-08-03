@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@heroui/react";
-import { BookOpen, Terminal, Sun, Moon, Users, GraduationCap } from "lucide-react";
+import { BookOpen, Terminal, Sun, Moon, GraduationCap } from "lucide-react";
+import AuthDialog from "./AuthDialog";
 import { useState, useEffect } from "react";
 
 export default function Navbar() {
@@ -80,6 +81,7 @@ export default function Navbar() {
               <span className="hidden sm:inline">Exam Gate</span>
             </Link>
           )}
+          <AuthDialog />
           <Button isIconOnly variant="ghost" size="sm" onPress={toggleTheme} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}>
             {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>

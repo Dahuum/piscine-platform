@@ -1,0 +1,134 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@heroui/react";
+import { createClient } from "@/lib/supabase/client";
+import { User, LogIn, LogOut } from "lucide-react";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+
+export default function AuthDialog() {
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data?.user || null);
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const { error: authError } =
+      mode === "login"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password });
+
+    if (authError) {
+      setError(authError.message);
+      setLoading(false);
+      return;
+    }
+
+    setOpen(false);
+    setEmail("");
+    setPassword("");
+    setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  if (!user) {
+    return (
+      <>
+        <Button
+          variant="ghost"
+          size="sm"
+          onPress={() => setOpen(true)}
+          className="text-xs"
+        >
+          <User className="h-3.5 w-3.5 mr-1" />
+          <span className="hidden sm:inline">Sign In</span>
+        </Button>
+
+        {open && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={() => setOpen(false)}>
+            <div
+              className="bg-background rounded-xl border shadow-2xl p-6 w-full max-w-sm mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-lg font-semibold mb-1">
+                {mode === "login" ? "Sign In" : "Create Account"}
+              </h2>
+              <p className="text-xs text-muted-foreground mb-4">
+                Sync your progress across devices.
+              </p>
+
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 rounded-lg border bg-muted/30 text-sm outline-none focus:border-primary transition-colors"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full px-3 py-2 rounded-lg border bg-muted/30 text-sm outline-none focus:border-primary transition-colors"
+                />
+                {error && <p className="text-xs text-red-500">{error}</p>}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  className="w-full"
+                  isDisabled={loading}
+                >
+                  {loading ? "..." : mode === "login" ? "Sign In" : "Create Account"}
+                </Button>
+              </form>
+
+              <p className="text-xs text-muted-foreground text-center mt-3">
+                {mode === "login" ? "No account? " : "Already have an account? "}
+                <button
+                  onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                  className="text-primary hover:underline"
+                >
+                  {mode === "login" ? "Sign up" : "Sign in"}
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <Button variant="ghost" size="sm" onPress={handleLogout} className="text-xs">
+      <LogOut className="h-3.5 w-3.5 mr-1" />
+      <span className="hidden sm:inline">{user.email?.split("@")[0]}</span>
+    </Button>
+  );
+}

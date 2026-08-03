@@ -6,6 +6,7 @@ import { Button, ProgressBar } from "@heroui/react";
 import { motion } from "framer-motion";
 import { Terminal, BookOpen, Lock, ChevronRight } from "lucide-react";
 import { examWeeks, lockedWeeks } from "@/lib/exam-data";
+import { getExamHistory, getPrepReview } from "@/lib/db";
 
 type Stat = { label: string; value: string };
 
@@ -19,6 +20,24 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.12 } },
 } as const;
 
+function processHistory(
+  history: { finalGrade: number; result: string; duration: number }[],
+) {
+  const total = history.length;
+  const best = total ? Math.max(...history.map((a) => a.finalGrade)) : 0;
+  const hours = Math.round(
+    history.reduce((s, a) => s + (a.duration || 0), 0) / 3600,
+  );
+  const passes = history.filter((a) => a.result === "completed").length;
+  const passRate = total ? Math.round((passes / total) * 100) : 0;
+  return [
+    { label: "Exams", value: String(total) },
+    { label: "Best", value: `${best}%` },
+    { label: "Hours", value: `${hours}h` },
+    { label: "Pass", value: `${passRate}%` },
+  ];
+}
+
 export default function ExamGateDashboard() {
   const [reviewed, setReviewed] = useState<Record<string, boolean>>({});
   const [stats, setStats] = useState<Stat[]>([
@@ -29,46 +48,34 @@ export default function ExamGateDashboard() {
   ]);
 
   useEffect(() => {
-    const r: Record<string, boolean> = {};
-    for (const id of Object.keys(examWeeks)) {
-      r[id] =
-        localStorage.getItem(`exam:prep:reviewed:${id}`) === "true";
-    }
-    setReviewed(r);
-
-    try {
-      const raw = localStorage.getItem("exam:history");
-      if (raw) {
-        const history = JSON.parse(raw) as {
-          weekId: string;
-          finalGrade: number;
-          result: string;
-          duration: number;
-        }[];
-        const total = history.length;
-        const best = history.length
-          ? Math.max(...history.map((a) => a.finalGrade))
-          : 0;
-        const hours = Math.round(
-          history.reduce((s, a) => s + (a.duration || 0), 0) / 3600,
-        );
-        const passes = history.filter(
-          (a) => a.result === "completed",
-        ).length;
-        const passRate = total
-          ? Math.round((passes / total) * 100)
-          : 0;
-
-        setStats([
-          { label: "Exams", value: String(total) },
-          { label: "Best", value: `${best}%` },
-          { label: "Hours", value: `${hours}h` },
-          { label: "Pass", value: `${passRate}%` },
-        ]);
+    (async () => {
+      const r: Record<string, boolean> = {};
+      for (const id of Object.keys(examWeeks)) {
+        r[id] = localStorage.getItem(`exam:prep:reviewed:${id}`) === "true";
+        try {
+          const dbReviewed = await getPrepReview(id);
+          if (dbReviewed) r[id] = true;
+        } catch {}
       }
-    } catch {
-      // ignore
-    }
+      setReviewed(r);
+
+      try {
+        const dbHistory = await getExamHistory();
+        if (dbHistory.length > 0) {
+          setStats(processHistory(dbHistory));
+          return;
+        }
+      } catch {}
+
+      try {
+        const raw = localStorage.getItem("exam:history");
+        if (raw) {
+          const history = JSON.parse(raw) as { finalGrade: number; result: string; duration: number }[];
+          setStats(processHistory(history));
+          return;
+        }
+      } catch {}
+    })();
   }, []);
 
   return (
