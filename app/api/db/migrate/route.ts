@@ -136,23 +136,23 @@ export async function GET() {
     return NextResponse.json({ success: false, results, error: "Could not connect to database" });
   }
 
-  const results: string[] = [];
+  const execResults: string[] = [];
 
   for (const stmt of SQL.split(";").map((s) => s.trim()).filter(Boolean)) {
     try {
       await pool.query(stmt + ";");
-      results.push(`✓ ${stmt.slice(0, 60)}...`);
+      execResults.push(`✓ ${stmt.slice(0, 60)}...`);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       if (!msg.includes("already exists") && !msg.includes("duplicate")) {
-        results.push(`✗ ${stmt.slice(0, 60)}: ${msg}`);
+        execResults.push(`✗ ${stmt.slice(0, 60)}: ${msg}`);
       } else {
-        results.push(`✓ ${stmt.slice(0, 60)} (already exists)`);
+        execResults.push(`✓ ${stmt.slice(0, 60)} (already exists)`);
       }
     }
   }
 
   await pool.end();
 
-  return NextResponse.json({ success: true, results });
+  return NextResponse.json({ success: true, results: execResults });
 }
