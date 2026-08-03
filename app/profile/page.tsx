@@ -155,23 +155,29 @@ function ProfileAuthModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <Card className="w-full max-w-sm mx-4 p-5" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-lg font-semibold mb-1">{mode === "login" ? "Sign In" : "Create Account"}</h2>
-        <p className="text-xs text-muted-foreground mb-4">Save your progress across devices.</p>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputClass} />
-          {error && <p className="text-xs text-red-500">{error}</p>}
-          <Button type="submit" variant="primary" className="w-full" isDisabled={loading}>
-            {loading ? "Loading..." : mode === "login" ? "Sign In" : "Create Account"}
-          </Button>
-        </form>
-        <p className="text-xs text-muted-foreground text-center mt-3">
-          {mode === "login" ? "No account? " : "Already registered? "}
-          <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-primary hover:underline font-medium">
-            {mode === "login" ? "Sign up" : "Sign in"}
-          </button>
-        </p>
+      <Card className="w-full max-w-sm mx-4 border shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <Card.Header className="flex flex-col gap-0.5">
+          <Card.Title>{mode === "login" ? "Sign In" : "Create Account"}</Card.Title>
+          <p className="text-xs text-muted-foreground">Save your progress across devices.</p>
+        </Card.Header>
+        <Card.Content>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputClass} />
+            {error && <p className="text-xs text-red-500">{error}</p>}
+            <Button type="submit" variant="primary" className="w-full" isDisabled={loading}>
+              {loading ? "Loading..." : mode === "login" ? "Sign In" : "Create Account"}
+            </Button>
+          </form>
+        </Card.Content>
+        <div className="px-4 pb-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            {mode === "login" ? "No account? " : "Already registered? "}
+            <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-primary hover:underline font-medium">
+              {mode === "login" ? "Sign up" : "Sign in"}
+            </button>
+          </p>
+        </div>
       </Card>
     </div>
   );

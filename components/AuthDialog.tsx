@@ -9,7 +9,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import MigrationModal from "./MigrationModal";
 import { detectExistingData } from "@/lib/migrate-data";
 
-const inputClass = "w-full h-10 px-3 rounded-lg border border-border bg-background text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all placeholder:text-muted-foreground/50";
+const inputClass = "w-full h-10 px-3 rounded-lg border bg-background text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all placeholder:text-muted-foreground/50";
 
 export default function AuthDialog() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -24,7 +24,6 @@ export default function AuthDialog() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data?.user || null));
-
     let migrationShown = false;
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
@@ -34,28 +33,22 @@ export default function AuthDialog() {
           const { hasData } = detectExistingData();
           if (hasData) setTimeout(() => setShowMigration(true), 600);
         }
-      } else {
-        setUser(null);
-        migrationShown = false;
-      }
+      } else { setUser(null); migrationShown = false; }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    const authFn = mode === "login"
-      ? supabase.auth.signInWithPassword({ email, password })
-      : supabase.auth.signUp({ email, password });
-    const { error: authError } = await authFn;
+    setLoading(true); setError("");
+    const { error: authError } = mode === "login"
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
     if (authError) { setError(authError.message); setLoading(false); return; }
-    setOpen(false);
-    setEmail("");
-    setPassword("");
-    setLoading(false);
+    setOpen(false); setEmail(""); setPassword(""); setLoading(false);
   };
+
+  const handleLogout = () => supabase.auth.signOut().then(() => setUser(null));
 
   if (!user) {
     return (
@@ -66,23 +59,29 @@ export default function AuthDialog() {
         </Button>
         {open && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setOpen(false)}>
-            <Card className="w-full max-w-sm mx-4 p-5" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-lg font-semibold mb-1">{mode === "login" ? "Sign In" : "Create Account"}</h2>
-              <p className="text-xs text-muted-foreground mb-4">Sync your progress across devices.</p>
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
-                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputClass} />
-                {error && <p className="text-xs text-red-500">{error}</p>}
-                <Button type="submit" variant="primary" className="w-full" isDisabled={loading}>
-                  {loading ? "Loading..." : mode === "login" ? "Sign In" : "Create Account"}
-                </Button>
-              </form>
-              <p className="text-xs text-muted-foreground text-center mt-3">
-                {mode === "login" ? "No account? " : "Already registered? "}
-                <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-primary hover:underline font-medium">
-                  {mode === "login" ? "Sign up" : "Sign in"}
-                </button>
-              </p>
+            <Card className="w-full max-w-sm mx-4 border shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <Card.Header className="flex flex-col gap-0.5">
+                <Card.Title>{mode === "login" ? "Sign In" : "Create Account"}</Card.Title>
+                <p className="text-xs text-muted-foreground">Sync your progress across devices.</p>
+              </Card.Header>
+              <Card.Content>
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+                  <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputClass} />
+                  {error && <p className="text-xs text-red-500">{error}</p>}
+                  <Button type="submit" variant="primary" className="w-full" isDisabled={loading}>
+                    {loading ? "Loading..." : mode === "login" ? "Sign In" : "Create Account"}
+                  </Button>
+                </form>
+              </Card.Content>
+              <div className="px-4 pb-4 text-center">
+                <p className="text-xs text-muted-foreground">
+                  {mode === "login" ? "No account? " : "Already registered? "}
+                  <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-primary hover:underline font-medium">
+                    {mode === "login" ? "Sign up" : "Sign in"}
+                  </button>
+                </p>
+              </div>
             </Card>
           </div>
         )}
@@ -104,6 +103,4 @@ export default function AuthDialog() {
       <MigrationModal open={showMigration} onComplete={() => setShowMigration(false)} />
     </>
   );
-
-  function handleLogout() { supabase.auth.signOut().then(() => setUser(null)); }
 }
