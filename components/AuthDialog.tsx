@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { User, LogIn, LogOut, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import MigrationModal from "./MigrationModal";
+import { detectExistingData } from "@/lib/migrate-data";
 
 export default function AuthDialog() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -15,6 +17,7 @@ export default function AuthDialog() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [showMigration, setShowMigration] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -22,7 +25,15 @@ export default function AuthDialog() {
       setUser(data?.user || null);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      if (session?.user) {
+        setUser(session.user);
+        const { hasData } = detectExistingData();
+        if (hasData) {
+          setShowMigration(true);
+        }
+      } else {
+        setUser(null);
+      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -47,6 +58,15 @@ export default function AuthDialog() {
     setEmail("");
     setPassword("");
     setLoading(false);
+
+    const { hasData } = detectExistingData();
+    if (hasData) {
+      setTimeout(() => setShowMigration(true), 500);
+    }
+  };
+
+  const handleMigrationComplete = () => {
+    setShowMigration(false);
   };
 
   const handleLogout = async () => {
@@ -82,40 +102,24 @@ export default function AuthDialog() {
 
               <form onSubmit={handleSubmit} className="space-y-3">
                 <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  type="email" placeholder="Email" value={email}
+                  onChange={(e) => setEmail(e.target.value)} required
                   className="w-full px-3 py-2 rounded-lg border bg-muted/30 text-sm outline-none focus:border-primary transition-colors"
                 />
                 <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
+                  type="password" placeholder="Password" value={password}
+                  onChange={(e) => setPassword(e.target.value)} required minLength={6}
                   className="w-full px-3 py-2 rounded-lg border bg-muted/30 text-sm outline-none focus:border-primary transition-colors"
                 />
                 {error && <p className="text-xs text-red-500">{error}</p>}
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="sm"
-                  className="w-full"
-                  isDisabled={loading}
-                >
+                <Button type="submit" variant="primary" size="sm" className="w-full" isDisabled={loading}>
                   {loading ? "..." : mode === "login" ? "Sign In" : "Create Account"}
                 </Button>
               </form>
 
               <p className="text-xs text-muted-foreground text-center mt-3">
                 {mode === "login" ? "No account? " : "Already have an account? "}
-                <button
-                  onClick={() => setMode(mode === "login" ? "signup" : "login")}
-                  className="text-primary hover:underline"
-                >
+                <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-primary hover:underline">
                   {mode === "login" ? "Sign up" : "Sign in"}
                 </button>
               </p>
@@ -138,6 +142,7 @@ export default function AuthDialog() {
       <Button variant="ghost" size="sm" onPress={handleLogout} className="text-xs">
         <LogOut className="h-3.5 w-3.5" />
       </Button>
+      <MigrationModal open={showMigration} onComplete={handleMigrationComplete} />
     </div>
   );
 }
