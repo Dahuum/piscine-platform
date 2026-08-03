@@ -30,7 +30,7 @@ export default function AuthRequiredModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
       <Card className="w-full max-w-sm mx-4 border shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <Card.Header className="flex flex-row items-start justify-between gap-2">
           <div className="flex items-center gap-2">

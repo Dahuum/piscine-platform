@@ -154,7 +154,7 @@ function ProfileAuthModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
       <Card className="w-full max-w-sm mx-4 border shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <Card.Header className="flex flex-col gap-0.5">
           <Card.Title>{mode === "login" ? "Sign In" : "Create Account"}</Card.Title>

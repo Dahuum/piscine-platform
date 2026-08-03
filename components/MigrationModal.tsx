@@ -59,7 +59,7 @@ export default function MigrationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <motion.div
         className="bg-background rounded-xl border shadow-2xl p-6 w-full max-w-md mx-4"
         initial={{ opacity: 0, scale: 0.95, y: 16 }}
