@@ -35,7 +35,7 @@ const rawExams: Record<string, Omit<ExamWeek, "exercisesByLevel">> = {
     description:
       "Piscine exam week 1. Start with simple output programs and argument handling, progress to basic C functions.",
     levelCount: 8,
-    gradePerLevel: Math.round(((0 + 1) / 8) * 100),
+    gradePerLevel: ((0 + 1) / 8) * 100,
     timeMinutes: 240,
     exercises: exam01Data as ExamExercise[],
   },
@@ -45,7 +45,7 @@ const rawExams: Record<string, Omit<ExamWeek, "exercisesByLevel">> = {
     description:
       "Piscine exam week 2. Covers string manipulation, numeric operations, binary bit manipulation.",
     levelCount: 8,
-    gradePerLevel: Math.round(((0 + 1) / 8) * 100),
+    gradePerLevel: ((0 + 1) / 8) * 100,
     timeMinutes: 240,
     exercises: exam02Data as ExamExercise[],
   },
@@ -55,7 +55,7 @@ const rawExams: Record<string, Omit<ExamWeek, "exercisesByLevel">> = {
     description:
       "Piscine exam week 3. Advanced C functions and string patterns.",
     levelCount: 2,
-    gradePerLevel: Math.round(((0 + 1) / 2) * 100),
+    gradePerLevel: ((0 + 1) / 2) * 100,
     timeMinutes: 240,
     exercises: exam03Data as ExamExercise[],
   },
@@ -143,7 +143,7 @@ export function getExercise(
 }
 
 export function getGradePerLevel(levelCount: number): number {
-  return Math.round(((0 + 1) / levelCount) * 100);
+  return ((0 + 1) / levelCount) * 100;
 }
 
 export function getCurrentGrade(
@@ -154,7 +154,7 @@ export function getCurrentGrade(
 }
 
 export function isExamComplete(accumulatedPoints: number): boolean {
-  return accumulatedPoints > 100;
+  return accumulatedPoints >= 100;
 }
 
 export function getAvailableLevels(week: ExamWeek): number[] {

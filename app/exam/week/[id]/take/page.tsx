@@ -275,82 +275,86 @@ function ExamInner({ weekId }: { weekId: string }) {
     }
   }, [cooldown]);
 
+  const handleTerminalSubmit = async () => {
+    if (!token || grading) return;
+    setGrading(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/exam/grade", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, studentCode: "" }),
+      });
+      await processGradeResponse(res);
+    } catch {
+      setFeedback({ passed: false, traceback: "Network error" });
+    }
+    setGrading(false);
+  };
+
+  const processGradeResponse = async (res: Response) => {
+    const data = await res.json();
+
+    if (res.status === 429) {
+      setCooldown({
+        until: Date.now() + data.cooldownRemaining,
+        remaining: Math.ceil(data.cooldownRemaining / 1000),
+      });
+      return;
+    }
+
+    if (data.error) {
+      if (data.status === "timeout") {
+        setStatus("timeout");
+        return;
+      }
+      setFeedback({ passed: false, traceback: data.error });
+      return;
+    }
+
+    if (data.passed) {
+      if (data.examComplete) {
+        setExamComplete(true);
+        setCurrentGrade(data.finalGrade || 100);
+        setLevelHistory(data.levelHistory || []);
+        setStatus("completed");
+        saveToHistory({ grade: data.finalGrade, levelHistory: data.levelHistory });
+        fetch("/api/exam/finish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, reason: "completed" }),
+        });
+        return;
+      }
+      setFeedback({ passed: true });
+      setShowNewLevel(true);
+      setCurrentGrade(data.grade);
+      setLevelHistory(data.levelHistory);
+      setCooldown(null);
+      setTimeout(() => {
+        setCurrentLevel(data.newLevel);
+        if (data.newExercise) setExercise(data.newExercise);
+        setCode("");
+        setFeedback(null);
+        setShowNewLevel(false);
+      }, 1800);
+    } else {
+      setFeedback({ passed: false, traceback: data.traceback, compilationError: data.compilationError });
+      if (data.cooldownSeconds > 0) {
+        setCooldown({ until: Date.now() + data.cooldownSeconds * 1000, remaining: data.cooldownSeconds });
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     if (!code.trim() || !token || grading) return;
     setGrading(true);
     setFeedback(null);
-
     try {
       const res = await fetch("/api/exam/grade", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, studentCode: code }),
       });
-      const data = await res.json();
-
-      if (res.status === 429) {
-        setCooldown({
-          until: Date.now() + data.cooldownRemaining,
-          remaining: Math.ceil(data.cooldownRemaining / 1000),
-        });
-        setGrading(false);
-        return;
-      }
-
-      if (data.error) {
-        if (data.status === "timeout") {
-          setStatus("timeout");
-          setGrading(false);
-          return;
-        }
-        setFeedback({ passed: false, traceback: data.error });
-        setGrading(false);
-        return;
-      }
-
-      if (data.passed) {
-        if (data.examComplete) {
-          setExamComplete(true);
-          setCurrentGrade(data.finalGrade || 100);
-          setLevelHistory(data.levelHistory || []);
-          setStatus("completed");
-          saveToHistory({
-            grade: data.finalGrade,
-            levelHistory: data.levelHistory,
-          });
-          fetch("/api/exam/finish", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token, reason: "completed" }),
-          });
-          return;
-        }
-        setFeedback({ passed: true });
-        setShowNewLevel(true);
-        setCurrentGrade(data.grade);
-        setLevelHistory(data.levelHistory);
-        setCooldown(null);
-
-        setTimeout(() => {
-          setCurrentLevel(data.newLevel);
-          if (data.newExercise) setExercise(data.newExercise);
-          setCode("");
-          setFeedback(null);
-          setShowNewLevel(false);
-        }, 1800);
-      } else {
-        setFeedback({
-          passed: false,
-          traceback: data.traceback,
-          compilationError: data.compilationError,
-        });
-        if (data.cooldownSeconds > 0) {
-          setCooldown({
-            until: Date.now() + data.cooldownSeconds * 1000,
-            remaining: data.cooldownSeconds,
-          });
-        }
-      }
+      await processGradeResponse(res);
     } catch {
       setFeedback({ passed: false, traceback: "Network error" });
     }
@@ -720,7 +724,9 @@ function ExamInner({ weekId }: { weekId: string }) {
             variant="primary"
             size="sm"
             onPress={
-              mode === "terminal" ? undefined : handleSubmit
+              mode === "terminal"
+                ? () => handleTerminalSubmit()
+                : handleSubmit
             }
             isDisabled={
               mode === "terminal"
