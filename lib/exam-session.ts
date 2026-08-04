@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { getPool } from "./pg-pool";
 
 export type ExamSessionStatus =
   | "active"
@@ -41,14 +41,6 @@ export function generateToken(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function sessionKey(token: string): string {
-  return `exam:session:${token}`;
-}
-
-function historyKey(visitorId: string): string {
-  return `exam:history:${visitorId}`;
-}
-
 export async function createSession(
   weekId: string,
   mode: "editor" | "terminal",
@@ -75,9 +67,10 @@ export async function createSession(
     levelStartedAt: now,
   };
 
-  await kv.set(sessionKey(token), JSON.stringify(session), {
-    ex: SESSION_TTL,
-  });
+  await getPool().query(
+    `INSERT INTO exam_sessions (token, data, expires_at) VALUES ($1, $2, now() + $3 * interval '1 second')`,
+    [token, JSON.stringify(session), SESSION_TTL],
+  );
 
   return { token, session };
 }
@@ -85,26 +78,26 @@ export async function createSession(
 export async function getSession(
   token: string,
 ): Promise<ExamSession | null> {
-  const raw = await kv.get<string>(sessionKey(token));
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as ExamSession;
-  } catch {
-    return null;
-  }
+  const { rows } = await getPool().query(
+    `SELECT data FROM exam_sessions WHERE token = $1 AND expires_at > now()`,
+    [token],
+  );
+  if (rows.length === 0) return null;
+  return rows[0].data as ExamSession;
 }
 
 export async function updateSession(
   token: string,
   session: ExamSession,
 ): Promise<void> {
-  await kv.set(sessionKey(token), JSON.stringify(session), {
-    ex: SESSION_TTL,
-  });
+  await getPool().query(
+    `UPDATE exam_sessions SET data = $2, expires_at = now() + $3 * interval '1 second' WHERE token = $1`,
+    [token, JSON.stringify(session), SESSION_TTL],
+  );
 }
 
 export async function deleteSession(token: string): Promise<void> {
-  await kv.del(sessionKey(token));
+  await getPool().query(`DELETE FROM exam_sessions WHERE token = $1`, [token]);
 }
 
 export function getTimeRemaining(session: ExamSession): number {
@@ -141,7 +134,6 @@ export async function saveAttempt(
   visitorId: string,
   session: ExamSession,
 ): Promise<void> {
-  const attempts = await getAttempts(visitorId);
   const attempt: ExamAttempt = {
     id: generateToken().slice(0, 12),
     weekId: session.weekId,
@@ -156,18 +148,18 @@ export async function saveAttempt(
     ),
     levels: session.levelHistory,
   };
-  attempts.unshift(attempt);
-  await kv.set(historyKey(visitorId), JSON.stringify(attempts));
+  await getPool().query(
+    `INSERT INTO exam_visitor_attempts (visitor_id, data) VALUES ($1, $2)`,
+    [visitorId, JSON.stringify(attempt)],
+  );
 }
 
 export async function getAttempts(
   visitorId: string,
 ): Promise<ExamAttempt[]> {
-  const raw = await kv.get<string>(historyKey(visitorId));
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as ExamAttempt[];
-  } catch {
-    return [];
-  }
+  const { rows } = await getPool().query(
+    `SELECT data FROM exam_visitor_attempts WHERE visitor_id = $1 ORDER BY created_at DESC`,
+    [visitorId],
+  );
+  return rows.map((r) => r.data as ExamAttempt);
 }
