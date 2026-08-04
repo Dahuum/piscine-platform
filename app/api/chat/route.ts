@@ -1,4 +1,19 @@
 import { NextRequest } from "next/server";
+import { examWeeks } from "@/lib/exam-data";
+
+// Small enough (~700 chars for all 3 weeks) to always include — unlike
+// per-module/per-exercise context, this shouldn't depend on which page the
+// question was asked from. A student on the home page asking "how many
+// points is a level worth" should get a real answer, not a guess just
+// because they weren't standing on an exam page when they asked.
+function buildPlatformFacts(): string {
+  return Object.values(examWeeks)
+    .map(
+      (week) =>
+        `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total), ${week.timeMinutes} minute time limit. A wrong submission triggers an increasing cooldown before the next attempt. One random exercise is drawn per level.`,
+    )
+    .join("\n");
+}
 
 export async function POST(req: NextRequest) {
   const { messages, pageContext } = await req.json();
@@ -33,8 +48,9 @@ export async function POST(req: NextRequest) {
         role: "system",
         content:
           "You are a teaching assistant for the 42 School C Piscine. Guide students without giving direct answers. Encourage them to think, explain concepts clearly, and help them debug their code. Be concise. The student is learning C programming and shell scripting. Never give complete solutions. Use proper markdown formatting for code blocks and clear explanations." +
+          `\n\nThis platform (not the real 42 curriculum) runs its own exam weeks with these exact mechanics — use ONLY these facts for exam structure/rules/levels/points questions, regardless of what page the student is asking from, and do not fall back to general knowledge about real 42 exams for anything covered here:\n${buildPlatformFacts()}` +
           (typeof pageContext === "string" && pageContext
-            ? `\n\nThe student is currently on the page described below, on this specific platform (not the real 42 curriculum — this platform's own days, exercises, and exam weeks, which have their own titles, exercise sets, and numbers that do not necessarily match real 42 or general knowledge). If asked about the current day/module, exercise, or exam's structure, rules, levels, or points, answer ONLY from these facts — do not fall back to general knowledge about 42 for anything covered here:\n${pageContext}`
+            ? `\n\nThe student is currently on the page described below. This platform's days and exercises have their own titles and numbers that do not necessarily match the real 42 curriculum or general knowledge — answer from these facts, not assumptions:\n${pageContext}`
             : ""),
       },
       ...messages.map((m: { role: string; content: string }) => ({

@@ -4,8 +4,6 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@heroui/react";
 import { Send, Bot, User, X, MessageSquare, Maximize2, Minimize2, Trash2 } from "lucide-react";
-import { examWeeks } from "@/lib/exam-data";
-import type { ExamWeek } from "@/lib/exam-data";
 import { modules } from "@/lib/modules";
 import type { Module, Exercise } from "@/lib/modules";
 
@@ -51,10 +49,6 @@ const INITIAL_MESSAGE: Message = {
   content: "Hello! I'm your 42 Piscine teaching assistant. I can help you understand C concepts, debug your code, and guide you through exercises. What are you working on?",
 };
 
-function describeWeek(week: ExamWeek): string {
-  return `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total), ${week.timeMinutes} minute time limit. A wrong submission triggers an increasing cooldown before the next attempt. One random exercise is drawn per level.`;
-}
-
 function describeModule(mod: Module): string {
   const exList = mod.exercises.map((e) => `${e.id} "${e.title}"`).join(", ");
   return `${mod.title} (id: ${mod.id}, "day" ${mod.order}, type: ${mod.type}): ${mod.summary} It has ${mod.exercises.length} exercises: ${exList}.`;
@@ -66,23 +60,15 @@ function describeExercise(mod: Module, ex: Exercise): string {
   return `The student is currently on exercise "${ex.title}" (${ex.id}) in ${mod.title}: ${ex.description}${proto}${allowed}`;
 }
 
-// Builds the facts the assistant should use instead of guessing, based on
-// which page (if any) the student is currently on — an exam week, a module
-// ("C day"), or a specific exercise. Returns null on pages with nothing
-// platform-specific to say, so the system prompt isn't padded needlessly.
+// Builds page-specific facts for module ("C day") and exercise pages, where
+// the content is too large to always include in every request (13 modules'
+// worth of exercise lists). Exam-week facts are NOT built here — they're
+// small enough that the API route always includes them regardless of which
+// page a question is asked from, so a question like "how many points is a
+// level worth" gets a real answer even from the home page.
 function buildPageContext(pathname: string | null): string | null {
   if (!pathname) return null;
 
-  const weekMatch = pathname.match(/^\/exam\/week\/([^/]+)/);
-  if (weekMatch) {
-    const week = examWeeks[weekMatch[1]];
-    return week ? describeWeek(week) : null;
-  }
-  if (pathname === "/exam" || pathname.startsWith("/exam/")) {
-    return Object.values(examWeeks).map(describeWeek).join("\n");
-  }
-
-  // Module ("C day") and exercise pages: /<moduleId> or /<moduleId>/<exerciseId>
   const segments = pathname.split("/").filter(Boolean);
   const mod = segments.length >= 1 ? modules[segments[0] as keyof typeof modules] : undefined;
   if (mod) {
