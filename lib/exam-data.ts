@@ -142,6 +142,18 @@ export function getExercise(
   );
 }
 
+// Exercise names are unique within a week, so unlike getExercise() this
+// doesn't need a level — useful for callers (like the prep Run endpoint)
+// that only have {weekId, exerciseName} on hand.
+export function getExerciseByName(
+  weekId: string,
+  name: string,
+): ExamExercise | null {
+  const week = examWeeks[weekId];
+  if (!week) return null;
+  return week.exercises.find((e) => e.name === name) || null;
+}
+
 export function getGradePerLevel(levelCount: number): number {
   return ((0 + 1) / levelCount) * 100;
 }

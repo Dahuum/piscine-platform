@@ -273,7 +273,7 @@ function PrepPracticeInner({
               )}
             </Button>
             <span className="text-[10px] text-muted-foreground/50 hidden sm:inline">
-              Tests your code — see output only
+              Runs against {exercise.testCases.length} test case{exercise.testCases.length === 1 ? "" : "s"} — see output only, no pass/fail
             </span>
           </div>
 

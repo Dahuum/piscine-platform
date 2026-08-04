@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeCode } from "@/lib/sandbox";
 import { modules } from "@/lib/modules";
-import { getExamWeekOrNull } from "@/lib/exam-data";
+import { getExerciseByName } from "@/lib/exam-data";
+import { runExamExercise } from "@/lib/exam-corrector";
 
 // Sandbox create + compile + run comfortably fits in this, but the default
 // serverless timeout (10s on Hobby) does not.
@@ -16,11 +17,15 @@ export async function POST(req: NextRequest) {
     }
 
     if (moduleId && moduleId.startsWith("exam_")) {
-      const week = getExamWeekOrNull(moduleId);
-      if (!week) {
-        return NextResponse.json({ error: "Unknown exam week" }, { status: 400 });
+      const exercise = exerciseId ? getExerciseByName(moduleId, exerciseId) : null;
+      if (!exercise) {
+        return NextResponse.json({ error: "Unknown exam exercise" }, { status: 400 });
       }
-      const output = await executeCode(code, "c");
+      // Function-type exercises are a bare function with no main() of their
+      // own — they need exercise.mainCode linked in to run at all. And
+      // running against the exercise's own test cases (rather than with no
+      // arguments) is what makes this useful to a student practicing.
+      const output = await runExamExercise(exercise, code);
       return NextResponse.json({ output });
     }
 

@@ -154,6 +154,66 @@ export async function gradeSubmission(
   }
 }
 
+// Compiles the student's code and runs it against the exercise's own test
+// cases, without comparing to the reference — used by exam prep ("Run") to
+// show the student their own output. Unlike a plain gcc-and-run, this links
+// exercise.mainCode when the exercise is function-type (a bare function has
+// no main() to link on its own) and actually passes each test case's args,
+// so a program-type exercise isn't limited to only ever seeing its
+// zero-argument behavior.
+export async function runExamExercise(
+  exercise: ExamExercise,
+  studentCode: string,
+): Promise<string> {
+  const apiKey = process.env.E2B_API_KEY;
+  if (!apiKey) {
+    return "Error: E2B_API_KEY not configured";
+  }
+
+  const sandbox = await Sandbox.create({ timeoutMs: 60000 });
+
+  try {
+    await sandbox.files.write("/tmp/student.c", studentCode);
+    if (exercise.mainCode) {
+      await sandbox.files.write("/tmp/main.c", exercise.mainCode);
+    }
+
+    const compileCmd =
+      exercise.type === "function"
+        ? "gcc -o /tmp/student /tmp/student.c /tmp/main.c -Wall -Wextra -Werror 2>&1"
+        : "gcc -o /tmp/student /tmp/student.c -Wall -Wextra -Werror 2>&1";
+
+    const compile = await runInSandbox(sandbox, compileCmd);
+    if (compile.exitCode !== 0) {
+      return `Compilation failed:\n${compile.stderr || compile.stdout || "unknown error"}`;
+    }
+
+    if (exercise.testCases.length === 0) {
+      const run = await runInSandbox(sandbox, "/tmp/student", 5000);
+      return (run.stdout + (run.stderr || "")) || "(no output)";
+    }
+
+    const blocks = [];
+    for (const tc of exercise.testCases) {
+      const args = tc.args.map((a) => `"${a.replace(/"/g, '\\"')}"`).join(" ");
+      const run = await runInSandbox(sandbox, `/tmp/student ${args}`, 5000);
+      const out = (run.stdout + (run.stderr || "")) || "(no output)";
+      const label = tc.args.length > 0 ? tc.args.join(" ") : "(no args)";
+      blocks.push(`$ ./${exercise.name} ${label}\n${out}`);
+    }
+    return blocks.join("\n" + "-".repeat(40) + "\n");
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return `Execution error: ${msg}`;
+  } finally {
+    try {
+      await sandbox.kill();
+    } catch {
+      // sandbox may already be dead
+    }
+  }
+}
+
 export function getCooldownSeconds(assignmentCount: number): number {
   if (assignmentCount <= 0) return 0;
   if (assignmentCount === 1) return 30;
