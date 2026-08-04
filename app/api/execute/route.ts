@@ -3,6 +3,10 @@ import { executeCode } from "@/lib/sandbox";
 import { modules } from "@/lib/modules";
 import { getExamWeekOrNull } from "@/lib/exam-data";
 
+// Sandbox create + compile + run comfortably fits in this, but the default
+// serverless timeout (10s on Hobby) does not.
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const { code, exerciseId, moduleId } = await req.json();

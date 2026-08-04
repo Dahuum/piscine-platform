@@ -16,6 +16,11 @@ import { gradeSubmission, getCooldownSeconds } from "@/lib/exam-corrector";
 import type { LevelHistoryEntry } from "@/lib/exam-session";
 import { Sandbox } from "e2b";
 
+// Grading spins up a sandbox to compile + run the reference and student
+// code against every test case — comfortably fits in this, but not in the
+// default serverless timeout (10s on Hobby).
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   try {
     const { token, studentCode } = await req.json();
