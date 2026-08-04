@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@heroui/react";
 import { motion } from "framer-motion";
 import { Database, Trash2, CheckCircle2 } from "lucide-react";
-import { detectExistingData, migrateAllData, clearLocalData, getLocalDataSummary } from "@/lib/migrate-data";
+import { detectExistingData, migrateAllData, markMigrationHandled, getLocalDataSummary } from "@/lib/migrate-data";
 
 export default function MigrationModal({
   open,
@@ -35,9 +35,11 @@ export default function MigrationModal({
     setLoading(true);
     setError("");
     try {
+      // migrateAllData() marks the prompt as handled internally on success —
+      // local progress/code stays intact (the app reads it from localStorage
+      // and it's now also synced to the account), it just won't be offered
+      // for import again.
       await migrateAllData();
-      clearLocalData();
-      setStats({ exercises: 0, exams: 0, prep: 0 });
       setSummary([]);
       setDone(true);
       setLoading(false);
@@ -48,7 +50,10 @@ export default function MigrationModal({
   };
 
   const handleSkip = () => {
-    clearLocalData();
+    // "Start fresh" means don't sync local progress to this account and
+    // don't ask again — it does NOT mean delete the user's solved exercises
+    // and code, which is what this used to do.
+    markMigrationHandled();
     onComplete();
   };
 

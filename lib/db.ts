@@ -4,27 +4,43 @@ import type { ExamSessionStatus } from "./exam-session";
 
 const supabase = () => createClient();
 
+// `cachedUserId` is kept in sync by the onAuthStateChange subscription below,
+// so it never goes stale after a login/logout — unlike a memoized promise,
+// which would freeze at whatever the very first call resolved to (often `null`,
+// if it ran before the session was hydrated) and never update again.
 let cachedUserId: string | null = null;
-let userIdPromise: Promise<string | null> | null = null;
+let initialized = false;
+let initPromise: Promise<void> | null = null;
+
+function ensureInitialized(): Promise<void> {
+  if (!initPromise) {
+    initPromise = supabase()
+      .auth.getUser()
+      .then(({ data }) => {
+        cachedUserId = data?.user?.id || null;
+        initialized = true;
+      })
+      .catch(() => {
+        initialized = true;
+      });
+
+    supabase().auth.onAuthStateChange((_event, session) => {
+      cachedUserId = session?.user?.id || null;
+      initialized = true;
+    });
+  }
+  return initPromise;
+}
 
 async function getUserId(): Promise<string | null> {
-  if (cachedUserId) return cachedUserId;
-  if (userIdPromise) return userIdPromise;
-
-  userIdPromise = supabase()
-    .auth.getUser()
-    .then(({ data }) => {
-      cachedUserId = data?.user?.id || null;
-      return cachedUserId;
-    })
-    .catch(() => null);
-
-  return userIdPromise;
+  if (!initialized) await ensureInitialized();
+  return cachedUserId;
 }
 
 export function clearUserIdCache() {
   cachedUserId = null;
-  userIdPromise = null;
+  initialized = false;
+  initPromise = null;
 }
 
 // ─── Auth ───────────────────────────────────────────
@@ -110,6 +126,26 @@ export async function getAllModuleProgress(): Promise<
     map[row.module_id][row.exercise_id] = row.status;
   }
   return map;
+}
+
+// Single round-trip fetch of every exercise's status + code, for hydrating
+// localStorage on login (see lib/hydrate-data.ts). getModuleProgress() above
+// is per-module and would need one query per module to cover everything.
+export async function getAllModuleProgressWithCode(): Promise<
+  { moduleId: string; exerciseId: string; status: string; code: string }[]
+> {
+  const userId = await getUserId();
+  if (!userId) return [];
+  const { data } = await supabase()
+    .from("normal_days_progress")
+    .select("module_id, exercise_id, status, code")
+    .eq("user_id", userId);
+  return (data || []).map((row) => ({
+    moduleId: row.module_id,
+    exerciseId: row.exercise_id,
+    status: row.status,
+    code: row.code || "",
+  }));
 }
 
 // ─── Exam History ────────────────────────────────────

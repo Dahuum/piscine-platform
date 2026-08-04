@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import MigrationModal from "./MigrationModal";
 import { detectExistingData } from "@/lib/migrate-data";
+import { hydrateFromCloud } from "@/lib/hydrate-data";
 
 const inputClass = "w-full h-10 px-3 rounded-lg border bg-background text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all placeholder:text-muted-foreground/50";
 
@@ -32,7 +33,23 @@ export default function AuthDialog() {
         if (!migrationShown) {
           migrationShown = true;
           const { hasData } = detectExistingData();
-          if (hasData) setTimeout(() => setShowMigration(true), 600);
+          if (hasData) {
+            setTimeout(() => setShowMigration(true), 600);
+          } else {
+            // No local data to offer importing (new device, or this browser
+            // was already synced before) — pull down whatever's already
+            // saved to the account instead, in case localStorage here is
+            // empty but the account has progress from elsewhere. Guarded so
+            // it runs once per tab per user, not on every auth event
+            // (a persisted session re-fires this on every page load).
+            const hydrateFlag = `hydrated:${session.user.id}`;
+            if (!sessionStorage.getItem(hydrateFlag)) {
+              sessionStorage.setItem(hydrateFlag, "1");
+              hydrateFromCloud().then((wrote) => {
+                if (wrote) window.location.reload();
+              });
+            }
+          }
         }
       } else { setUser(null); migrationShown = false; }
     });

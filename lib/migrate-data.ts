@@ -2,6 +2,21 @@ import { createClient } from "./supabase/client";
 
 const supabase = () => createClient();
 
+// Set once the user has been offered the import (whether they imported or
+// skipped), so the modal doesn't reappear on every subsequent login. This is
+// intentionally separate from the actual progress:/code: keys — the modal's
+// job is "have we asked?", not "does local data still exist?". Conflating
+// the two used to mean the only way to stop re-asking was to delete the
+// user's local progress and code, which nuked their work if the cloud write
+// silently failed for any reason.
+const MIGRATION_HANDLED_KEY = "migration:handled";
+
+export function markMigrationHandled() {
+  try {
+    localStorage.setItem(MIGRATION_HANDLED_KEY, "1");
+  } catch {}
+}
+
 export function detectExistingData(): {
   hasData: boolean;
   stats: { exercises: number; exams: number; prep: number };
@@ -11,6 +26,9 @@ export function detectExistingData(): {
   let prep = 0;
 
   try {
+    if (localStorage.getItem(MIGRATION_HANDLED_KEY)) {
+      return { hasData: false, stats: { exercises: 0, exams: 0, prep: 0 } };
+    }
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (!key) continue;
@@ -131,9 +149,14 @@ export async function migrateAllData(): Promise<{
     }
   } catch {}
 
+  markMigrationHandled();
   return { exercises: exercisesCount, exams: examsCount, prep: prepCount };
 }
 
+// Not called by MigrationModal anymore — clearing local data right after an
+// upsert is what turned a swallowed Supabase error into permanent data loss
+// (the write silently failed, but the local copy was deleted anyway). Kept
+// for a possible future explicit "delete my local data" action.
 export function clearLocalData() {
   const keysToRemove: string[] = [];
   try {
