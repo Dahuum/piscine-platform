@@ -12,6 +12,7 @@ import {
   Terminal as TerminalIcon,
   Monitor,
 } from "lucide-react";
+import { getExamHistory } from "@/lib/db";
 
 type LevelEntry = {
   level: number;
@@ -55,14 +56,26 @@ export default function ExamHistoryPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("exam:history");
-      if (raw) {
-        setHistory(JSON.parse(raw));
+    (async () => {
+      try {
+        const dbHistory = await getExamHistory();
+        if (dbHistory.length > 0) {
+          setHistory(dbHistory as HistoryEntry[]);
+          return;
+        }
+      } catch {
+        // not logged in, or request failed — fall through to localStorage
       }
-    } catch {
-      // ignore
-    }
+
+      try {
+        const raw = localStorage.getItem("exam:history");
+        if (raw) {
+          setHistory(JSON.parse(raw));
+        }
+      } catch {
+        // ignore
+      }
+    })();
   }, []);
 
   const filtered =

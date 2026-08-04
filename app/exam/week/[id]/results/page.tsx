@@ -13,6 +13,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { getExamWeekOrNull } from "@/lib/exam-data";
+import { getExamHistory } from "@/lib/db";
 
 type LevelEntry = {
   level: number;
@@ -54,16 +55,31 @@ export default function ExamResultsPage() {
   );
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("exam:history");
-      if (raw) {
-        const history: AttemptData[] = JSON.parse(raw);
-        const latest = history.find((a) => a.weekId === weekId);
-        if (latest) setAttempt(latest);
+    (async () => {
+      try {
+        const dbHistory = await getExamHistory();
+        if (dbHistory.length > 0) {
+          const latest = dbHistory.find((a) => a.weekId === weekId);
+          if (latest) {
+            setAttempt(latest as AttemptData);
+            return;
+          }
+        }
+      } catch {
+        // not logged in, or request failed — fall through to localStorage
       }
-    } catch {
-      // ignore
-    }
+
+      try {
+        const raw = localStorage.getItem("exam:history");
+        if (raw) {
+          const history: AttemptData[] = JSON.parse(raw);
+          const latest = history.find((a) => a.weekId === weekId);
+          if (latest) setAttempt(latest);
+        }
+      } catch {
+        // ignore
+      }
+    })();
   }, [weekId]);
 
   const formatTime = (sec: number) => {

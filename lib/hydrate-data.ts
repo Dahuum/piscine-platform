@@ -7,7 +7,7 @@
 // who signs in on a browser/device where localStorage is empty (a new
 // device, or one that was cleared) sees an account with stats but no
 // visible progress, even though the rows are safely in the database.
-import { getAllModuleProgressWithCode, getAllPrepReviews, getAllPrepExercises } from "@/lib/db";
+import { getAllModuleProgressWithCode, getAllPrepReviews, getAllPrepExercises, getExamHistory } from "@/lib/db";
 
 export async function hydrateFromCloud(): Promise<boolean> {
   let wrote = false;
@@ -50,6 +50,17 @@ export async function hydrateFromCloud(): Promise<boolean> {
           localStorage.setItem(key, "done");
           wrote = true;
         }
+      }
+    }
+
+    // exam/history and exam/week/[id]/results now read Supabase directly
+    // and don't strictly need this, but keep the local mirror in sync too —
+    // saveToHistory() in the exam take page still reads/prepends to it.
+    if (localStorage.getItem("exam:history") === null) {
+      const history = await getExamHistory();
+      if (history.length > 0) {
+        localStorage.setItem("exam:history", JSON.stringify(history));
+        wrote = true;
       }
     }
   } catch {

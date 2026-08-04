@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { messages } = await req.json();
+  const { messages, examContext } = await req.json();
 
   const apiKey = process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY;
 
@@ -32,7 +32,10 @@ export async function POST(req: NextRequest) {
       {
         role: "system",
         content:
-          "You are a teaching assistant for the 42 School C Piscine. Guide students without giving direct answers. Encourage them to think, explain concepts clearly, and help them debug their code. Be concise. The student is learning C programming and shell scripting. Never give complete solutions. Use proper markdown formatting for code blocks and clear explanations.",
+          "You are a teaching assistant for the 42 School C Piscine. Guide students without giving direct answers. Encourage them to think, explain concepts clearly, and help them debug their code. Be concise. The student is learning C programming and shell scripting. Never give complete solutions. Use proper markdown formatting for code blocks and clear explanations." +
+          (typeof examContext === "string" && examContext
+            ? `\n\nThe student is currently looking at exam-related material on this platform. Use ONLY the following facts if asked about exam rules, structure, levels, or points — these are this platform's actual mechanics, not the real 42 exam, and do not match general knowledge about 42 exams:\n${examContext}`
+            : ""),
       },
       ...messages.map((m: { role: string; content: string }) => ({
         role: m.role === "assistant" ? "assistant" : "user",

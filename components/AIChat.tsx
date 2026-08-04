@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@heroui/react";
 import { Send, Bot, User, X, MessageSquare, Maximize2, Minimize2, Trash2 } from "lucide-react";
+import { examWeeks } from "@/lib/exam-data";
+import type { ExamWeek } from "@/lib/exam-data";
 
 type Message = { id: string; role: "user" | "assistant"; content: string };
 
@@ -46,7 +49,28 @@ const INITIAL_MESSAGE: Message = {
   content: "Hello! I'm your 42 Piscine teaching assistant. I can help you understand C concepts, debug your code, and guide you through exercises. What are you working on?",
 };
 
+function describeWeek(week: ExamWeek): string {
+  return `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total), ${week.timeMinutes} minute time limit. A wrong submission triggers an increasing cooldown before the next attempt. One random exercise is drawn per level.`;
+}
+
+// Builds the facts the assistant should use instead of guessing, based on
+// which exam page (if any) the student is currently on. Returns null off
+// exam pages so the system prompt isn't padded with irrelevant context.
+function buildExamContext(pathname: string | null): string | null {
+  if (!pathname) return null;
+  const weekMatch = pathname.match(/^\/exam\/week\/([^/]+)/);
+  if (weekMatch) {
+    const week = examWeeks[weekMatch[1]];
+    return week ? describeWeek(week) : null;
+  }
+  if (pathname === "/exam" || pathname.startsWith("/exam/")) {
+    return Object.values(examWeeks).map(describeWeek).join("\n");
+  }
+  return null;
+}
+
 export default function AIChat() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
@@ -55,6 +79,12 @@ export default function AIChat() {
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // No AI assistance during the actual timed exam — this is a rule the exam
+  // itself states ("No AI assistance during the exam"), but nothing
+  // previously enforced it: this widget is otherwise rendered globally.
+  const isLiveExam = /^\/exam\/week\/[^/]+\/take/.test(pathname || "");
+  const examContext = buildExamContext(pathname);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -83,7 +113,10 @@ export default function AIChat() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({
+          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+          examContext,
+        }),
         signal: controller.signal,
       });
 
@@ -150,6 +183,8 @@ export default function AIChat() {
       send();
     }
   };
+
+  if (isLiveExam) return null;
 
   if (!open) {
     return (
