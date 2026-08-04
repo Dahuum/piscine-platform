@@ -511,27 +511,35 @@ function ExamInner({ weekId }: { weekId: string }) {
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
           Choose mode
         </p>
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-2">
           {[
-            { mode: "editor" as const, icon: Monitor, title: "Editor", desc: "Monaco editor + Run button" },
-            { mode: "terminal" as const, icon: Terminal, title: "Terminal", desc: "Real shell via xterm.js" },
+            { mode: "editor" as const, icon: Monitor, title: "Editor", desc: "Monaco editor + Run button", available: true },
+            { mode: "terminal" as const, icon: Terminal, title: "Terminal", desc: "Real shell via xterm.js", available: false },
           ].map((item) => (
             <motion.button
               key={item.mode}
-              onClick={() => setMode(item.mode)}
+              onClick={() => item.available && setMode(item.mode)}
+              disabled={!item.available}
               className={`rounded-lg border p-4 text-left transition-all duration-200 ${
-                mode === item.mode
-                  ? "border-primary bg-primary/5 ring-1 ring-primary shadow-sm"
-                  : "hover:border-border hover:bg-muted/50"
+                !item.available
+                  ? "opacity-50 cursor-not-allowed"
+                  : mode === item.mode
+                    ? "border-primary bg-primary/5 ring-1 ring-primary shadow-sm"
+                    : "hover:border-border hover:bg-muted/50"
               }`}
-              whileTap={{ scale: 0.97 }}
+              whileTap={item.available ? { scale: 0.97 } : undefined}
             >
-              <item.icon className={`h-5 w-5 mb-2 ${mode === item.mode ? "text-primary" : "text-muted-foreground"}`} />
+              <item.icon className={`h-5 w-5 mb-2 ${mode === item.mode && item.available ? "text-primary" : "text-muted-foreground"}`} />
               <div className="text-sm font-semibold">{item.title}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">{item.desc}</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">
+                {item.available ? item.desc : "Temporarily unavailable"}
+              </div>
             </motion.button>
           ))}
         </div>
+        <p className="text-[11px] text-muted-foreground/70 mb-6">
+          Terminal mode needs an always-on server we haven&apos;t set up yet — use Editor mode for now, it grades the same way.
+        </p>
 
         <Button
           variant="primary"
@@ -539,7 +547,7 @@ function ExamInner({ weekId }: { weekId: string }) {
           onPress={() => setStage("confirm")}
           className="w-full"
         >
-          Continue with {mode === "editor" ? "Editor" : "Terminal"}
+          Continue with Editor
         </Button>
       </motion.div>
     );
