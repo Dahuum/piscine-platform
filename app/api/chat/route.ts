@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { messages, examContext } = await req.json();
+  const { messages, pageContext } = await req.json();
 
   const apiKey = process.env.OPENROUTER_API_KEY || process.env.DEEPSEEK_API_KEY;
 
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
         role: "system",
         content:
           "You are a teaching assistant for the 42 School C Piscine. Guide students without giving direct answers. Encourage them to think, explain concepts clearly, and help them debug their code. Be concise. The student is learning C programming and shell scripting. Never give complete solutions. Use proper markdown formatting for code blocks and clear explanations." +
-          (typeof examContext === "string" && examContext
-            ? `\n\nThe student is currently looking at exam-related material on this platform. Use ONLY the following facts if asked about exam rules, structure, levels, or points — these are this platform's actual mechanics, not the real 42 exam, and do not match general knowledge about 42 exams:\n${examContext}`
+          (typeof pageContext === "string" && pageContext
+            ? `\n\nThe student is currently on the page described below, on this specific platform (not the real 42 curriculum — this platform's own days, exercises, and exam weeks, which have their own titles, exercise sets, and numbers that do not necessarily match real 42 or general knowledge). If asked about the current day/module, exercise, or exam's structure, rules, levels, or points, answer ONLY from these facts — do not fall back to general knowledge about 42 for anything covered here:\n${pageContext}`
             : ""),
       },
       ...messages.map((m: { role: string; content: string }) => ({

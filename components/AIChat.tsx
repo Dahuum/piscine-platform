@@ -6,6 +6,8 @@ import { Button } from "@heroui/react";
 import { Send, Bot, User, X, MessageSquare, Maximize2, Minimize2, Trash2 } from "lucide-react";
 import { examWeeks } from "@/lib/exam-data";
 import type { ExamWeek } from "@/lib/exam-data";
+import { modules } from "@/lib/modules";
+import type { Module, Exercise } from "@/lib/modules";
 
 type Message = { id: string; role: "user" | "assistant"; content: string };
 
@@ -53,11 +55,24 @@ function describeWeek(week: ExamWeek): string {
   return `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total), ${week.timeMinutes} minute time limit. A wrong submission triggers an increasing cooldown before the next attempt. One random exercise is drawn per level.`;
 }
 
+function describeModule(mod: Module): string {
+  const exList = mod.exercises.map((e) => `${e.id} "${e.title}"`).join(", ");
+  return `${mod.title} (id: ${mod.id}, "day" ${mod.order}, type: ${mod.type}): ${mod.summary} It has ${mod.exercises.length} exercises: ${exList}.`;
+}
+
+function describeExercise(mod: Module, ex: Exercise): string {
+  const proto = "prototype" in ex && ex.prototype ? ` Prototype: ${ex.prototype}.` : "";
+  const allowed = "allowed" in ex && ex.allowed?.length ? ` Allowed functions: ${ex.allowed.join(", ")}.` : "";
+  return `The student is currently on exercise "${ex.title}" (${ex.id}) in ${mod.title}: ${ex.description}${proto}${allowed}`;
+}
+
 // Builds the facts the assistant should use instead of guessing, based on
-// which exam page (if any) the student is currently on. Returns null off
-// exam pages so the system prompt isn't padded with irrelevant context.
-function buildExamContext(pathname: string | null): string | null {
+// which page (if any) the student is currently on — an exam week, a module
+// ("C day"), or a specific exercise. Returns null on pages with nothing
+// platform-specific to say, so the system prompt isn't padded needlessly.
+function buildPageContext(pathname: string | null): string | null {
   if (!pathname) return null;
+
   const weekMatch = pathname.match(/^\/exam\/week\/([^/]+)/);
   if (weekMatch) {
     const week = examWeeks[weekMatch[1]];
@@ -66,6 +81,18 @@ function buildExamContext(pathname: string | null): string | null {
   if (pathname === "/exam" || pathname.startsWith("/exam/")) {
     return Object.values(examWeeks).map(describeWeek).join("\n");
   }
+
+  // Module ("C day") and exercise pages: /<moduleId> or /<moduleId>/<exerciseId>
+  const segments = pathname.split("/").filter(Boolean);
+  const mod = segments.length >= 1 ? modules[segments[0] as keyof typeof modules] : undefined;
+  if (mod) {
+    if (segments.length >= 2) {
+      const ex = mod.exercises.find((e) => e.id === segments[1]);
+      if (ex) return `${describeExercise(mod, ex)}\n${describeModule(mod)}`;
+    }
+    return describeModule(mod);
+  }
+
   return null;
 }
 
@@ -84,7 +111,7 @@ export default function AIChat() {
   // itself states ("No AI assistance during the exam"), but nothing
   // previously enforced it: this widget is otherwise rendered globally.
   const isLiveExam = /^\/exam\/week\/[^/]+\/take/.test(pathname || "");
-  const examContext = buildExamContext(pathname);
+  const pageContext = buildPageContext(pathname);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -115,7 +142,7 @@ export default function AIChat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
-          examContext,
+          pageContext,
         }),
         signal: controller.signal,
       });
