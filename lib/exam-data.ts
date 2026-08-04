@@ -54,8 +54,8 @@ const rawExams: Record<string, Omit<ExamWeek, "exercisesByLevel">> = {
     title: "Exam Week 03",
     description:
       "Piscine exam week 3. Advanced C functions and string patterns.",
-    levelCount: 2,
-    gradePerLevel: ((0 + 1) / 2) * 100,
+    levelCount: 4,
+    gradePerLevel: ((0 + 1) / 4) * 100,
     timeMinutes: 240,
     exercises: exam03Data as ExamExercise[],
   },
