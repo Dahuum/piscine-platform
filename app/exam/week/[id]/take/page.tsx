@@ -130,11 +130,7 @@ function ExamInner({ weekId }: { weekId: string }) {
   const [examComplete, setExamComplete] = useState(false);
   const [showNewLevel, setShowNewLevel] = useState(false);
   const [starting, setStarting] = useState(false);
-  const [resuming, setResuming] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      !!sessionStorage.getItem(`exam:token:${weekId}`),
-  );
+  const [resuming, setResuming] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const outputRef = useRef<HTMLPreElement>(null);
   const [terminalSandbox, setTerminalSandbox] = useState<{
@@ -165,10 +161,21 @@ function ExamInner({ weekId }: { weekId: string }) {
   // its own clock/cooldown regardless of what the client remembers, so a
   // lost/reset client previously meant losing progress and, worse, getting
   // a free cooldown reset by just starting over.
+  //
+  // `resuming` starts false (matching the server, which never has access
+  // to sessionStorage) rather than reading sessionStorage directly in a
+  // useState initializer — that would render "resuming" on the client but
+  // "select" on the server for anyone with a saved token, which is exactly
+  // the kind of server/client branch that trips a hydration mismatch
+  // (confirmed via a real render diff during testing). Flipping it here,
+  // post-mount, means a resuming user briefly sees "select" render once
+  // before the spinner takes over instead — much cheaper than a mismatch.
   useEffect(() => {
     const saved =
       typeof window !== "undefined" ? sessionStorage.getItem(tokenKey) : null;
     if (!saved) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setResuming(true);
     fetch(`/api/exam/status?token=${encodeURIComponent(saved)}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -720,28 +727,30 @@ function ExamInner({ weekId }: { weekId: string }) {
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* Top bar */}
       <motion.div
-        className="border-b px-4 flex items-center gap-4 flex-shrink-0 bg-background"
+        className="border-b px-2 sm:px-4 flex items-center gap-1.5 sm:gap-4 flex-shrink-0 bg-background overflow-hidden"
         style={{ height: 44 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
         <span
-          className={`text-sm font-sans font-bold tabular-nums ${
+          className={`text-sm font-sans font-bold tabular-nums flex-shrink-0 ${
             timeRemaining < 1800 ? "text-red-500" : "text-foreground"
           }`}
         >
           {formatTime(timeRemaining)}
         </span>
-        <span className="text-muted-foreground/40 text-xs">·</span>
-        <span className="text-sm tabular-nums font-medium">
-          Level {currentLevel}/{week.levelCount}
+        <span className="text-muted-foreground/40 text-xs hidden sm:inline flex-shrink-0">·</span>
+        <span className="text-sm tabular-nums font-medium flex-shrink-0">
+          <span className="hidden sm:inline">Level </span>
+          {currentLevel}/{week.levelCount}
         </span>
-        <span className="text-muted-foreground/40 text-xs">·</span>
-        <span className="text-sm tabular-nums font-medium">
-          Grade {currentGrade}/100
+        <span className="text-muted-foreground/40 text-xs hidden sm:inline flex-shrink-0">·</span>
+        <span className="text-sm tabular-nums font-medium flex-shrink-0">
+          <span className="hidden sm:inline">Grade </span>
+          {currentGrade}/100
         </span>
         <div className="flex-1" />
-        <div className="flex items-center gap-1">
+        <div className="hidden sm:flex items-center gap-1">
           {Array.from({ length: week.levelCount }, (_, i) => {
             const historyEntry = levelHistory.find((h) => h.level === i);
             const isPassed = historyEntry?.passed;
@@ -855,7 +864,7 @@ function ExamInner({ weekId }: { weekId: string }) {
         )}
 
         {/* Submit bar */}
-        <div className="border-t px-4 py-2.5 flex items-center gap-3 flex-shrink-0 bg-muted/20">
+        <div className="border-t px-3 sm:px-4 py-2.5 flex items-center gap-2 sm:gap-3 flex-shrink-0 bg-muted/20 overflow-hidden">
           <Button
             variant="primary"
             size="sm"
@@ -891,26 +900,27 @@ function ExamInner({ weekId }: { weekId: string }) {
                 whileTap={{ scale: 0.95 }}
               >
                 <Play className="h-3.5 w-3.5 mr-1.5" />
-                Submit for Grading
+                <span className="hidden sm:inline">Submit for Grading</span>
+                <span className="sm:hidden">Submit</span>
               </motion.span>
             )}
           </Button>
-          <span className="text-[10px] text-muted-foreground/50 hidden sm:inline">
+          <span className="text-[10px] text-muted-foreground/50 hidden sm:inline flex-shrink-0">
             {mode === "terminal"
               ? "Grade your code in rendu/"
               : "Ctrl+Enter"}
           </span>
           {cooldown && (
             <motion.span
-              className="text-xs text-amber-600 font-medium"
+              className="text-xs text-amber-600 font-medium flex-shrink-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
               Cooldown: {cooldown.remaining}s
             </motion.span>
           )}
-          <div className="flex-1" />
-          <span className="text-[11px] text-muted-foreground font-medium">
+          <div className="flex-1 min-w-0" />
+          <span className="text-[11px] text-muted-foreground font-medium truncate min-w-0">
             L{currentLevel} · {exercise?.name}
           </span>
         </div>

@@ -114,25 +114,25 @@ function PrepPracticeInner({
       transition={{ duration: 0.1 }}
     >
       <div
-        className="border-b px-4 flex items-center gap-3 flex-shrink-0 bg-background"
+        className="border-b px-3 sm:px-4 flex items-center gap-2 sm:gap-3 flex-shrink-0 bg-background overflow-hidden"
         style={{ height: 38 }}
       >
         <Link
           href={`/exam/week/${weekId}/prep`}
-          className="text-xs text-muted-foreground hover:text-foreground no-underline flex items-center gap-1 transition-colors"
+          className="text-xs text-muted-foreground hover:text-foreground no-underline flex items-center gap-1 transition-colors flex-shrink-0"
         >
           <ChevronLeft className="h-3.5 w-3.5" />{" "}
-          {weekId.replace("_", " ").toUpperCase()} Prep
+          <span className="hidden sm:inline">{weekId.replace("_", " ").toUpperCase()} Prep</span>
         </Link>
-        <span className="text-muted-foreground/40 text-xs">/</span>
-        <span className="text-sm font-semibold">{exercise.name}</span>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-muted-foreground/40 text-xs hidden sm:inline flex-shrink-0">/</span>
+        <span className="text-sm font-semibold truncate min-w-0">{exercise.name}</span>
+        <span className="text-[11px] text-muted-foreground flex-shrink-0">
           Level {exercise.level}
         </span>
       </div>
 
-      <div className="flex-1 flex lg:flex-row overflow-hidden min-h-0">
-        <div className="lg:w-[340px] border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+        <div className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
           <div
             className="flex border-b bg-muted/30 flex-shrink-0"
             style={{ height: 40 }}
@@ -285,8 +285,8 @@ function PrepPracticeInner({
           </div>
 
           <div
-            className="flex-shrink-0 border-t bg-white dark:bg-zinc-950"
-            style={{ height: 160 }}
+            className="flex-shrink-0 border-t bg-white dark:bg-zinc-950 overflow-hidden"
+            style={{ height: "min(160px, 30vh)" }}
           >
             <div className="px-3 py-1.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
@@ -305,7 +305,7 @@ function PrepPracticeInner({
             <pre
               ref={outputRef}
               className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
-              style={{ height: 127 }}
+              style={{ height: "calc(100% - 33px)" }}
             >
               {output || (
                 <span className="text-zinc-400 dark:text-zinc-600">

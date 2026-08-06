@@ -64,6 +64,19 @@ function ExercisePageInner({
     if (output && outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight;
   }, [output]);
 
+  useEffect(() => {
+    // Closes the console by default on phone-width screens — on a small
+    // viewport, an open-by-default console (plus its resizer + the
+    // editor's own minimum height) doesn't fit in the space left after
+    // the stacked exercise panel. This has to run post-mount rather than
+    // as a lazy useState initializer: window.innerWidth isn't known during
+    // SSR, so branching on it in the initializer would render one thing
+    // on the server and another on the client and trip a hydration
+    // mismatch (confirmed via a real render diff during testing).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (window.innerWidth < 1024) setConsoleOpen(false);
+  }, []);
+
   const explanationPrompt = buildExplanationPrompt({
     context: `Module: ${mod.title}`,
     title: ex.title,
@@ -132,23 +145,23 @@ function ExercisePageInner({
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* Top bar */}
-      <div className="border-b px-4 flex items-center gap-3 flex-shrink-0 bg-background" style={{ height: 38 }}>
-        <Link href={`/${mod.id}`} className="text-xs text-muted-foreground hover:text-foreground no-underline flex items-center gap-1">
-          <ChevronLeft className="h-3.5 w-3.5" /> {mod.title}
+      <div className="border-b px-3 sm:px-4 flex items-center gap-2 sm:gap-3 flex-shrink-0 bg-background overflow-hidden" style={{ height: 38 }}>
+        <Link href={`/${mod.id}`} className="text-xs text-muted-foreground hover:text-foreground no-underline flex items-center gap-1 flex-shrink-0">
+          <ChevronLeft className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{mod.title}</span>
         </Link>
-        <span className="text-muted-foreground/40 text-xs">/</span>
-        <span className="text-sm font-semibold">{ex.title}</span>
-        <span className="text-[11px] text-muted-foreground">Ex {String(ex.number).padStart(2, "0")}</span>
-        {isDone && <span className="text-[10px] font-medium text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider">Done</span>}
+        <span className="text-muted-foreground/40 text-xs hidden sm:inline flex-shrink-0">/</span>
+        <span className="text-sm font-semibold truncate min-w-0">{ex.title}</span>
+        <span className="text-[11px] text-muted-foreground hidden sm:inline flex-shrink-0">Ex {String(ex.number).padStart(2, "0")}</span>
+        {isDone && <span className="text-[10px] font-medium text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">Done</span>}
 
         <div className="flex-1" />
 
-        <ProgressBar value={pct} size="sm" className="w-20 hidden sm:block" color="accent" />
-        <span className="text-[10px] text-muted-foreground tabular-nums hidden sm:inline">
+        <ProgressBar value={pct} size="sm" className="w-20 hidden md:block" color="accent" />
+        <span className="text-[10px] text-muted-foreground tabular-nums hidden sm:inline flex-shrink-0">
           {exerciseIndex + 1}/{mod.exercises.length}
         </span>
 
-        <div className="flex items-center">
+        <div className="flex items-center flex-shrink-0">
           <Button isIconOnly variant="ghost" size="sm" isDisabled={!prevEx}
             onPress={() => prevEx && router.push(`/${mod.id}/${prevEx.id}`)} aria-label="Previous"
             className="hover:bg-muted transition-colors">
@@ -162,9 +175,9 @@ function ExercisePageInner({
         </div>
       </div>
 
-      <div className="flex-1 flex lg:flex-row overflow-hidden min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
         {/* Left panel */}
-        <div className="lg:w-[340px] border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
+        <div className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
           <div className="flex border-b bg-muted/30 flex-shrink-0" style={{ height: 40 }}>
             <TabButton active={leftTab === "exercise"} onClick={() => setLeftTab("exercise")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Exercise" />
             <TabButton active={leftTab === "explanation"} onClick={() => setLeftTab("explanation")} icon={<Lightbulb className="h-3.5 w-3.5" />} label="Explanation" />
@@ -274,9 +287,12 @@ function ExercisePageInner({
               language={mod.type === "shell" ? "shell" : "c"} />
           </div>
 
-          {/* Resizer */}
+          {/* Resizer — drag-to-resize only makes sense with a mouse, so it's
+              hidden on mobile rather than shown non-functional; the console
+              still opens/closes via the toolbar toggle and is height-capped
+              below so it can't crowd out the editor on a small screen. */}
           {consoleOpen && (
-            <div className="h-1.5 bg-border hover:bg-primary/30 cursor-ns-resize flex-shrink-0 flex items-center justify-center group"
+            <div className="hidden lg:flex h-1.5 bg-border hover:bg-primary/30 cursor-ns-resize flex-shrink-0 items-center justify-center group"
               onMouseDown={onResizeMouseDown}>
               <div className="w-10 h-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />
             </div>
@@ -284,7 +300,7 @@ function ExercisePageInner({
 
           {/* Console */}
           {consoleOpen && (
-            <div className="flex-shrink-0 border-t bg-white dark:bg-zinc-950" style={{ height: consoleHeight }}>
+            <div className="flex-shrink-0 border-t bg-white dark:bg-zinc-950 overflow-hidden" style={{ height: `min(${consoleHeight}px, 45vh)` }}>
               <div className="px-3 py-1.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Output</span>
                 {running && <span className="text-[10px] text-amber-600 dark:text-amber-400 animate-pulse">running...</span>}
@@ -297,7 +313,7 @@ function ExercisePageInner({
               </div>
               <pre ref={outputRef}
                 className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
-                style={{ height: consoleHeight - 33 }}>
+                style={{ height: "calc(100% - 33px)" }}>
                 {verdict && (
                   <div className={`mb-2 pb-2 border-b border-zinc-200 dark:border-zinc-800 font-sans text-xs font-medium ${verdict.trim().startsWith("✅") ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                     {verdict}
