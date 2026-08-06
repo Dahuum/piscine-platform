@@ -19,7 +19,6 @@ const wss = new WebSocketServer({ server });
 wss.on("connection", (ws) => {
   let sandbox = null;
   let ptyPid = null;
-  let ptyHandle = null;
 
   ws.on("message", async (raw) => {
     let msg;
@@ -45,7 +44,6 @@ wss.on("connection", (ws) => {
         });
 
         ptyPid = handle.pid;
-        ptyHandle = handle;
         ws.send(json({ type: "ready", sandboxId: sandbox.sandboxId, pid: ptyPid }));
         return;
       }
@@ -56,7 +54,7 @@ wss.on("connection", (ws) => {
           try { sandbox = await Sandbox.connect(msg.sandboxId); } catch { ws.send(json({ type: "error", error: "sandbox not found" })); return; }
         }
 
-        const handle = await sandbox.pty.connect(msg.pid, {
+        await sandbox.pty.connect(msg.pid, {
           onData: (data) => {
             if (ws.readyState === ws.OPEN) {
               ws.send(json({ type: "data", data: Array.from(data) }));
@@ -65,7 +63,6 @@ wss.on("connection", (ws) => {
         });
 
         ptyPid = msg.pid;
-        ptyHandle = handle;
         ws.send(json({ type: "ready", sandboxId: sandbox.sandboxId, pid: ptyPid }));
         return;
       }

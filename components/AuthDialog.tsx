@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Button, Card } from "@heroui/react";
 import { createClient } from "@/lib/supabase/client";
-import { User, LogIn, LogOut, LayoutDashboard } from "lucide-react";
+import { User, LogOut, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import MigrationModal from "./MigrationModal";

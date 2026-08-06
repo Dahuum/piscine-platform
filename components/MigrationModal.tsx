@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@heroui/react";
 import { motion } from "framer-motion";
 import { Database, Trash2, CheckCircle2 } from "lucide-react";
-import { detectExistingData, migrateAllData, markMigrationHandled, getLocalDataSummary } from "@/lib/migrate-data";
+import { migrateAllData, markMigrationHandled, getLocalDataSummary } from "@/lib/migrate-data";
 
 export default function MigrationModal({
   open,
@@ -16,18 +16,10 @@ export default function MigrationModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
-  const [summary, setSummary] = useState<string[]>([]);
-  const [stats, setStats] = useState({ exercises: 0, exams: 0, prep: 0 });
-
-  useEffect(() => {
-    if (open) {
-      const data = detectExistingData();
-      setStats(data.stats);
-      if (data.hasData) {
-        setSummary(getLocalDataSummary());
-      }
-    }
-  }, [open]);
+  // The parent only mounts this component while `open` is true (see
+  // AuthDialog.tsx: `{showMigration && <MigrationModal .../>}`), so this
+  // only ever needs to compute once at mount, not react to `open` changing.
+  const [summary] = useState(() => (typeof window !== "undefined" ? getLocalDataSummary() : []));
 
   if (!open) return null;
 
@@ -40,7 +32,6 @@ export default function MigrationModal({
       // and it's now also synced to the account), it just won't be offered
       // for import again.
       await migrateAllData();
-      setSummary([]);
       setDone(true);
       setLoading(false);
     } catch (e: unknown) {
@@ -131,7 +122,7 @@ export default function MigrationModal({
                 isDisabled={loading}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1" />
-                Start fresh — don't import
+                Start fresh — don&apos;t import
               </Button>
             </div>
           </>

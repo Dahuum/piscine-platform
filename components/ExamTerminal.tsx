@@ -8,7 +8,6 @@ import "@xterm/xterm/css/xterm.css";
 
 type ExamTerminalProps = {
   onReady?: (sandboxId: string, pid: number) => void;
-  onGrade?: () => void;
   connectTo?: { sandboxId: string; pid: number };
   disabled?: boolean;
 };
@@ -19,7 +18,6 @@ const WS_URL = typeof window !== "undefined"
 
 export default function ExamTerminal({
   onReady,
-  onGrade,
   connectTo,
   disabled,
 }: ExamTerminalProps) {
@@ -28,6 +26,11 @@ export default function ExamTerminal({
   const fitAddonRef = useRef<FitAddon | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const sandboxRef = useRef<{ sandboxId?: string; pid?: number }>({});
+  // Reconnect logic calls the *current* connectWs via this ref rather than
+  // referencing the useCallback binding directly from inside its own
+  // onclose handler — avoids invoking a stale closure if connectWs's
+  // identity changes (deps update) while a reconnect timer is pending.
+  const connectWsRef = useRef<(onOpen?: () => void) => void>(() => {});
 
   const send = useCallback((msg: Record<string, unknown>) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -61,8 +64,6 @@ export default function ExamTerminal({
           } else if (msg.type === "ready") {
             sandboxRef.current = { sandboxId: msg.sandboxId, pid: msg.pid };
             onReady?.(msg.sandboxId, msg.pid);
-          } else if (msg.type === "grade_result" && onGrade) {
-            // handled by parent via callback
           } else if (msg.type === "error") {
             xtermRef.current?.writeln(`\r\n\x1b[31mError: ${msg.error}\x1b[0m`);
           }
@@ -76,7 +77,7 @@ export default function ExamTerminal({
         if (!disabled) {
           setTimeout(() => {
             xtermRef.current?.writeln("\r\n\x1b[33mReconnecting...\x1b[0m");
-            connectWs();
+            connectWsRef.current();
           }, 2000);
         }
       };
@@ -89,6 +90,10 @@ export default function ExamTerminal({
     },
     [connectTo, disabled, onReady, send],
   );
+
+  useEffect(() => {
+    connectWsRef.current = connectWs;
+  }, [connectWs]);
 
   useEffect(() => {
     if (!terminalRef.current) return;

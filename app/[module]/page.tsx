@@ -5,27 +5,27 @@ import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
 import { ProgressBar } from "@heroui/react";
 import { ChevronRight, ChevronLeft, Lock, CheckCircle2, Circle, Terminal, Code2, Trophy } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function ModulePage() {
   const params = useParams<{ module: string }>();
   const mod = modules[params.module as keyof typeof modules];
   if (!mod) notFound();
-  return <ModulePageInner mod={mod} />;
+  // Remount on module change — navigating between modules doesn't reload
+  // the page, so without this the completed-exercises list would need an
+  // effect to re-sync instead of a plain initializer.
+  return <ModulePageInner key={mod.id} mod={mod} />;
 }
 
 function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] }) {
-  const [completed, setCompleted] = useState<string[]>([]);
+  const [completed] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    return mod.exercises
+      .filter((ex: Exercise) => localStorage.getItem(`progress:${mod.id}:${ex.id}`) === "done")
+      .map((ex: Exercise) => ex.id);
+  });
   const total = mod.exercises.length;
   const pct = total > 0 ? Math.round((completed.length / total) * 100) : 0;
-
-  useEffect(() => {
-    const done: string[] = [];
-    mod.exercises.forEach((ex: Exercise) => {
-      if (localStorage.getItem(`progress:${mod.id}:${ex.id}`) === "done") done.push(ex.id);
-    });
-    setCompleted(done);
-  }, [mod.id, mod.exercises]);
 
   const isUnlocked = (index: number) => {
     if (index === 0) return true;

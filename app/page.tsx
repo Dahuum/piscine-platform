@@ -4,34 +4,35 @@ import { moduleOrder, modules, type Exercise } from "@/lib/modules";
 import Link from "next/link";
 import { ProgressBar } from "@heroui/react";
 import { Terminal, Code2, ChevronRight, Trophy, GraduationCap } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+function computeProgress() {
+  const p: Record<string, number> = {};
+  let done = 0;
+  let total = 0;
+  if (typeof window === "undefined") return { p, done, total };
+  moduleOrder.forEach((id) => {
+    const mod = modules[id as keyof typeof modules];
+    if (!mod) return;
+    let c = 0;
+    mod.exercises.forEach((ex: Exercise) => {
+      total++;
+      if (localStorage.getItem(`progress:${mod.id}:${ex.id}`) === "done") {
+        c++;
+        done++;
+      }
+    });
+    // Guard on this module's own exercise count, not the running total
+    // across all modules processed so far (which is >0 after the first
+    // module regardless of this one) — that guard doesn't protect the
+    // division it's next to.
+    p[id] = mod.exercises.length > 0 ? Math.round((c / mod.exercises.length) * 100) : 0;
+  });
+  return { p, done, total };
+}
 
 export default function Home() {
-  const [progress, setProgress] = useState<Record<string, number>>({});
-  const [totalCompleted, setTotalCompleted] = useState(0);
-  const [totalExercises, setTotalExercises] = useState(0);
-
-  useEffect(() => {
-    const p: Record<string, number> = {};
-    let done = 0;
-    let total = 0;
-    moduleOrder.forEach((id) => {
-      const mod = modules[id as keyof typeof modules];
-      if (!mod) return;
-      let c = 0;
-      mod.exercises.forEach((ex: Exercise) => {
-        total++;
-        if (localStorage.getItem(`progress:${mod.id}:${ex.id}`) === "done") {
-          c++;
-          done++;
-        }
-      });
-      p[id] = total > 0 ? Math.round((c / mod.exercises.length) * 100) : 0;
-    });
-    setProgress(p);
-    setTotalCompleted(done);
-    setTotalExercises(total);
-  }, []);
+  const [{ p: progress, done: totalCompleted, total: totalExercises }] = useState(computeProgress);
 
   const overallPct = totalExercises > 0 ? Math.round((totalCompleted / totalExercises) * 100) : 0;
 

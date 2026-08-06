@@ -6,18 +6,40 @@ import { Button } from "@heroui/react";
 import { BookOpen, Terminal, Sun, Moon, GraduationCap } from "lucide-react";
 import AuthDialog from "./AuthDialog";
 import { useState, useEffect } from "react";
+import { getTheme, saveTheme } from "@/lib/db";
+
+function computeInitialIsDark(): boolean {
+  if (typeof window === "undefined") return false;
+  const stored = localStorage.getItem("theme");
+  return stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+}
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(computeInitialIsDark);
   const [online, setOnline] = useState(0);
 
+  // DOM class syncs from isDark state (not the other way around) — this is
+  // a pure side effect, no setState, so it's fine to run on every change.
   useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      document.documentElement.classList.add("dark");
-      setIsDark(true);
-    }
+    document.documentElement.classList.toggle("dark", isDark);
+  }, [isDark]);
+
+  // Logged-in users' theme preference (lib/db.ts's saveTheme/getTheme,
+  // backed by the user_settings table) previously existed but nothing
+  // called it — only localStorage was ever read, so the preference never
+  // followed a user across devices. Async, so setIsDark here doesn't
+  // trigger the "setState synchronously in an effect" concern — it's not
+  // synchronous.
+  useEffect(() => {
+    (async () => {
+      try {
+        const theme = await getTheme();
+        if (theme) setIsDark(theme === "dark");
+      } catch {
+        // not logged in, or request failed — keep the localStorage value
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -43,9 +65,11 @@ export default function Navbar() {
   }, []);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle("dark");
-    localStorage.setItem("theme", isDark ? "light" : "dark");
+    const next = !isDark;
+    setIsDark(next); // DOM class updates via the isDark effect above
+    const theme = next ? "dark" : "light";
+    localStorage.setItem("theme", theme);
+    saveTheme(theme).catch(() => {});
   };
 
         const notHome = pathname !== "/";

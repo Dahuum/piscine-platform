@@ -15,6 +15,11 @@ function buildPlatformFacts(): string {
     .join("\n");
 }
 
+// The response streams, and its total duration isn't bounded by max_tokens
+// alone (slow upstream generation, long conversations) — give it the same
+// headroom as the other routes rather than relying on Vercel's 10s default.
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const { messages, pageContext } = await req.json();
 

@@ -29,7 +29,15 @@ export default function ExamPrepExercisePage() {
   );
   if (!ex) notFound();
 
-  return <PrepPracticeInner weekId={weekId} exercise={ex} />;
+  // Remount on exercise change so code/output don't carry over between
+  // different prep exercises without a full page reload.
+  return (
+    <PrepPracticeInner
+      key={`${weekId}:${lvl}:${ex.name}`}
+      weekId={weekId}
+      exercise={ex}
+    />
+  );
 }
 
 function PrepPracticeInner({
@@ -39,7 +47,10 @@ function PrepPracticeInner({
   weekId: string;
   exercise: ExamExercise;
 }) {
-  const [code, setCode] = useState("");
+  const codeKey = `exam:code:${weekId}:${exercise.level}:${exercise.name}`;
+  const prepKey = `exam:prep:${weekId}:${exercise.level}:${exercise.name}`;
+
+  const [code, setCode] = useState(() => (typeof window !== "undefined" && localStorage.getItem(codeKey)) || "");
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
   const [leftTab, setLeftTab] = useState<"exercise" | "explanation">(
@@ -47,18 +58,14 @@ function PrepPracticeInner({
   );
   const outputRef = useRef<HTMLPreElement>(null);
 
-  const codeKey = `exam:code:${weekId}:${exercise.level}:${exercise.name}`;
-  const prepKey = `exam:prep:${weekId}:${exercise.level}:${exercise.name}`;
   const markAsSeen = () => {
     localStorage.setItem(prepKey, "done");
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem(codeKey);
-    if (saved) setCode(saved);
     markAsSeen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [codeKey]);
+  }, [prepKey]);
 
   useEffect(() => {
     if (output && outputRef.current) {

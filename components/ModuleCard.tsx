@@ -3,7 +3,7 @@
 import { Card, Badge } from "@heroui/react";
 import { ChevronRight, Terminal, Code2 } from "lucide-react";
 import Link from "next/link";
-import { modules, moduleOrder } from "@/lib/modules";
+import { modules } from "@/lib/modules";
 
 export default function ModuleCard({ moduleId }: { moduleId: string }) {
   const mod = modules[moduleId as keyof typeof modules];

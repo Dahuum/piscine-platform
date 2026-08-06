@@ -8,7 +8,6 @@ import {
   ChevronRight, ChevronLeft, Play, RotateCcw,
   PanelBottomClose, PanelBottomOpen,
   BookOpen, Lightbulb, CheckCircle2, Circle, Keyboard,
-  Terminal, Code2, Zap,
 } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import CodeEditor from "@/components/CodeEditor";
@@ -20,7 +19,10 @@ export default function ExercisePage() {
   if (!mod) notFound();
   const exIdx = mod.exercises.findIndex((e: { id: string }) => e.id === params.exercise);
   if (exIdx === -1) notFound();
-  return <ExercisePageInner mod={mod} exerciseIndex={exIdx} />;
+  // Remount on exercise change (Next/Prev navigation doesn't reload the
+  // page) so all local state — code, run output, AI verdict, explanation —
+  // starts fresh instead of carrying over from the previous exercise.
+  return <ExercisePageInner key={`${mod.id}:${exIdx}`} mod={mod} exerciseIndex={exIdx} />;
 }
 
 function ExercisePageInner({
@@ -32,44 +34,45 @@ function ExercisePageInner({
 }) {
   const ex = mod.exercises[exerciseIndex];
   const router = useRouter();
-  const [code, setCode] = useState("");
+  const progressKey = `progress:${mod.id}:${ex.id}`;
+  const codeKey = `code:${mod.id}:${ex.id}`;
+  const cacheKey = `explanation:v8:${mod.id}:${ex.id}`;
+
+  const [code, setCode] = useState(() => (typeof window !== "undefined" && localStorage.getItem(codeKey)) || "");
   const [output, setOutput] = useState("");
   const [verdict, setVerdict] = useState("");
   const [running, setRunning] = useState(false);
-  const [isDone, setIsDone] = useState(false);
+  const [isDone, setIsDone] = useState(() => typeof window !== "undefined" && localStorage.getItem(progressKey) === "done");
   const [consoleOpen, setConsoleOpen] = useState(true);
-  const [consoleHeight, setConsoleHeight] = useState(220);
+  const [consoleHeight, setConsoleHeight] = useState(() => {
+    if (typeof window === "undefined") return 220;
+    const sh = localStorage.getItem("console-height");
+    return sh ? parseInt(sh, 10) : 220;
+  });
   const [leftTab, setLeftTab] = useState<"exercise" | "explanation">("exercise");
-  const [explanation, setExplanation] = useState("");
+  const [explanation, setExplanation] = useState(() => (typeof window !== "undefined" && localStorage.getItem(cacheKey)) || "");
   const [loadingExplanation, setLoadingExplanation] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const outputRef = useRef<HTMLPreElement>(null);
   const resizingRef = useRef(false);
   const codeRef = useRef(code);
-  codeRef.current = code;
-
-  const progressKey = `progress:${mod.id}:${ex.id}`;
-  const codeKey = `code:${mod.id}:${ex.id}`;
-  const cacheKey = `explanation:v8:${mod.id}:${ex.id}`;
 
   useEffect(() => {
-    const savedCode = localStorage.getItem(codeKey);
-    if (savedCode) setCode(savedCode);
-    setIsDone(localStorage.getItem(progressKey) === "done");
-    const sh = localStorage.getItem("console-height");
-    if (sh) setConsoleHeight(parseInt(sh, 10));
-  }, [codeKey, progressKey]);
+    codeRef.current = code;
+  }, [code]);
 
   useEffect(() => {
     if (output && outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight;
   }, [output]);
 
   useEffect(() => {
-    setExplanation("");
-    setLoadingExplanation(true);
     const cached = localStorage.getItem(cacheKey);
-    if (cached) { setExplanation(cached); setLoadingExplanation(false); return; }
+    if (cached) return;
 
+    // Not cached — about to kick off the async fetch below, so this is a
+    // one-time transition into a loading state, not a re-render loop.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoadingExplanation(true);
     (async () => {
       try {
         const res = await fetch("/api/chat", {
@@ -335,7 +338,7 @@ function ExercisePageInner({
                   </div>
                 )}
                 {output || (
-                  <span className="text-zinc-400 dark:text-zinc-600">// Write code and press Run or Ctrl+Enter</span>
+                  <span className="text-zinc-400 dark:text-zinc-600">{"// Write code and press Run or Ctrl+Enter"}</span>
                 )}
               </pre>
             </div>
@@ -384,7 +387,6 @@ function Explanation({ text }: { text: string }) {
       els.push(<h4 key={i} className="text-[11px] font-bold text-foreground mt-4 mb-2 uppercase tracking-wide">{line.trim().replace(/:$/, "")}</h4>);
       i++;
     } else if (line.trim().startsWith("```")) {
-      const lang = line.trim().slice(3).trim();
       i++;
       const codeLines: string[] = [];
       while (i < lines.length && !lines[i].trim().startsWith("```")) {
