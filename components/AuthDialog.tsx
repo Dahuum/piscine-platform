@@ -22,6 +22,7 @@ export default function AuthDialog() {
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [showMigration, setShowMigration] = useState(false);
+  const [confirmSent, setConfirmSent] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -59,11 +60,32 @@ export default function AuthDialog() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setError("");
-    const { error: authError } = mode === "login"
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
+    if (mode === "login") {
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) { setError(authError.message); setLoading(false); return; }
+      setOpen(false); setEmail(""); setPassword(""); setLoading(false);
+      return;
+    }
+    const { data, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/auth/confirm` },
+    });
     if (authError) { setError(authError.message); setLoading(false); return; }
-    setOpen(false); setEmail(""); setPassword(""); setLoading(false);
+    setLoading(false);
+    // A user comes back with no session when email confirmation is required
+    // (mailer_autoconfirm is off for this project) — the account isn't
+    // usable yet until they click the link, so tell them that instead of
+    // silently closing the dialog like nothing happened.
+    if (data.user && !data.session) {
+      setConfirmSent(true);
+      return;
+    }
+    setOpen(false); setEmail(""); setPassword("");
+  };
+
+  const resetDialog = () => {
+    setOpen(false); setEmail(""); setPassword(""); setError(""); setConfirmSent(false); setMode("login");
   };
 
   const handleLogout = () => supabase.auth.signOut().then(() => setUser(null));
@@ -76,30 +98,49 @@ export default function AuthDialog() {
           <span className="hidden sm:inline">Sign In</span>
         </Button>
         {open && createPortal(
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)}>
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={resetDialog}>
             <Card className="w-full max-w-sm mx-4 border shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <Card.Header className="flex flex-col gap-0.5">
-                <Card.Title>{mode === "login" ? "Sign In" : "Create Account"}</Card.Title>
-                <p className="text-xs text-muted-foreground">Sync your progress across devices.</p>
-              </Card.Header>
-              <Card.Content>
-                <form onSubmit={handleSubmit} className="space-y-3">
-                  <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
-                  <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputClass} />
-                  {error && <p className="text-xs text-red-500">{error}</p>}
-                  <Button type="submit" variant="primary" className="w-full" isDisabled={loading}>
-                    {loading ? "Loading..." : mode === "login" ? "Sign In" : "Create Account"}
-                  </Button>
-                </form>
-              </Card.Content>
-              <div className="px-4 pb-4 text-center">
-                <p className="text-xs text-muted-foreground">
-                  {mode === "login" ? "No account? " : "Already registered? "}
-                  <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-primary hover:underline font-medium">
-                    {mode === "login" ? "Sign up" : "Sign in"}
-                  </button>
-                </p>
-              </div>
+              {confirmSent ? (
+                <>
+                  <Card.Header className="flex flex-col gap-0.5">
+                    <Card.Title>Check your email</Card.Title>
+                  </Card.Header>
+                  <Card.Content>
+                    <p className="text-sm text-muted-foreground">
+                      We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>.
+                      Click it to activate your account — you&apos;ll be brought back here signed in.
+                    </p>
+                  </Card.Content>
+                  <div className="px-4 pb-4">
+                    <Button variant="ghost" className="w-full" onPress={resetDialog}>Got it</Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Card.Header className="flex flex-col gap-0.5">
+                    <Card.Title>{mode === "login" ? "Sign In" : "Create Account"}</Card.Title>
+                    <p className="text-xs text-muted-foreground">Sync your progress across devices.</p>
+                  </Card.Header>
+                  <Card.Content>
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+                      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputClass} />
+                      {error && <p className="text-xs text-red-500">{error}</p>}
+                      <Button type="submit" variant="primary" className="w-full" isDisabled={loading}>
+                        {loading ? "Loading..." : mode === "login" ? "Sign In" : "Create Account"}
+                      </Button>
+                    </form>
+                  </Card.Content>
+                  <div className="px-4 pb-4 text-center">
+                    <p className="text-xs text-muted-foreground">
+                      {mode === "login" ? "No account? " : "Already registered? "}
+                      <button onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); }} className="text-primary hover:underline font-medium">
+                        {mode === "login" ? "Sign up" : "Sign in"}
+                      </button>
+                    </p>
+                  </div>
+                </>
+              )}
             </Card>
           </div>,
           document.body
