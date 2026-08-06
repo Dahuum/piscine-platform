@@ -86,6 +86,25 @@ export async function getSession(
   return rows[0].data as ExamSession;
 }
 
+// Used by /api/exam/start to avoid creating a second "active" row for a
+// visitor who already has one running for this week — a double-click on
+// "Begin Exam", or a client that lost its saved token and re-starts,
+// would otherwise leave the earlier session orphaned until its 5h TTL.
+export async function getActiveSessionForVisitor(
+  weekId: string,
+  visitorId: string,
+): Promise<{ token: string; session: ExamSession } | null> {
+  const { rows } = await getPool().query(
+    `SELECT token, data FROM exam_sessions
+     WHERE data->>'weekId' = $1 AND data->>'visitorId' = $2
+       AND data->>'status' = 'active' AND expires_at > now()
+     ORDER BY created_at DESC LIMIT 1`,
+    [weekId, visitorId],
+  );
+  if (rows.length === 0) return null;
+  return { token: rows[0].token as string, session: rows[0].data as ExamSession };
+}
+
 export async function updateSession(
   token: string,
   session: ExamSession,

@@ -15,7 +15,7 @@ import {
   Trophy,
   CheckCircle2,
 } from "lucide-react";
-import { getExamWeekOrNull, lockedWeeks } from "@/lib/exam-data";
+import { getExamWeekOrNull, lockedWeeks, getExercise } from "@/lib/exam-data";
 import type { ExamExercise } from "@/lib/exam-data";
 import { saveExamAttempt } from "@/lib/db";
 import CodeEditor from "@/components/CodeEditor";
@@ -129,12 +129,20 @@ function ExamInner({ weekId }: { weekId: string }) {
   const [status, setStatus] = useState<string>("active");
   const [examComplete, setExamComplete] = useState(false);
   const [showNewLevel, setShowNewLevel] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [resuming, setResuming] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!sessionStorage.getItem(`exam:token:${weekId}`),
+  );
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const outputRef = useRef<HTMLPreElement>(null);
   const [terminalSandbox, setTerminalSandbox] = useState<{
     sandboxId: string;
     pid: number;
   } | null>(null);
+
+  const tokenKey = `exam:token:${weekId}`;
 
   const getVisitorId = () =>
     typeof window !== "undefined"
@@ -151,7 +159,65 @@ function ExamInner({ weekId }: { weekId: string }) {
     }
   }, []);
 
+  // On mount, check for a saved token from a previous tab session (e.g. a
+  // refresh) and try to reconnect to its still-active server-side session
+  // instead of defaulting to "select" — the server session keeps running
+  // its own clock/cooldown regardless of what the client remembers, so a
+  // lost/reset client previously meant losing progress and, worse, getting
+  // a free cooldown reset by just starting over.
+  useEffect(() => {
+    const saved =
+      typeof window !== "undefined" ? sessionStorage.getItem(tokenKey) : null;
+    if (!saved) return;
+    fetch(`/api/exam/status?token=${encodeURIComponent(saved)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data || data.error) {
+          sessionStorage.removeItem(tokenKey);
+          return;
+        }
+        if (data.status !== "active") {
+          sessionStorage.removeItem(tokenKey);
+          if (data.status === "completed" || data.status === "timeout") {
+            router.replace(`/exam/week/${weekId}/results`);
+          }
+          return;
+        }
+        const resolvedExercise = getExercise(
+          weekId,
+          data.currentLevel,
+          data.currentExercise,
+        );
+        setToken(saved);
+        setCurrentLevel(data.currentLevel);
+        setCurrentGrade(data.grade);
+        setLevelHistory(data.levelHistory || []);
+        setTimeRemaining(Math.round(data.timeRemaining));
+        if (data.cooldownUntil > Date.now()) {
+          setCooldown({
+            until: data.cooldownUntil,
+            remaining: Math.ceil((data.cooldownUntil - Date.now()) / 1000),
+          });
+        }
+        if (resolvedExercise) {
+          setExercise({
+            name: resolvedExercise.name,
+            level: resolvedExercise.level,
+            type: resolvedExercise.type,
+            subject: resolvedExercise.subject,
+          });
+        }
+        setStatus("active");
+        setStage("active");
+      })
+      .catch(() => sessionStorage.removeItem(tokenKey))
+      .finally(() => setResuming(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const startExam = async (selectedMode: "editor" | "terminal") => {
+    if (starting) return;
+    setStarting(true);
     try {
       const body: Record<string, unknown> = {
         weekId,
@@ -173,20 +239,35 @@ function ExamInner({ weekId }: { weekId: string }) {
       }
       const data = await res.json();
       setToken(data.token);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(tokenKey, data.token);
+      }
       setExercise(data.exercise);
       setCode("");
-      setCurrentLevel(0);
-      setCurrentGrade(0);
+      setCurrentLevel(data.currentLevel ?? 0);
+      setCurrentGrade(data.currentGrade ?? 0);
+      setLevelHistory(data.levelHistory || []);
       setFeedback(null);
-      setCooldown(null);
+      setCooldown(
+        data.cooldownUntil && data.cooldownUntil > Date.now()
+          ? {
+              until: data.cooldownUntil,
+              remaining: Math.ceil((data.cooldownUntil - Date.now()) / 1000),
+            }
+          : null,
+      );
       setStage("active");
       setStatus("active");
       setExamComplete(false);
       setShowNewLevel(false);
-      setTimeRemaining(data.timeLimitSeconds);
+      setTimeRemaining(
+        data.resumed ? Math.round(data.timeRemaining) : data.timeLimitSeconds,
+      );
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Failed to start";
       alert(msg);
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -245,6 +326,7 @@ function ExamInner({ weekId }: { weekId: string }) {
 
   useEffect(() => {
     if (status === "timeout" && token) {
+      if (typeof window !== "undefined") sessionStorage.removeItem(tokenKey);
       fetch("/api/exam/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -253,6 +335,11 @@ function ExamInner({ weekId }: { weekId: string }) {
         .then((r) => r.json())
         .then((d) => {
           saveToHistory(d);
+        })
+        .catch(() => {
+          // best-effort — the timeout banner + local history entry already
+          // reflect the outcome even if the server-side save failed
+          saveToHistory({});
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -302,6 +389,30 @@ function ExamInner({ weekId }: { weekId: string }) {
       return;
     }
 
+    if (data.systemError) {
+      // Our fault (grading infra), not the student's — no cooldown was
+      // applied server-side either, so just surface it and let them retry.
+      setFeedback({
+        passed: false,
+        traceback: data.error,
+        compilationError: data.compilationError,
+      });
+      return;
+    }
+
+    if (data.exercise) {
+      // Server moved us to a different exercise (the previous one no
+      // longer resolved) — reflect that instead of continuing to show a
+      // stale prompt the next submission won't actually be graded against.
+      setExercise(data.exercise);
+      setCode("");
+      setFeedback({
+        passed: false,
+        traceback: "That exercise changed — you've been given a new one, please try again.",
+      });
+      return;
+    }
+
     if (data.error) {
       if (data.status === "timeout") {
         setStatus("timeout");
@@ -317,12 +428,13 @@ function ExamInner({ weekId }: { weekId: string }) {
         setCurrentGrade(data.finalGrade || 100);
         setLevelHistory(data.levelHistory || []);
         setStatus("completed");
+        if (typeof window !== "undefined") sessionStorage.removeItem(tokenKey);
         saveToHistory({ grade: data.finalGrade, levelHistory: data.levelHistory });
         fetch("/api/exam/finish", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token, reason: "completed" }),
-        });
+        }).catch(() => {});
         return;
       }
       setFeedback({ passed: true });
@@ -378,17 +490,33 @@ function ExamInner({ weekId }: { weekId: string }) {
   }, [stage, code, token, grading]);
 
   const finishExam = async () => {
+    if (typeof window !== "undefined") sessionStorage.removeItem(tokenKey);
     if (token) {
-      await fetch("/api/exam/finish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, reason: "abandoned" }),
-      });
+      try {
+        await fetch("/api/exam/finish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, reason: "abandoned" }),
+        });
+      } catch {
+        // best-effort — still navigate away even if this failed, otherwise
+        // a network hiccup leaves the user stuck on the exam screen
+      }
     }
     router.push(`/exam/week/${weekId}/results`);
   };
 
-
+  // Avoid flashing the "select" screen (with its own "Begin Exam" button)
+  // for the instant it takes to check whether a saved token can resume an
+  // already-active session — that flash previously made it easy to
+  // accidentally start a second session before the resume check landed.
+  if (resuming) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)]">
+        <RotateCcw className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (examComplete) {
     return (
@@ -577,11 +705,11 @@ function ExamInner({ weekId }: { weekId: string }) {
           240 minutes · Cannot be paused.
         </p>
         <div className="flex justify-center gap-3">
-          <Button variant="outline" onPress={() => setStage("select")}>
+          <Button variant="outline" onPress={() => setStage("select")} isDisabled={starting}>
             Back
           </Button>
-          <Button variant="primary" onPress={() => startExam(mode)}>
-            Begin Exam
+          <Button variant="primary" onPress={() => startExam(mode)} isDisabled={starting}>
+            {starting ? "Starting..." : "Begin Exam"}
           </Button>
         </div>
       </motion.div>

@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const result = await gradeSubmission(exercise, studentCode);
+    const result = await gradeSubmission(exercise, code);
 
     const timeOnLevel = Math.round(
       (Date.now() - session.levelStartedAt) / 1000,
@@ -189,6 +189,17 @@ export async function POST(req: NextRequest) {
         },
         grade: session.gradePerLevel * session.currentLevel,
         levelHistory: session.levelHistory,
+      });
+    } else if (result.systemError) {
+      // Our fault (E2B down, broken reference code), not the student's —
+      // don't burn an attempt or start a cooldown on a submission that
+      // never had a fair shot at passing.
+      return NextResponse.json({
+        passed: false,
+        systemError: true,
+        error: "System error while grading — this wasn't your code's fault, please try submitting again.",
+        traceback: result.traceback,
+        compilationError: result.compilationError,
       });
     } else {
       session.assignmentCount++;

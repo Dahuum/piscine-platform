@@ -9,6 +9,7 @@ import { Play, RotateCcw, ChevronLeft, BookOpen, Lightbulb } from "lucide-react"
 import { getExamWeekOrNull, lockedWeeks } from "@/lib/exam-data";
 import type { ExamExercise } from "@/lib/exam-data";
 import CodeEditor from "@/components/CodeEditor";
+import { ExplanationPanel, buildExplanationPrompt } from "@/components/ExplanationPanel";
 
 export default function ExamPrepExercisePage() {
   const params = useParams<{
@@ -47,8 +48,16 @@ function PrepPracticeInner({
   weekId: string;
   exercise: ExamExercise;
 }) {
+  const week = getExamWeekOrNull(weekId)!;
   const codeKey = `exam:code:${weekId}:${exercise.level}:${exercise.name}`;
   const prepKey = `exam:prep:${weekId}:${exercise.level}:${exercise.name}`;
+  const explanationCacheKey = `explanation:exam:v1:${weekId}:${exercise.level}:${exercise.name}`;
+  const explanationPrompt = buildExplanationPrompt({
+    context: `Exam: ${week.title}, Level ${exercise.level}`,
+    title: exercise.name,
+    description: exercise.subject.description,
+    allowed: exercise.subject.allowed,
+  });
 
   const [code, setCode] = useState(() => (typeof window !== "undefined" && localStorage.getItem(codeKey)) || "");
   const [output, setOutput] = useState("");
@@ -133,7 +142,7 @@ function PrepPracticeInner({
               {
                 k: "explanation" as const,
                 icon: Lightbulb,
-                label: "Tips",
+                label: "Explanation",
               },
             ].map((tab) => (
               <motion.button
@@ -212,35 +221,14 @@ function PrepPracticeInner({
                   initial={{ opacity: 0, x: 8 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -8 }}
-                  className="text-sm text-muted-foreground space-y-3"
                 >
-                  <p>
-                    <strong className="text-foreground">
-                      What you&apos;re learning:
-                    </strong>{" "}
-                    {exercise.type === "function"
-                      ? "Implement a C function that solves a specific problem."
-                      : "Write a complete C program that takes input and produces output."}
-                  </p>
-                  <p>
-                    <strong className="text-foreground">
-                      How to approach:
-                    </strong>{" "}
-                    Read the description carefully. Understand what inputs your
-                    code receives and what output is expected. Write small,
-                    testable pieces. Use the Run button to test your code.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">
-                      Watch out for:
-                    </strong>{" "}
-                    Edge cases, memory leaks, incorrect types, and off-by-one
-                    errors. Check the allowed functions — you can only use
-                    what&apos;s listed.
-                  </p>
-                  <p className="text-[11px] text-muted-foreground/60 border-t pt-2">
-                    In the real exam, no tips are available. Practice without
-                    them when ready.
+                  <ExplanationPanel
+                    cacheKey={explanationCacheKey}
+                    prompt={explanationPrompt}
+                  />
+                  <p className="text-[11px] text-muted-foreground/60 border-t pt-2 mt-3">
+                    In the real exam, no explanations are available. Practice
+                    without them when ready.
                   </p>
                 </motion.div>
               )}

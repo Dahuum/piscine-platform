@@ -15,6 +15,11 @@ type GradeResult =
       compilationError?: string;
       results: TestResult[];
       traceback: string;
+      // Set when the failure is ours (missing E2B key, broken reference
+      // code) rather than the student's — the route uses this to skip
+      // burning an attempt/cooldown on a submission that never had a fair
+      // shot at passing.
+      systemError?: boolean;
     };
 
 async function runInSandbox(
@@ -56,6 +61,7 @@ export async function gradeSubmission(
       compilationError: "E2B_API_KEY not configured",
       results: [],
       traceback: "INTERNAL ERROR: E2B_API_KEY not configured",
+      systemError: true,
     };
   }
 
@@ -80,6 +86,7 @@ export async function gradeSubmission(
         compilationError: `Reference compilation failed: ${refCompile.stderr || refCompile.stdout}`,
         results: [],
         traceback: `INTERNAL ERROR: ref compilation failed:\n${refCompile.stderr || refCompile.stdout}`,
+        systemError: true,
       };
     }
 
