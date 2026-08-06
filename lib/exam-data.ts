@@ -1,6 +1,7 @@
 import exam01Data from "@/content/exam/exam_01/exercises.json";
 import exam02Data from "@/content/exam/exam_02/exercises.json";
 import exam03Data from "@/content/exam/exam_03/exercises.json";
+import exam04Data from "@/content/exam/exam_04/exercises.json";
 
 export type ExamExercise = {
   name: string;
@@ -59,6 +60,16 @@ const rawExams: Record<string, Omit<ExamWeek, "exercisesByLevel">> = {
     timeMinutes: 240,
     exercises: exam03Data as ExamExercise[],
   },
+  exam_04: {
+    id: "exam_04",
+    title: "Exam Week 04",
+    description:
+      "Piscine exam week 4. Linked lists (t_list): traversal, insertion, callbacks, sorting, and merging.",
+    levelCount: 4,
+    gradePerLevel: ((0 + 1) / 4) * 100,
+    timeMinutes: 240,
+    exercises: exam04Data as ExamExercise[],
+  },
 };
 
 function buildExercisesByLevel(
@@ -88,17 +99,16 @@ export const examWeeks: Record<string, ExamWeek> = {
     ...rawExams.exam_03,
     exercisesByLevel: buildExercisesByLevel(rawExams.exam_03.exercises),
   },
-};
-
-export const lockedWeeks = {
   exam_04: {
-    id: "exam_04",
-    title: "Exam Week 04",
-    description:
-      "Advanced C: linked lists, recursion, complex algorithms. Coming soon — exercises are being prepared.",
-    comingSoon: true,
+    ...rawExams.exam_04,
+    exercisesByLevel: buildExercisesByLevel(rawExams.exam_04.exercises),
   },
 };
+
+export const lockedWeeks: Record<
+  string,
+  { id: string; title: string; description: string; comingSoon: true }
+> = {};
 
 export function getExamWeekOrNull(id: string): ExamWeek | null {
   return examWeeks[id] || null;

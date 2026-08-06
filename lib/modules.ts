@@ -185,8 +185,9 @@ export const modules = {
       { id: "ex00", title: "ft_strdup", number: 0, description: "Reproduce the behavior of strdup using malloc.", prototype: "char *ft_strdup(char *src);", allowed: ["malloc"], files: ["ft_strdup.c"], type: "c" },
       { id: "ex01", title: "ft_range", number: 1, description: "Create a function that returns an array of int containing all values between min and max.", prototype: "int *ft_range(int min, int max);", allowed: ["malloc"], files: ["ft_range.c"], type: "c" },
       { id: "ex02", title: "ft_ultimate_range", number: 2, description: "Create a function that allocates and returns a range. Store the size in the parameter.", prototype: "int ft_ultimate_range(int **range, int min, int max);", allowed: ["malloc"], files: ["ft_ultimate_range.c"], type: "c" },
-      { id: "ex03", title: "ft_convert_base", number: 3, description: "Create a function that converts a number from one base to another.", prototype: "char *ft_convert_base(char *nbr, char *base_from, char *base_to);", allowed: ["malloc"], files: ["ft_convert_base.c"], type: "c" },
-      { id: "ex04", title: "ft_split", number: 4, description: "Create a function that splits a string according to a charset.", prototype: "char **ft_split(char *str, char *charset);", allowed: ["malloc"], files: ["ft_split.c"], type: "c" },
+      { id: "ex03", title: "ft_strjoin", number: 3, description: "Concatenate all the strings in strs, separated by sep. If size is 0, return an empty, freeable string.", prototype: "char *ft_strjoin(int size, char **strs, char *sep);", allowed: ["malloc"], files: ["ft_strjoin.c"], type: "c" },
+      { id: "ex04", title: "ft_convert_base", number: 4, description: "Create a function that converts a number from one base to another.", prototype: "char *ft_convert_base(char *nbr, char *base_from, char *base_to);", allowed: ["malloc"], files: ["ft_convert_base.c"], type: "c" },
+      { id: "ex05", title: "ft_split", number: 5, description: "Create a function that splits a string according to a charset.", prototype: "char **ft_split(char *str, char *charset);", allowed: ["malloc"], files: ["ft_split.c"], type: "c" },
     ],
   },
   c08: {
@@ -220,12 +221,27 @@ export const modules = {
       { id: "ex02", title: "ft_split", number: 2, description: "Create a recursive implementation of ft_split.", prototype: "char **ft_split(char *str, char *charset);", allowed: ["malloc"], files: ["ft_split.c"], type: "c" },
     ],
   },
+  c10: {
+    id: "c10",
+    title: "C 10",
+    version: "4.0",
+    type: "c",
+    order: 12,
+    description: "File handling with open, read, write, close.",
+    summary: "Recreate classic Unix file utilities in C. Read files byte by byte with the raw syscalls, then rebuild cat, tail, and hexdump from scratch.",
+    exercises: [
+      { id: "ex00", title: "ft_display_file", number: 0, description: "Display the content of the file whose name is given as a parameter. Print an error message if it fails.", prototype: "int main(int argc, char **argv);", allowed: ["open", "read", "write", "close"], files: ["ft_display_file.c"], type: "c" },
+      { id: "ex01", title: "ft_cat", number: 1, description: "Reproduce the behavior of the cat command: print each file given as a parameter, or read stdin if none is given.", prototype: "int main(int argc, char **argv);", allowed: ["open", "read", "write", "close"], files: ["ft_cat.c"], type: "c" },
+      { id: "ex02", title: "ft_tail", number: 2, description: "Reproduce 'tail -c N': print only the last N bytes of each file given as a parameter, usage: ./ft_tail -c N file1 file2 ...", prototype: "int main(int argc, char **argv);", allowed: ["open", "read", "write", "close"], files: ["ft_tail.c"], type: "c" },
+      { id: "ex03", title: "ft_hexdump", number: 3, description: "Reproduce 'hexdump -C': print the content of each file given as a parameter as a hex + ASCII dump, 16 bytes per line.", prototype: "int main(int argc, char **argv);", allowed: ["open", "read", "write", "close", "malloc"], files: ["ft_hexdump.c"], type: "c" },
+    ],
+  },
   c11: {
     id: "c11",
     title: "C 11",
     version: "8.0",
     type: "c",
-    order: 12,
+    order: 13,
     description: "Function pointers.",
     summary: "Unlock the power of callbacks. Use function pointers to create generic functions: for_each, map, any, count_if. Build a simple calculator with function pointer dispatch.",
     exercises: [
@@ -246,4 +262,4 @@ export type Exercise = Module["exercises"][number];
 
 export type ModuleType = "shell" | "c";
 
-export const moduleOrder = ["shell00", "shell01", "c00", "c01", "c02", "c03", "c04", "c05", "c06", "c07", "c08", "c09", "c11"];
+export const moduleOrder = ["shell00", "shell01", "c00", "c01", "c02", "c03", "c04", "c05", "c06", "c07", "c08", "c09", "c10", "c11"];
