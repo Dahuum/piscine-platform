@@ -57,48 +57,55 @@ export default function Home() {
 
   return (
     <motion.div
-      className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
+      className="max-w-screen-xl mx-auto px-4 py-10 sm:py-16"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: DURATION.base }}
     >
-      {/* Header */}
+      {/* Header — the one hero moment in the app: bigger title, a soft
+          violet glow behind it (pure CSS, no asset), a more confident stat
+          pill. overflow-hidden on this wrapper keeps the blurred glow from
+          affecting layout/scroll. */}
       <motion.div
-        className="mb-8"
+        className="relative overflow-hidden mb-12"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-3">
+        <div
+          className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="relative flex items-center justify-between flex-wrap gap-4 mb-4">
           <div>
-            <h1 className="page-title">42 Piscine</h1>
-            <p className="text-sm text-muted-foreground mt-1">Master C programming. 13 modules, 95+ exercises.</p>
+            <h1 className="hero-title">42 Piscine</h1>
+            <p className="text-base text-muted-foreground mt-2">Master C programming. 13 modules, 95+ exercises.</p>
           </div>
           {totalExercises > 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.05, ...SPRING_POP }}
-              className={panelClasses({ className: "flex items-center gap-3 bg-muted/50 px-4 py-3" })}
+              className={panelClasses({ className: "flex items-center gap-4 bg-muted/50 border-primary/20 px-6 py-4" })}
             >
               <div className="text-center">
-                <div className="text-2xl font-bold tabular-nums">{totalCompleted}</div>
+                <div className="text-3xl font-bold tabular-nums">{totalCompleted}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Done</div>
               </div>
-              <div className="w-px h-8 bg-border" />
+              <div className="w-px h-9 bg-border" />
               <div className="text-center">
-                <div className="text-2xl font-bold tabular-nums">{totalExercises}</div>
+                <div className="text-3xl font-bold tabular-nums">{totalExercises}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Total</div>
               </div>
-              <div className="w-px h-8 bg-border" />
+              <div className="w-px h-9 bg-border" />
               <div className="text-center">
-                <div className="text-2xl font-bold tabular-nums text-primary">{overallPct}%</div>
+                <div className="text-3xl font-bold tabular-nums text-primary">{overallPct}%</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Complete</div>
               </div>
             </motion.div>
           )}
         </div>
         {totalExercises > 0 && (
-          <ProgressBar value={overallPct} color={overallPct === 100 ? "success" : "accent"} size="sm" className="max-w-md" />
+          <ProgressBar value={overallPct} color={overallPct === 100 ? "success" : "accent"} size="sm" className="relative max-w-md" />
         )}
       </motion.div>
 
@@ -122,7 +129,7 @@ export default function Home() {
 
       {/* Exam Gate */}
       <motion.div
-        className="border-t pt-6 mt-4"
+        className="border-t pt-6 mt-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
@@ -158,8 +165,8 @@ function Section({ title, icon, color, children }: { title: string; icon: React.
     primary: "text-primary bg-primary/10",
   };
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="mb-12">
+      <div className="flex items-center gap-2 mb-4">
         <div className={`h-6 w-6 rounded flex items-center justify-center ${colorMap[color] || colorMap.primary}`}>
           {icon}
         </div>
@@ -185,7 +192,7 @@ function ModuleRow({ id, progress }: { id: string; progress: number }) {
     <motion.div variants={staggerItem}>
     <Link
       href={`/${mod.id}`}
-      className="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-transparent hover:border-border"
+      className="flex items-center gap-4 px-5 py-4 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-transparent hover:border-border"
     >
       <div className="w-20 flex-shrink-0">
         <span className="text-sm font-semibold tabular-nums">{mod.title}</span>

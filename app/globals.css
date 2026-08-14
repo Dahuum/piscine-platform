@@ -17,10 +17,19 @@
    ad hoc heading size before this existed; new headings should use these
    instead of inventing another one-off text-2xl/text-xl combo. */
 @utility page-title {
-  font-size: 1.5rem;
-  line-height: 2rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 800;
   letter-spacing: -0.02em;
+}
+
+/* The one true landing moment in the app (home page H1 only) — bigger and
+   heavier than page-title on purpose, not just page-title-plus-a-class. */
+@utility hero-title {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 @utility section-title {

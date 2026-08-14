@@ -78,7 +78,7 @@ export default function ExamGateDashboard() {
       transition={{ duration: DURATION.base }}
     >
       <motion.div
-        className="mb-8"
+        className="mb-12"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -98,7 +98,7 @@ export default function ExamGateDashboard() {
 
       {/* Stats */}
       <motion.div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
