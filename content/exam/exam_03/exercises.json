@@ -1187,7 +1187,7 @@
       "allowed": [],
       "description": "Write a function who takes two unsigned int as parameters and returns the\ncomputed LCM of those parameters.\n\nLCM (Lowest Common Multiple) of two non-zero integers is the smallest postive\ninteger divisible by the both integers.\n\nA LCM can be calculated in two ways:\n\n- You can calculate every multiples of each integers until you have a common\nmultiple other than 0\n\n- You can use the HCF (Highest Common Factor) of these two integers and\ncalculate as follows:\n\n    LCM(x, y) = | x * y | / HCF(x, y)\n\n | x * y | means \"Absolute value of the product of x by y\"\n\nIf at least one integer is null, LCM is equal to 0.\n\nYour function must be prototyped as follows:\n\n unsigned int    lcm(unsigned int a, unsigned int b);"
     },
-    "referenceCode": "unsigned int    lcm(unsigned int a, unsigned int b)\n{\n    unsigned int    d;\n\n    if (!a || !b)\n        return (0);\n    if (a > b)\n        d = (a / 2) + 1;\n    else\n        d = (b / 2) + 1;\n    while (!((a % d) == 0 && (b % d) == 0))\n        d--;\n    return (a * b / d);\n}\n",
+    "referenceCode": "unsigned int\tgcd(unsigned int a, unsigned int b)\n{\n\tunsigned int\tt;\n\n\twhile (b)\n\t{\n\t\tt = b;\n\t\tb = a % b;\n\t\ta = t;\n\t}\n\treturn (a);\n}\n\nunsigned int\tlcm(unsigned int a, unsigned int b)\n{\n\tif (!a || !b)\n\t\treturn (0);\n\treturn (a / gcd(a, b) * b);\n}\n",
     "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nunsigned int lcm(unsigned int a, unsigned int b);\n\nint main(int ac, char **av)\n{\n\tif (ac == 3)\n\t\tprintf(\"%u\", lcm((unsigned int)atoi(av[1]), (unsigned int)atoi(av[2])));\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
     "testCases": [
       {
@@ -1215,6 +1215,18 @@
         "args": [
           "7",
           "7"
+        ]
+      },
+      {
+        "args": [
+          "12",
+          "18"
+        ]
+      },
+      {
+        "args": [
+          "100",
+          "75"
         ]
       }
     ]
