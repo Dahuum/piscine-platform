@@ -6,8 +6,28 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Page-title/section-title scale — a couple of files each picked their own
+   ad hoc heading size before this existed; new headings should use these
+   instead of inventing another one-off text-2xl/text-xl combo. */
+@utility page-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+@utility section-title {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 :root {
@@ -19,6 +39,15 @@
   --muted-foreground: #71717a;
   --border: #e4e4e7;
   --radius: 0.625rem;
+  /* HeroUI's own brand color ("accent") defaults to blue and was never
+     reconciled with the app's violet --primary — every color="accent"
+     HeroUI component (ProgressBar, Badge, focus rings) rendered a
+     different brand color than every hand-rolled bg-primary element.
+     Reusing --primary/--primary-foreground here makes them agree; HeroUI's
+     derived --accent-hover/--accent-soft/etc. recompute from these
+     automatically since they're color-mix()'d from the same two vars. */
+  --accent: var(--primary);
+  --accent-foreground: var(--primary-foreground);
 }
 
 .dark {
@@ -29,6 +58,8 @@
   --muted: #27272a;
   --muted-foreground: #a1a1aa;
   --border: #27272a;
+  --accent: var(--primary);
+  --accent-foreground: var(--primary-foreground);
 }
 
 * {

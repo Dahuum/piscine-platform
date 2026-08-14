@@ -101,7 +101,7 @@ export default function ExamTerminal({
     const term = new Terminal({
       cursorBlink: true,
       fontSize: 14,
-      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+      fontFamily: "var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace",
       theme: {
         background: "#1e1e1e",
         foreground: "#d4d4d4",

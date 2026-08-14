@@ -7,18 +7,10 @@ import { motion } from "framer-motion";
 import { Terminal, BookOpen, Lock, ChevronRight } from "lucide-react";
 import { examWeeks, lockedWeeks } from "@/lib/exam-data";
 import { getExamHistory, getPrepReview } from "@/lib/db";
+import { panelClasses } from "@/components/Panel";
+import { DURATION, staggerContainer, staggerItem } from "@/lib/motion";
 
 type Stat = { label: string; value: string };
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-} as const;
-
-const item = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.12 } },
-} as const;
 
 function processHistory(
   history: { finalGrade: number; result: string; duration: number }[],
@@ -83,7 +75,7 @@ export default function ExamGateDashboard() {
       className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.12 }}
+      transition={{ duration: DURATION.base }}
     >
       <motion.div
         className="mb-8"
@@ -97,25 +89,25 @@ export default function ExamGateDashboard() {
           >
             <Terminal className="h-5 w-5 text-primary" />
           </motion.div>
-          <h1 className="text-2xl font-bold">Exam Gate</h1>
+          <h1 className="page-title">Exam Gate</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Practice and take the 42 piscine exams. 3 exam weeks available.
+          Practice and take the 42 piscine exams. {Object.keys(examWeeks).length} exam weeks available.
         </p>
       </motion.div>
 
       {/* Stats */}
       <motion.div
         className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8"
-        variants={container}
-        initial="hidden"
-        animate="show"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
       >
         {stats.map((s) => (
           <motion.div
             key={s.label}
-            variants={item}
-            className="rounded-xl border bg-muted/20 p-4 text-center hover:bg-muted/30 transition-colors"
+            variants={staggerItem}
+            className={panelClasses({ className: "bg-muted/20 p-4 text-center hover:bg-muted/30 transition-colors" })}
           >
             <div className="text-xl font-bold tabular-nums">
               {s.value}
@@ -130,9 +122,9 @@ export default function ExamGateDashboard() {
       {/* Week cards */}
       <motion.div
         className="space-y-4"
-        variants={container}
-        initial="hidden"
-        animate="show"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
       >
         {[...Object.values(examWeeks), ...Object.values(lockedWeeks)].map(
           (week) => {
@@ -144,12 +136,8 @@ export default function ExamGateDashboard() {
             return (
               <motion.div
                 key={week.id}
-                variants={item}
-                className={`rounded-xl border p-5 transition-all duration-200 ${
-                  isLocked
-                    ? "opacity-50"
-                    : "hover:border-primary/30 hover:shadow-sm"
-                }`}
+                variants={staggerItem}
+                className={panelClasses({ hover: !isLocked, className: `p-5 ${isLocked ? "opacity-50" : ""}` })}
               >
                 <div className="flex items-start justify-between flex-wrap gap-3 mb-3">
                   <div>

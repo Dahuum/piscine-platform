@@ -13,6 +13,8 @@ import {
   Monitor,
 } from "lucide-react";
 import { getExamHistory } from "@/lib/db";
+import { panelClasses } from "@/components/Panel";
+import { DURATION, staggerContainer, staggerItem } from "@/lib/motion";
 
 type LevelEntry = {
   level: number;
@@ -39,16 +41,6 @@ const WEEK_LABELS: Record<string, string> = {
   exam_02: "Exam Week 02",
   exam_03: "Exam Week 03",
 };
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-} as const;
-
-const rowAnim = {
-  hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.1 } },
-} as const;
 
 export default function ExamHistoryPage() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -109,7 +101,7 @@ export default function ExamHistoryPage() {
       className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.12 }}
+      transition={{ duration: DURATION.base }}
     >
       <Link
         href="/exam"
@@ -119,7 +111,7 @@ export default function ExamHistoryPage() {
       </Link>
 
       <motion.h1
-        className="text-2xl font-bold mb-2"
+        className="page-title mb-2"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -177,9 +169,9 @@ export default function ExamHistoryPage() {
 
           <motion.div
             className="space-y-3"
-            variants={container}
-            initial="hidden"
-            animate="show"
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
           >
             {filtered.map((entry) => {
               const isExpanded = expandedId === entry.id;
@@ -194,8 +186,8 @@ export default function ExamHistoryPage() {
               return (
                 <motion.div
                   key={entry.id}
-                  className="border rounded-lg overflow-hidden transition-shadow hover:border-primary/20"
-                  variants={rowAnim}
+                  className={panelClasses({ hover: true, className: "overflow-hidden" })}
+                  variants={staggerItem}
                 >
                   <motion.button
                     onClick={() => toggleExpand(entry.id)}

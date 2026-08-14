@@ -5,6 +5,7 @@ import { Button } from "@heroui/react";
 import { motion } from "framer-motion";
 import { Database, Trash2, CheckCircle2 } from "lucide-react";
 import { migrateAllData, markMigrationHandled, getLocalDataSummary } from "@/lib/migrate-data";
+import { panelClasses } from "@/components/Panel";
 
 export default function MigrationModal({
   open,
@@ -57,7 +58,7 @@ export default function MigrationModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <motion.div
-        className="bg-background rounded-xl border shadow-2xl p-6 w-full max-w-md mx-4"
+        className={panelClasses({ className: "bg-background shadow-2xl p-6 w-full max-w-md mx-4" })}
         initial={{ opacity: 0, scale: 0.95, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.15 }}

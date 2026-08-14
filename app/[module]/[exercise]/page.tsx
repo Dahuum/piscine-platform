@@ -3,7 +3,7 @@
 import { modules } from "@/lib/modules";
 import { notFound, useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button, ProgressBar } from "@heroui/react";
+import { Button, ProgressBar, Badge } from "@heroui/react";
 import {
   ChevronRight, ChevronLeft, Play, RotateCcw,
   PanelBottomClose, PanelBottomOpen,
@@ -13,6 +13,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import CodeEditor from "@/components/CodeEditor";
 import { saveModuleProgress } from "@/lib/db";
 import { ExplanationPanel, buildExplanationPrompt, parseChatStream } from "@/components/ExplanationPanel";
+import Panel from "@/components/Panel";
 
 export default function ExercisePage() {
   const params = useParams<{ module: string; exercise: string }>();
@@ -152,7 +153,7 @@ function ExercisePageInner({
         <span className="text-muted-foreground/40 text-xs hidden sm:inline flex-shrink-0">/</span>
         <span className="text-sm font-semibold truncate min-w-0">{ex.title}</span>
         <span className="text-[11px] text-muted-foreground hidden sm:inline flex-shrink-0">Ex {String(ex.number).padStart(2, "0")}</span>
-        {isDone && <span className="text-[10px] font-medium text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider flex-shrink-0">Done</span>}
+        {isDone && <Badge variant="soft" color="success" size="sm" className="flex-shrink-0">Done</Badge>}
 
         <div className="flex-1" />
 
@@ -189,10 +190,10 @@ function ExercisePageInner({
                 <p className="text-sm text-muted-foreground leading-relaxed">{ex.description}</p>
 
                 {"prototype" in ex && (
-                  <div className="p-3 rounded-lg bg-muted/50 border">
+                  <Panel className="p-3 bg-muted/50">
                     <Label>Prototype</Label>
                     <code className="text-sm font-mono text-foreground">{ex.prototype}</code>
-                  </div>
+                  </Panel>
                 )}
 
                 {"allowed" in ex && ex.allowed && ex.allowed.length > 0 && (

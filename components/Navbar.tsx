@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@heroui/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Terminal, Sun, Moon, GraduationCap } from "lucide-react";
 import AuthDialog from "./AuthDialog";
 import { useState, useEffect } from "react";
@@ -77,7 +78,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
-      <div className="flex h-14 items-center justify-between px-4 max-w-screen-2xl mx-auto">
+      <div className="flex h-14 items-center justify-between px-4 max-w-screen-xl mx-auto">
         <Link href="/" className="flex items-center gap-2 font-semibold text-foreground no-underline">
           <Terminal className="h-5 w-5 text-primary" />
           <span className="hidden sm:inline">42 Piscine</span>
@@ -106,8 +107,19 @@ export default function Navbar() {
             </Link>
           )}
           <AuthDialog />
-          <Button isIconOnly variant="ghost" size="sm" onPress={toggleTheme} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}>
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          <Button isIconOnly variant="ghost" size="sm" onPress={toggleTheme} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} className="overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={isDark ? "sun" : "moon"}
+                initial={{ opacity: 0, rotate: -90, scale: 0.6 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.6 }}
+                transition={{ duration: 0.15 }}
+                className="inline-flex"
+              >
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </motion.span>
+            </AnimatePresence>
           </Button>
         </div>
       </div>
