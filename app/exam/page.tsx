@@ -137,7 +137,7 @@ export default function ExamGateDashboard() {
               <motion.div
                 key={week.id}
                 variants={staggerItem}
-                className={panelClasses({ hover: !isLocked, className: `p-5 ${isLocked ? "opacity-50" : ""}` })}
+                className={panelClasses({ hover: !isLocked, glow: !isLocked, className: `p-5 ${isLocked ? "opacity-50" : ""}` })}
               >
                 <div className="flex items-start justify-between flex-wrap gap-3 mb-3">
                   <div>

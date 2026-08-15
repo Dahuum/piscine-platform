@@ -9,6 +9,10 @@ type PanelProps = React.HTMLAttributes<HTMLDivElement> & {
   // nothing at all for what was visually the same "this row is clickable"
   // signal — pick this instead of hand-rolling another variant.
   hover?: boolean;
+  // Opt-in signature hover treatment (rotating conic-gradient border, see
+  // .panel-glow in globals.css) — reserved for the handful of panels meant
+  // to read as the app's one "featured interactive" moment, not a default.
+  glow?: boolean;
 };
 
 // Shared class-string builder so motion.div usages (which can't cleanly
@@ -18,11 +22,12 @@ type PanelProps = React.HTMLAttributes<HTMLDivElement> & {
 // className={panelClasses({ hover: true, className: "p-4" })} ...>`.
 export function panelClasses({
   hover = false,
+  glow = false,
   className = "",
-}: { hover?: boolean; className?: string } = {}) {
+}: { hover?: boolean; glow?: boolean; className?: string } = {}) {
   return `rounded-xl border ${
     hover ? "transition-colors duration-200 hover:border-primary/30" : ""
-  } ${className}`;
+  } ${glow ? "panel-glow" : ""} ${className}`;
 }
 
 // The shared "bordered panel" primitive every page was hand-rolling a
@@ -36,8 +41,8 @@ export function panelClasses({
 // hover treatment are standardized here. For a framer-motion-animated
 // panel, use motion.div with panelClasses() instead of wrapping this.
 const Panel = forwardRef<HTMLDivElement, PanelProps>(
-  ({ className = "", hover = false, children, ...props }, ref) => (
-    <div ref={ref} className={panelClasses({ hover, className })} {...props}>
+  ({ className = "", hover = false, glow = false, children, ...props }, ref) => (
+    <div ref={ref} className={panelClasses({ hover, glow, className })} {...props}>
       {children}
     </div>
   ),

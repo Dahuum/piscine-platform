@@ -192,7 +192,7 @@ function ModuleRow({ id, progress }: { id: string; progress: number }) {
     <motion.div variants={staggerItem}>
     <Link
       href={`/${mod.id}`}
-      className="flex items-center gap-4 px-5 py-4 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-transparent hover:border-border"
+      className="panel-glow flex items-center gap-4 px-5 py-4 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-transparent hover:border-border"
     >
       <div className="w-20 flex-shrink-0">
         <span className="text-sm font-semibold tabular-nums">{mod.title}</span>
