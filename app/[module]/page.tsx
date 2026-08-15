@@ -47,7 +47,7 @@ function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] })
       </Link>
 
       <motion.div
-        className="flex items-start justify-between flex-wrap gap-4 mb-8"
+        className="flex items-start justify-between flex-wrap gap-4 mb-6"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -94,7 +94,7 @@ function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] })
             <motion.div key={ex.id} variants={staggerItem}>
             <Link
               href={unlocked ? `/${mod.id}/${ex.id}` : "#"}
-              className={`flex items-center gap-3 px-5 py-4 rounded-lg transition-colors group no-underline border border-transparent ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group no-underline border border-transparent ${
                 unlocked
                   ? "hover:bg-muted/50 hover:border-border cursor-pointer"
                   : "opacity-40 pointer-events-none"
