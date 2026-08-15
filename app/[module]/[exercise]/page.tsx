@@ -409,9 +409,12 @@ Student code:
 ${code}
 \`\`\`
 
-Evaluate if this code correctly implements the exercise. Reply in EXACTLY this format:
+Evaluate if this code correctly implements the exercise. There is no compiler or test runner grounding this check — you are the only judge, so think it through carefully before deciding rather than pattern-matching on how the code looks. Reply in EXACTLY this format:
 
-VERDICT: <✅ or ❌ followed by a short reason, max 15 words>
+REASONING:
+Mentally trace what this code actually does for a couple of concrete inputs implied by the description/prototype. Check: does the logic match the required behavior for those inputs? Does it only use allowed functions? Any edge case (empty input, boundary value, sign, off-by-one) it would get wrong? 2-4 sentences, then decide.
+
+VERDICT: <✅ or ❌, followed by a short reason, max 15 words>
 
 Only if the verdict is ❌, follow with a blank line then:
 DETAILS:
@@ -420,18 +423,24 @@ DETAILS:
   Got: <what this code actually does instead, and why>
 (add a second "- Test:" bullet only if there's a second, distinct failure worth flagging)
 
-If the verdict is ✅, output nothing after the VERDICT line — no DETAILS section at all.`;
+If the verdict is ✅, output nothing after the VERDICT line — no DETAILS section at all. Do not let the REASONING section change the required format of what follows it.`;
 }
 
-// Splits the AI's "VERDICT: ...\n\nDETAILS:\n..." reply into the short
-// status line (shown in the toolbar and as the console's summary line) and
-// the longer failure breakdown (shown as its own console section, only
-// present when the verdict is ❌ — see verdictPrompt above).
+// Splits the AI's "REASONING: ...\n\nVERDICT: ...\n\nDETAILS:\n..." reply
+// into the short status line (shown in the toolbar and as the console's
+// summary line) and the longer failure breakdown (shown as its own console
+// section, only present when the verdict is ❌ — see verdictPrompt above).
+// The REASONING section itself is intentionally discarded here — it exists
+// to make the model think before committing to VERDICT as its first
+// token (a real accuracy difference for an LLM-as-judge with no compiler
+// or test runner backing it), not to be shown to the student verbatim.
 function parseVerdict(raw: string): { verdict: string; details: string } {
-  const idx = raw.indexOf("DETAILS:");
-  const verdictPart = (idx === -1 ? raw : raw.slice(0, idx))
+  const vIdx = raw.indexOf("VERDICT:");
+  const afterVerdict = vIdx === -1 ? raw : raw.slice(vIdx);
+  const dIdx = afterVerdict.indexOf("DETAILS:");
+  const verdictPart = (dIdx === -1 ? afterVerdict : afterVerdict.slice(0, dIdx))
     .replace(/^VERDICT:\s*/i, "")
     .trim();
-  const detailsPart = idx === -1 ? "" : raw.slice(idx + "DETAILS:".length).trim();
+  const detailsPart = dIdx === -1 ? "" : afterVerdict.slice(dIdx + "DETAILS:".length).trim();
   return { verdict: verdictPart, details: detailsPart };
 }
