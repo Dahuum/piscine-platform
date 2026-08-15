@@ -38,7 +38,7 @@ export default function CodeEditor({ value, onChange, language }: CodeEditorProp
       options={{
         minimap: { enabled: false },
         fontSize: 14,
-        fontFamily: "var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace",
+        fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
         lineNumbers: "on",
         scrollBeyondLastLine: false,
         automaticLayout: true,

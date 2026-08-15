@@ -2,12 +2,9 @@
 
 import { moduleOrder, modules, type Exercise } from "@/lib/modules";
 import Link from "next/link";
-import { ProgressBar, Badge } from "@heroui/react";
-import { motion } from "framer-motion";
+import { ProgressBar } from "@heroui/react";
 import { Terminal, Code2, ChevronRight, Trophy, GraduationCap } from "lucide-react";
-import { useState, useEffect } from "react";
-import { panelClasses } from "@/components/Panel";
-import { DURATION, SPRING_POP, staggerContainer, staggerItem } from "@/lib/motion";
+import { useState } from "react";
 
 function computeProgress() {
   const p: Record<string, number> = {};
@@ -34,52 +31,22 @@ function computeProgress() {
   return { p, done, total };
 }
 
-const EMPTY_PROGRESS = { p: {} as Record<string, number>, done: 0, total: 0 };
-
 export default function Home() {
-  // Starts at the same all-zero shape the server renders (computeProgress()
-  // itself returns this when window is undefined) rather than computing
-  // real numbers in a useState initializer — that ran on the client's very
-  // first render too, before hydration reconciled, so whether the stat
-  // pill/progress bar render at all differed between server and client
-  // (confirmed via a real hydration-mismatch diff). Corrected below in an
-  // effect instead, matching the pattern used elsewhere in this codebase
-  // for the same class of bug.
-  const [{ p: progress, done: totalCompleted, total: totalExercises }, setProgressState] =
-    useState(EMPTY_PROGRESS);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProgressState(computeProgress());
-  }, []);
+  const [{ p: progress, done: totalCompleted, total: totalExercises }] = useState(computeProgress);
 
   const overallPct = totalExercises > 0 ? Math.round((totalCompleted / totalExercises) * 100) : 0;
 
   return (
-    <motion.div
-      className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: DURATION.base }}
-    >
+    <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
       {/* Header */}
-      <motion.div
-        className="mb-8"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <div className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-4 mb-3">
           <div>
-            <h1 className="page-title">42 Piscine</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">42 Piscine</h1>
             <p className="text-sm text-muted-foreground mt-1">Master C programming. 13 modules, 95+ exercises.</p>
           </div>
           {totalExercises > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.05, ...SPRING_POP }}
-              className={panelClasses({ className: "flex items-center gap-3 bg-muted/50 px-4 py-3" })}
-            >
+            <div className="flex items-center gap-3 bg-muted/50 rounded-xl px-4 py-3">
               <div className="text-center">
                 <div className="text-2xl font-bold tabular-nums">{totalCompleted}</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Done</div>
@@ -94,13 +61,13 @@ export default function Home() {
                 <div className="text-2xl font-bold tabular-nums text-primary">{overallPct}%</div>
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Complete</div>
               </div>
-            </motion.div>
+            </div>
           )}
         </div>
         {totalExercises > 0 && (
           <ProgressBar value={overallPct} color={overallPct === 100 ? "success" : "accent"} size="sm" className="max-w-md" />
         )}
-      </motion.div>
+      </div>
 
       {/* Shell Section */}
       <Section title="Shell" icon={<Terminal className="h-4 w-4" />} color="emerald">
@@ -121,12 +88,7 @@ export default function Home() {
       </Section>
 
       {/* Exam Gate */}
-      <motion.div
-        className="border-t pt-6 mt-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-      >
+      <div className="border-t pt-6 mt-4">
         <Link
           href="/exam"
           className="flex items-center gap-4 px-4 py-4 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-dashed hover:border-border"
@@ -141,14 +103,14 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge variant="soft" color="warning" size="sm">
+            <span className="text-[10px] font-medium text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
               New
-            </Badge>
+            </span>
             <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
           </div>
         </Link>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -165,14 +127,7 @@ function Section({ title, icon, color, children }: { title: string; icon: React.
         </div>
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{title}</h2>
       </div>
-      <motion.div
-        className="space-y-1.5"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
-        {children}
-      </motion.div>
+      <div className="space-y-1.5">{children}</div>
     </div>
   );
 }
@@ -182,7 +137,6 @@ function ModuleRow({ id, progress }: { id: string; progress: number }) {
   if (!mod) return null;
 
   return (
-    <motion.div variants={staggerItem}>
     <Link
       href={`/${mod.id}`}
       className="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-muted/50 transition-colors group no-underline border border-transparent hover:border-border"
@@ -209,6 +163,5 @@ function ModuleRow({ id, progress }: { id: string; progress: number }) {
         <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-foreground transition-colors" />
       </div>
     </Link>
-    </motion.div>
   );
 }

@@ -3,11 +3,9 @@
 import { modules, type Exercise } from "@/lib/modules";
 import { notFound, useParams } from "next/navigation";
 import Link from "next/link";
-import { ProgressBar, Badge } from "@heroui/react";
-import { motion } from "framer-motion";
+import { ProgressBar } from "@heroui/react";
 import { ChevronRight, ChevronLeft, Lock, CheckCircle2, Circle, Terminal, Code2, Trophy } from "lucide-react";
 import { useState } from "react";
-import { DURATION, staggerContainer, staggerItem } from "@/lib/motion";
 
 export default function ModulePage() {
   const params = useParams<{ module: string }>();
@@ -35,22 +33,13 @@ function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] })
   };
 
   return (
-    <motion.div
-      className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: DURATION.base }}
-    >
+    <div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10">
       {/* Back + Header */}
       <Link href="/" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-4">
         <ChevronLeft className="h-3.5 w-3.5" /> All Modules
       </Link>
 
-      <motion.div
-        className="flex items-start justify-between flex-wrap gap-4 mb-6"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
             {mod.type === "shell" ? (
@@ -62,7 +51,7 @@ function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] })
                 <Code2 className="h-4 w-4" />
               </div>
             )}
-            <h1 className="page-title">{mod.title}</h1>
+            <h1 className="text-2xl font-bold">{mod.title}</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1 max-w-lg">{mod.summary}</p>
         </div>
@@ -77,22 +66,17 @@ function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] })
           </div>
           {pct === 100 && <Trophy className="h-5 w-5 text-emerald-500" />}
         </div>
-      </motion.div>
+      </div>
 
       {/* Exercise list */}
-      <motion.div
-        className="space-y-1"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
+      <div className="space-y-1">
         {mod.exercises.map((ex: Exercise, index: number) => {
           const isDone = completed.includes(ex.id);
           const unlocked = isUnlocked(index);
 
           return (
-            <motion.div key={ex.id} variants={staggerItem}>
             <Link
+              key={ex.id}
               href={unlocked ? `/${mod.id}/${ex.id}` : "#"}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group no-underline border border-transparent ${
                 unlocked
@@ -131,15 +115,14 @@ function ModulePageInner({ mod }: { mod: typeof modules[keyof typeof modules] })
 
               <div className="flex items-center gap-2 flex-shrink-0">
                 {isDone && (
-                  <Badge variant="soft" color="success" size="sm">Done</Badge>
+                  <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-wider">Done</span>
                 )}
                 <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-foreground transition-colors" />
               </div>
             </Link>
-            </motion.div>
           );
         })}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

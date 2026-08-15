@@ -10,10 +10,8 @@ import {
 } from "lucide-react";
 import { getExamWeekOrNull, getAvailableLevels, lockedWeeks } from "@/lib/exam-data";
 import { savePrepReview, savePrepExercise, getPrepReview, getPrepExercises } from "@/lib/db";
-import { panelClasses } from "@/components/Panel";
-import { DURATION } from "@/lib/motion";
 
-const cardHover = { scale: 1.01, transition: { duration: DURATION.base } };
+const cardHover = { scale: 1.01, transition: { duration: 0.15 } };
 const cardTap = { scale: 0.98 };
 
 export default function ExamPrepPage() {
@@ -96,7 +94,7 @@ function PrepInner({ weekId }: { weekId: string }) {
   }
 
   return (
-    <motion.div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: DURATION.base }}>
+    <motion.div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.12 }}>
       <Link href="/exam" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline mb-4 transition-colors">
         <ChevronLeft className="h-3.5 w-3.5" /> Exam Gate
       </Link>
@@ -107,7 +105,7 @@ function PrepInner({ weekId }: { weekId: string }) {
             <div className="h-7 w-7 rounded flex items-center justify-center bg-primary/10">
               <BookOpen className="h-4 w-4 text-primary" />
             </div>
-            <h1 className="page-title">{week.title} — Preparation</h1>
+            <h1 className="text-2xl font-bold">{week.title} — Preparation</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1">Review all exercises before taking the real exam.</p>
         </div>
@@ -141,7 +139,7 @@ function PrepInner({ weekId }: { weekId: string }) {
           const isExpanded = expandedLevels.has(lvl);
 
           return (
-            <motion.div key={lvl} className={panelClasses({ hover: true, className: "overflow-hidden" })} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: lvl * 0.02 }}>
+            <motion.div key={lvl} className="border rounded-lg overflow-hidden transition-shadow duration-200 hover:border-primary/20" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: lvl * 0.02 }}>
               <motion.button onClick={() => toggleLevel(lvl)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left" whileHover={{ backgroundColor: "var(--muted)" }}>
                 <motion.span animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.1 }}>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />

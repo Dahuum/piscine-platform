@@ -14,8 +14,6 @@ import {
 } from "lucide-react";
 import { getExamWeekOrNull } from "@/lib/exam-data";
 import { getExamHistory } from "@/lib/db";
-import { panelClasses } from "@/components/Panel";
-import { DURATION, EASE_STANDARD, SPRING_POP, staggerContainer, staggerItem } from "@/lib/motion";
 
 type LevelEntry = {
   level: number;
@@ -36,6 +34,16 @@ type AttemptData = {
   finalGrade: number;
   levels: LevelEntry[];
 };
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } },
+} as const;
+
+const item = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.1 } },
+} as const;
 
 export default function ExamResultsPage() {
   const params = useParams<{ id: string }>();
@@ -124,7 +132,7 @@ export default function ExamResultsPage() {
       className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: DURATION.base }}
+      transition={{ duration: 0.12 }}
     >
       <Link
         href="/exam"
@@ -135,23 +143,21 @@ export default function ExamResultsPage() {
 
       {/* Hero card */}
       <motion.div
-        className={panelClasses({
-          className: `p-6 mb-8 text-center ${
-            attempt.result === "completed"
-              ? "bg-emerald-500/5 border-emerald-500/20"
-              : attempt.result === "timeout"
-                ? "bg-amber-500/5 border-amber-500/20"
-                : "bg-muted/20"
-          }`,
-        })}
+        className={`rounded-xl border p-6 mb-8 text-center ${
+          attempt.result === "completed"
+            ? "bg-emerald-500/5 border-emerald-500/20"
+            : attempt.result === "timeout"
+              ? "bg-amber-500/5 border-amber-500/20"
+              : "bg-muted/20"
+        }`}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: DURATION.base, ease: EASE_STANDARD }}
+        transition={{ duration: 0.15, ease: [0, 0, 0.2, 1] }}
       >
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.05, ...SPRING_POP }}
+          transition={{ delay: 0.05, type: "spring", stiffness: 200 }}
         >
           {attempt.result === "completed" ? (
             <Trophy className="h-12 w-12 text-emerald-500 mx-auto mb-3" />
@@ -162,7 +168,7 @@ export default function ExamResultsPage() {
           )}
         </motion.div>
 
-        <h1 className="page-title mb-1">
+        <h1 className="text-2xl font-bold mb-1">
           {attempt.result === "completed"
             ? "Exam Completed"
             : attempt.result === "timeout"
@@ -191,9 +197,9 @@ export default function ExamResultsPage() {
       {/* Stats */}
       <motion.div
         className="grid grid-cols-3 gap-3 mb-8"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
+        variants={container}
+        initial="hidden"
+        animate="show"
       >
         {[
           { label: "Passed", value: String(passedCount) },
@@ -202,8 +208,8 @@ export default function ExamResultsPage() {
         ].map((s) => (
           <motion.div
             key={s.label}
-            variants={staggerItem}
-            className={panelClasses({ className: "p-3 text-center" })}
+            variants={item}
+            className="rounded-lg border p-3 text-center"
           >
             <div className="text-lg font-bold tabular-nums">
               {s.value}
@@ -217,7 +223,7 @@ export default function ExamResultsPage() {
 
       {/* Level breakdown */}
       <motion.h2
-        className="section-title mb-3"
+        className="text-sm font-semibold mb-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.08 }}
@@ -226,15 +232,15 @@ export default function ExamResultsPage() {
       </motion.h2>
       <motion.div
         className="space-y-1"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
+        variants={container}
+        initial="hidden"
+        animate="show"
       >
         {attempt.levels.map((lvl) => (
           <motion.div
             key={lvl.level}
-            variants={staggerItem}
-            className={panelClasses({ hover: true, className: "overflow-hidden" })}
+            variants={item}
+            className="border rounded-lg overflow-hidden transition-shadow hover:border-primary/20"
           >
             <motion.button
               onClick={() => toggleLevel(lvl.level)}
