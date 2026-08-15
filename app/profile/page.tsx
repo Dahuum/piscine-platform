@@ -52,7 +52,7 @@ export default function ProfilePage() {
     <motion.div className="max-w-screen-xl mx-auto px-4 py-8 sm:py-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.12 }}>
       <motion.div className="mb-8" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center"><User className="h-5 w-5 text-primary" /></div>
+          <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center"><User className="h-5 w-5 text-foreground" /></div>
           <div>
             <h1 className="text-2xl font-bold">{email.split("@")[0]}</h1>
             <p className="text-xs text-muted-foreground">{email}</p>

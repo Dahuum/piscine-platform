@@ -84,10 +84,10 @@ export default function ExamGateDashboard() {
       >
         <div className="flex items-center gap-3 mb-2">
           <motion.div
-            className="h-9 w-9 rounded-lg flex items-center justify-center bg-primary/10"
+            className="h-9 w-9 rounded-lg flex items-center justify-center bg-muted"
             whileHover={{ scale: 1.05 }}
           >
-            <Terminal className="h-5 w-5 text-primary" />
+            <Terminal className="h-5 w-5 text-foreground" />
           </motion.div>
           <h1 className="page-title">Exam Gate</h1>
         </div>

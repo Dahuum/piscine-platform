@@ -36,8 +36,8 @@ export default function SetupPage() {
           { num: "4", title: "Done!", desc: "Sign in on the platform — all progress syncs automatically." },
         ].map((step) => (
           <div key={step.num} className="flex gap-3">
-            <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <span className="text-xs font-bold text-primary">{step.num}</span>
+            <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+              <span className="text-xs font-bold text-foreground">{step.num}</span>
             </div>
             <div>
               <p className="text-sm font-medium">{step.title}</p>

@@ -47,7 +47,12 @@
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
   --border: #e4e4e7;
-  --radius: 0.625rem;
+  /* Sharper corners read as more deliberate/confident than the soft
+     rounded-xl look most dashboards default to. This one variable drives
+     the entire radius scale app-wide (HeroUI's own radius-xs..4xl and
+     Tailwind's rounded-md/lg/xl are all calc()'d from it), so a single
+     value change here is enough — no per-component rounding to hunt down. */
+  --radius: 0.25rem;
   /* HeroUI's own brand color ("accent") defaults to blue and was never
      reconciled with the app's violet --primary — every color="accent"
      HeroUI component (ProgressBar, Badge, focus rings) rendered a

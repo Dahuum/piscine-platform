@@ -104,8 +104,8 @@ function PrepInner({ weekId }: { weekId: string }) {
       <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="h-7 w-7 rounded flex items-center justify-center bg-primary/10">
-              <BookOpen className="h-4 w-4 text-primary" />
+            <div className="h-7 w-7 rounded flex items-center justify-center bg-muted">
+              <BookOpen className="h-4 w-4 text-foreground" />
             </div>
             <h1 className="page-title">{week.title} — Preparation</h1>
           </div>
