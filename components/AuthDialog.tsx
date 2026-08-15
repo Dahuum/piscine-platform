@@ -8,7 +8,7 @@ import { User, LogOut, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import MigrationModal from "./MigrationModal";
-import { detectExistingData } from "@/lib/migrate-data";
+import { detectExistingData, markMigrationHandled } from "@/lib/migrate-data";
 import { hydrateFromCloud } from "@/lib/hydrate-data";
 import { setCachedUserId } from "@/lib/db";
 
@@ -45,7 +45,6 @@ export default function AuthDialog() {
         if (!migrationShown) {
           migrationShown = true;
           const userId = session.user.id;
-          const hydrateFlag = `hydrated:${userId}`;
           const migrationPendingFlag = `migration-pending:${userId}`;
 
           if (sessionStorage.getItem(migrationPendingFlag)) {
@@ -55,34 +54,44 @@ export default function AuthDialog() {
             // modal before it ever appeared. Show it now instead.
             sessionStorage.removeItem(migrationPendingFlag);
             setTimeout(() => setShowMigration(true), 600);
-          } else if (!sessionStorage.getItem(hydrateFlag)) {
-            // Always pull down whatever's already saved to the account,
-            // regardless of whether this device also has local-only data —
-            // those aren't mutually exclusive. Having typed even one
-            // character into an editor before logging in is enough to make
-            // detectExistingData() report "has local data", and that used
-            // to skip hydration entirely: a real account with real history
-            // from another device would show nothing here because the
-            // (one-way, local -> cloud only) migration prompt ran instead
-            // of ever pulling the cloud data down. Guarded so it runs once
-            // per tab per user, not on every auth event (a persisted
-            // session re-fires this on every page load).
-            sessionStorage.setItem(hydrateFlag, "1");
-            // Snapshot before hydration writes anything, so newly
-            // hydrated-in keys aren't miscounted as "local progress" worth
-            // re-uploading a moment later.
+          } else {
+            // Always attempt to pull down whatever's already saved to the
+            // account — regardless of whether this device also has
+            // local-only data (those aren't mutually exclusive; see
+            // detectExistingData below), and on every fresh page load, not
+            // gated behind a "have we already tried in this tab" flag.
+            // hydrateFromCloud() only ever fills in localStorage keys that
+            // are currently null, so calling it again once everything's
+            // already synced is a cheap no-op (a handful of SELECT
+            // queries, no writes, no reload) — a one-shot flag isn't
+            // needed for correctness, and a previous version of this code
+            // used one and it caused a real bug: if that one allowed
+            // attempt ran before the account's data was queryable for any
+            // reason (a timing race elsewhere, since fixed, or simply
+            // predating a fix like this one), the flag stayed set for that
+            // browser tab forever with no way to retry short of closing
+            // it — a real account's real progress would look permanently
+            // empty on that device even though nothing was actually wrong
+            // with the account's data.
             const { hasData } = detectExistingData(userId);
             hydrateFromCloud().then((wrote) => {
               if (wrote) {
-                if (hasData) sessionStorage.setItem(migrationPendingFlag, "1");
+                if (hasData) {
+                  sessionStorage.setItem(migrationPendingFlag, "1");
+                } else {
+                  // Nothing genuinely local-only existed before this
+                  // hydration ran — mark migration as handled so a later
+                  // detectExistingData() call (after the reload below, or
+                  // on a future visit) doesn't mistake the rows we just
+                  // pulled down FROM the account for new local progress
+                  // worth offering to push back TO it.
+                  markMigrationHandled(userId);
+                }
                 window.location.reload();
               } else if (hasData) {
                 setTimeout(() => setShowMigration(true), 600);
               }
             });
-          } else {
-            const { hasData } = detectExistingData(userId);
-            if (hasData) setTimeout(() => setShowMigration(true), 600);
           }
         }
       } else {
