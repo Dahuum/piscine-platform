@@ -42,6 +42,7 @@ function ExercisePageInner({
   const [code, setCode] = useState(() => (typeof window !== "undefined" && localStorage.getItem(codeKey)) || "");
   const [output, setOutput] = useState("");
   const [verdict, setVerdict] = useState("");
+  const [verdictDetails, setVerdictDetails] = useState("");
   const [running, setRunning] = useState(false);
   const [isDone, setIsDone] = useState(() => typeof window !== "undefined" && localStorage.getItem(progressKey) === "done");
   const [consoleOpen, setConsoleOpen] = useState(true);
@@ -89,7 +90,7 @@ function ExercisePageInner({
   const handleRun = useCallback(async () => {
     const c = codeRef.current;
     if (!c.trim()) { setOutput(""); setConsoleOpen(true); return; }
-    setRunning(true); setConsoleOpen(true); setVerdict(""); setOutput("");
+    setRunning(true); setConsoleOpen(true); setVerdict(""); setVerdictDetails(""); setOutput("");
 
     try {
       const res = await fetch("/api/execute", {
@@ -106,8 +107,10 @@ function ExercisePageInner({
         body: JSON.stringify({ messages: [{ role: "user", content: verdictPrompt(mod.title, ex.title, ex.description, mod.type, c, ex) }] }),
       });
       const t = await aiRes.text();
-      setVerdict(parseChatStream(t));
-    } catch { setVerdict(""); }
+      const { verdict: v, details: d } = parseVerdict(parseChatStream(t));
+      setVerdict(v);
+      setVerdictDetails(d);
+    } catch { setVerdict(""); setVerdictDetails(""); }
 
     setRunning(false);
   }, [ex.id, mod.id, mod.title, ex.title, ex.description, mod.type]);
@@ -348,6 +351,16 @@ function ExercisePageInner({
                     {verdict}
                   </div>
                 )}
+                {verdictDetails && (
+                  <div className="mb-2 pb-2 border-b border-zinc-200 dark:border-zinc-800 font-sans">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-red-500 dark:text-red-400 mb-1">
+                      Failed test details
+                    </div>
+                    <div className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed whitespace-pre-wrap">
+                      {verdictDetails}
+                    </div>
+                  </div>
+                )}
                 {output || (
                   <span className="text-zinc-400 dark:text-zinc-600">{"// Write code and press Run or Ctrl+Enter"}</span>
                 )}
@@ -396,5 +409,29 @@ Student code:
 ${code}
 \`\`\`
 
-Evaluate if this code correctly implements the exercise. Reply with EXACTLY ONE LINE: start with ✅ if correct or ❌ if not, then a short reason (max 15 words). No extra text.`;
+Evaluate if this code correctly implements the exercise. Reply in EXACTLY this format:
+
+VERDICT: <✅ or ❌ followed by a short reason, max 15 words>
+
+Only if the verdict is ❌, follow with a blank line then:
+DETAILS:
+- Test: <a concrete input/scenario that breaks this code>
+  Expected: <what correct output/behavior should be>
+  Got: <what this code actually does instead, and why>
+(add a second "- Test:" bullet only if there's a second, distinct failure worth flagging)
+
+If the verdict is ✅, output nothing after the VERDICT line — no DETAILS section at all.`;
+}
+
+// Splits the AI's "VERDICT: ...\n\nDETAILS:\n..." reply into the short
+// status line (shown in the toolbar and as the console's summary line) and
+// the longer failure breakdown (shown as its own console section, only
+// present when the verdict is ❌ — see verdictPrompt above).
+function parseVerdict(raw: string): { verdict: string; details: string } {
+  const idx = raw.indexOf("DETAILS:");
+  const verdictPart = (idx === -1 ? raw : raw.slice(0, idx))
+    .replace(/^VERDICT:\s*/i, "")
+    .trim();
+  const detailsPart = idx === -1 ? "" : raw.slice(idx + "DETAILS:".length).trim();
+  return { verdict: verdictPart, details: detailsPart };
 }
