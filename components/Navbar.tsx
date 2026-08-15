@@ -1,11 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Moon, Menu } from "lucide-react";
+import { BookOpen, Terminal, Sun, Moon, GraduationCap } from "lucide-react";
 import AuthDialog from "./AuthDialog";
-import { useSidebar } from "./Sidebar";
 import { useState, useEffect } from "react";
 import { getTheme, saveTheme } from "@/lib/db";
 
@@ -15,32 +15,23 @@ function computeInitialIsDark(): boolean {
   return stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
 }
 
-// The slim persistent 3.5rem strip to the right of Sidebar.tsx — deliberately
-// kept at the same height the old Navbar.tsx used, since three full-bleed
-// editor pages hardcode h-[calc(100vh-3.5rem)] and changing this height
-// would silently break their layout math.
-export default function TopBar() {
+export default function Navbar() {
   const pathname = usePathname();
-  const { setMobileOpen } = useSidebar();
-  // Starts at the same false the server always renders (computeInitialIsDark
-  // returns false when window is undefined) rather than reading localStorage
-  // in the useState initializer — that ran on the client's first render too,
-  // before hydration reconciled, so a returning dark-mode user's toggle
-  // button/icon differed between server and client (confirmed via a real
-  // hydration-mismatch diff). Corrected below in an effect instead, matching
-  // the pattern already used for computeProgress() on the home page.
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(computeInitialIsDark);
   const [online, setOnline] = useState(0);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsDark(computeInitialIsDark());
-  }, []);
-
+  // DOM class syncs from isDark state (not the other way around) — this is
+  // a pure side effect, no setState, so it's fine to run on every change.
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
 
+  // Logged-in users' theme preference (lib/db.ts's saveTheme/getTheme,
+  // backed by the user_settings table) previously existed but nothing
+  // called it — only localStorage was ever read, so the preference never
+  // followed a user across devices. Async, so setIsDark here doesn't
+  // trigger the "setState synchronously in an effect" concern — it's not
+  // synchronous.
   useEffect(() => {
     (async () => {
       try {
@@ -76,28 +67,22 @@ export default function TopBar() {
 
   const toggleTheme = () => {
     const next = !isDark;
-    setIsDark(next);
+    setIsDark(next); // DOM class updates via the isDark effect above
     const theme = next ? "dark" : "light";
     localStorage.setItem("theme", theme);
     saveTheme(theme).catch(() => {});
   };
 
+        const notHome = pathname !== "/";
   const isExamActive = pathname.includes("/exam/week/") && pathname.includes("/take");
 
   return (
-    <header className="sticky top-0 z-30 h-14 flex-shrink-0 border-b bg-background/80 backdrop-blur-sm">
-      <div className="flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          {!isExamActive && (
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="lg:hidden h-8 w-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              aria-label="Open menu"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-          )}
-        </div>
+    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
+      <div className="flex h-14 items-center justify-between px-4 max-w-screen-xl mx-auto">
+        <Link href="/" className="flex items-center gap-2 font-semibold text-foreground no-underline">
+          <Terminal className="h-5 w-5 text-primary" />
+          <span className="hidden sm:inline">42 Piscine</span>
+        </Link>
 
         <div className="flex items-center gap-1">
           {online > 0 && !isExamActive && (
@@ -108,6 +93,18 @@ export default function TopBar() {
               </span>
               {online}
             </span>
+          )}
+          {notHome && !isExamActive && (
+            <Link href="/" className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors no-underline">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Modules</span>
+            </Link>
+          )}
+          {!isExamActive && (
+            <Link href="/exam" className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors no-underline">
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden sm:inline">Exam Gate</span>
+            </Link>
           )}
           <AuthDialog />
           <Button isIconOnly variant="ghost" size="sm" onPress={toggleTheme} aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} className="overflow-hidden">
