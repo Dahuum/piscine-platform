@@ -43,6 +43,22 @@ export function clearUserIdCache() {
   initPromise = null;
 }
 
+// Lets a caller that already knows the authoritative user id (e.g.
+// AuthDialog's own onAuthStateChange handler, which receives the session
+// directly) seed the cache immediately instead of waiting on this module's
+// own onAuthStateChange subscription above to get around to it. Those are
+// two independent subscriptions with no ordering guarantee between them —
+// if AuthDialog's hydration logic runs before this module's listener has
+// updated cachedUserId, getUserId() returns a stale null (since `initialized`
+// is already true from an earlier logged-out call) and every DB read
+// silently comes back empty, even though the user really is logged in. This
+// closes that race by making the caller who already has the answer just say
+// so, rather than relying on both sides to agree on timing.
+export function setCachedUserId(id: string | null) {
+  cachedUserId = id;
+  initialized = true;
+}
+
 // ─── Auth ───────────────────────────────────────────
 
 export async function signIn(email: string, password: string) {

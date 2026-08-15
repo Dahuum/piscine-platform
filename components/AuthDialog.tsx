@@ -10,6 +10,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import MigrationModal from "./MigrationModal";
 import { detectExistingData } from "@/lib/migrate-data";
 import { hydrateFromCloud } from "@/lib/hydrate-data";
+import { setCachedUserId } from "@/lib/db";
 
 const inputClass = "w-full h-10 px-3 rounded-lg border bg-background text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all placeholder:text-muted-foreground/50";
 
@@ -31,6 +32,16 @@ export default function AuthDialog() {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
+        // lib/db.ts keeps its own independent onAuthStateChange subscription
+        // to cache the user id for every DB read/write in the app, with no
+        // ordering guarantee relative to this one. If hydrateFromCloud()
+        // below runs before that other subscription gets around to updating
+        // its cache, every query it makes silently sees a stale null user id
+        // and comes back empty — hydration would then do nothing at all,
+        // with no error, even though the user is genuinely logged in. Seed
+        // it directly with the id this handler already has, so hydration
+        // never has to depend on that race resolving in the right order.
+        setCachedUserId(session.user.id);
         if (!migrationShown) {
           migrationShown = true;
           const userId = session.user.id;
@@ -74,7 +85,11 @@ export default function AuthDialog() {
             if (hasData) setTimeout(() => setShowMigration(true), 600);
           }
         }
-      } else { setUser(null); migrationShown = false; }
+      } else {
+        setUser(null);
+        migrationShown = false;
+        setCachedUserId(null);
+      }
     });
     return () => listener.subscription.unsubscribe();
   }, []);
