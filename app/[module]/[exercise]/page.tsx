@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button, ProgressBar } from "@heroui/react";
 import {
   ChevronRight, ChevronLeft, Play, RotateCcw,
-  PanelBottomClose, PanelBottomOpen,
+  PanelBottomClose, PanelBottomOpen, PanelLeftClose, PanelLeftOpen,
   BookOpen, Lightbulb, CheckCircle2, Circle, Keyboard,
 } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -51,6 +51,7 @@ function ExercisePageInner({
     return sh ? parseInt(sh, 10) : 220;
   });
   const [leftTab, setLeftTab] = useState<"exercise" | "explanation">("exercise");
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const outputRef = useRef<HTMLPreElement>(null);
   const resizingRef = useRef(false);
@@ -121,6 +122,7 @@ function ExercisePageInner({
         e.preventDefault(); router.push(`/${mod.id}/${mod.exercises[exerciseIndex - 1].id}`);
       }
       if ((e.metaKey || e.ctrlKey) && e.key === "j") { e.preventDefault(); setConsoleOpen(o => !o); }
+      if ((e.metaKey || e.ctrlKey) && e.key === "b") { e.preventDefault(); setLeftPanelOpen(o => !o); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -176,55 +178,81 @@ function ExercisePageInner({
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-        {/* Left panel */}
-        <div className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
-          <div className="flex border-b bg-muted/30 flex-shrink-0" style={{ height: 40 }}>
-            <TabButton active={leftTab === "exercise"} onClick={() => setLeftTab("exercise")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Exercise" />
-            <TabButton active={leftTab === "explanation"} onClick={() => setLeftTab("explanation")} icon={<Lightbulb className="h-3.5 w-3.5" />} label="Explanation" />
-          </div>
+        {/* Left panel — collapsible (Ctrl+B or the toggle button) so the
+            editor can have the full width/height on a small screen or when
+            you already know the exercise and just want to code. */}
+        {leftPanelOpen ? (
+          <div className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
+            <div className="flex items-center border-b bg-muted/30 flex-shrink-0" style={{ height: 40 }}>
+              <TabButton active={leftTab === "exercise"} onClick={() => setLeftTab("exercise")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Exercise" />
+              <TabButton active={leftTab === "explanation"} onClick={() => setLeftTab("explanation")} icon={<Lightbulb className="h-3.5 w-3.5" />} label="Explanation" />
+              <button
+                onClick={() => setLeftPanelOpen(false)}
+                aria-label="Hide exercise panel"
+                title="Hide panel (Ctrl+B)"
+                className="h-full px-2.5 flex-shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <PanelLeftClose className="h-3.5 w-3.5" />
+              </button>
+            </div>
 
-          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin min-h-0">
-            {leftTab === "exercise" ? (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground leading-relaxed">{ex.description}</p>
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin min-h-0">
+              {leftTab === "exercise" ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed">{ex.description}</p>
 
-                {"prototype" in ex && (
-                  <div className="p-3 rounded-lg bg-muted/50 border">
-                    <Label>Prototype</Label>
-                    <code className="text-sm font-mono text-foreground">{ex.prototype}</code>
-                  </div>
-                )}
+                  {"prototype" in ex && (
+                    <div className="p-3 rounded-lg bg-muted/50 border">
+                      <Label>Prototype</Label>
+                      <code className="text-sm font-mono text-foreground">{ex.prototype}</code>
+                    </div>
+                  )}
 
-                {"allowed" in ex && ex.allowed && ex.allowed.length > 0 && (
+                  {"allowed" in ex && ex.allowed && ex.allowed.length > 0 && (
+                    <div>
+                      <Label>Allowed functions</Label>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {ex.allowed.map((fn: string) => (
+                          <span key={fn} className="text-xs px-2 py-0.5 rounded-md bg-muted font-mono text-muted-foreground border">{fn}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <Label>Allowed functions</Label>
+                    <Label>Turn-in files</Label>
                     <div className="flex flex-wrap gap-1.5 mt-1">
-                      {ex.allowed.map((fn: string) => (
-                        <span key={fn} className="text-xs px-2 py-0.5 rounded-md bg-muted font-mono text-muted-foreground border">{fn}</span>
+                      {ex.files.map((f: string) => (
+                        <span key={f} className="text-xs px-2 py-0.5 rounded-md bg-muted/50 font-mono text-muted-foreground">{f}</span>
                       ))}
                     </div>
                   </div>
-                )}
 
-                <div>
-                  <Label>Turn-in files</Label>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {ex.files.map((f: string) => (
-                      <span key={f} className="text-xs px-2 py-0.5 rounded-md bg-muted/50 font-mono text-muted-foreground">{f}</span>
-                    ))}
+                  <div className="text-[11px] text-muted-foreground/60 border-t pt-3">
+                    Compiled with {mod.type === "shell" ? "/bin/sh" : "gcc"}.
+                    {mod.type === "c" && " Submit only the required function."}
                   </div>
                 </div>
-
-                <div className="text-[11px] text-muted-foreground/60 border-t pt-3">
-                  Compiled with {mod.type === "shell" ? "/bin/sh" : "gcc"}.
-                  {mod.type === "c" && " Submit only the required function."}
-                </div>
-              </div>
-            ) : (
-              <ExplanationPanel cacheKey={cacheKey} prompt={explanationPrompt} />
-            )}
+              ) : (
+                <ExplanationPanel cacheKey={cacheKey} prompt={explanationPrompt} />
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="w-full h-8 lg:h-full lg:w-8 border-b lg:border-b-0 lg:border-r flex-shrink-0 flex lg:flex-col items-center bg-muted/20">
+            <button
+              onClick={() => setLeftPanelOpen(true)}
+              aria-label="Show exercise panel"
+              title="Show panel (Ctrl+B)"
+              className="h-8 w-8 flex-shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <PanelLeftOpen className="h-3.5 w-3.5" />
+            </button>
+            <span className="hidden lg:block text-[10px] text-muted-foreground uppercase tracking-wider [writing-mode:vertical-rl] mt-2 select-none">
+              Exercise
+            </span>
+          </div>
+        )}
 
         {/* Right panel */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0 relative">
@@ -277,6 +305,7 @@ function ExercisePageInner({
                 <Shortcut keys="Ctrl →" label="Next exercise" />
                 <Shortcut keys="Ctrl ←" label="Previous exercise" />
                 <Shortcut keys="Ctrl J" label="Toggle console" />
+                <Shortcut keys="Ctrl B" label="Toggle exercise panel" />
               </div>
             </div>
           )}
