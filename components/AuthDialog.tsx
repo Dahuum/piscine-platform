@@ -33,23 +33,45 @@ export default function AuthDialog() {
         setUser(session.user);
         if (!migrationShown) {
           migrationShown = true;
-          const { hasData } = detectExistingData();
-          if (hasData) {
+          const userId = session.user.id;
+          const hydrateFlag = `hydrated:${userId}`;
+          const migrationPendingFlag = `migration-pending:${userId}`;
+
+          if (sessionStorage.getItem(migrationPendingFlag)) {
+            // Hydration on the previous load found local-only data worth
+            // offering to push up, but it also had to reload the page to
+            // surface what it pulled down — which would have discarded the
+            // modal before it ever appeared. Show it now instead.
+            sessionStorage.removeItem(migrationPendingFlag);
             setTimeout(() => setShowMigration(true), 600);
+          } else if (!sessionStorage.getItem(hydrateFlag)) {
+            // Always pull down whatever's already saved to the account,
+            // regardless of whether this device also has local-only data —
+            // those aren't mutually exclusive. Having typed even one
+            // character into an editor before logging in is enough to make
+            // detectExistingData() report "has local data", and that used
+            // to skip hydration entirely: a real account with real history
+            // from another device would show nothing here because the
+            // (one-way, local -> cloud only) migration prompt ran instead
+            // of ever pulling the cloud data down. Guarded so it runs once
+            // per tab per user, not on every auth event (a persisted
+            // session re-fires this on every page load).
+            sessionStorage.setItem(hydrateFlag, "1");
+            // Snapshot before hydration writes anything, so newly
+            // hydrated-in keys aren't miscounted as "local progress" worth
+            // re-uploading a moment later.
+            const { hasData } = detectExistingData(userId);
+            hydrateFromCloud().then((wrote) => {
+              if (wrote) {
+                if (hasData) sessionStorage.setItem(migrationPendingFlag, "1");
+                window.location.reload();
+              } else if (hasData) {
+                setTimeout(() => setShowMigration(true), 600);
+              }
+            });
           } else {
-            // No local data to offer importing (new device, or this browser
-            // was already synced before) — pull down whatever's already
-            // saved to the account instead, in case localStorage here is
-            // empty but the account has progress from elsewhere. Guarded so
-            // it runs once per tab per user, not on every auth event
-            // (a persisted session re-fires this on every page load).
-            const hydrateFlag = `hydrated:${session.user.id}`;
-            if (!sessionStorage.getItem(hydrateFlag)) {
-              sessionStorage.setItem(hydrateFlag, "1");
-              hydrateFromCloud().then((wrote) => {
-                if (wrote) window.location.reload();
-              });
-            }
+            const { hasData } = detectExistingData(userId);
+            if (hasData) setTimeout(() => setShowMigration(true), 600);
           }
         }
       } else { setUser(null); migrationShown = false; }
@@ -161,7 +183,7 @@ export default function AuthDialog() {
         </Button>
       </div>
       {showMigration && createPortal(
-        <MigrationModal open={showMigration} onComplete={() => setShowMigration(false)} />,
+        <MigrationModal open={showMigration} userId={user.id} onComplete={() => setShowMigration(false)} />,
         document.body
       )}
     </>

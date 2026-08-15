@@ -8,9 +8,11 @@ import { migrateAllData, markMigrationHandled, getLocalDataSummary } from "@/lib
 
 export default function MigrationModal({
   open,
+  userId,
   onComplete,
 }: {
   open: boolean;
+  userId: string;
   onComplete: () => void;
 }) {
   const [loading, setLoading] = useState(false);
@@ -44,7 +46,7 @@ export default function MigrationModal({
     // "Start fresh" means don't sync local progress to this account and
     // don't ask again — it does NOT mean delete the user's solved exercises
     // and code, which is what this used to do.
-    markMigrationHandled();
+    markMigrationHandled(userId);
     onComplete();
   };
 
