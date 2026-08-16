@@ -43,6 +43,7 @@ function ExercisePageInner({
   const [output, setOutput] = useState("");
   const [verdict, setVerdict] = useState("");
   const [verdictDetails, setVerdictDetails] = useState("");
+  const [aiUnavailable, setAiUnavailable] = useState(false);
   const [running, setRunning] = useState(false);
   const [isDone, setIsDone] = useState(() => typeof window !== "undefined" && localStorage.getItem(progressKey) === "done");
   const [consoleOpen, setConsoleOpen] = useState(true);
@@ -90,7 +91,7 @@ function ExercisePageInner({
   const handleRun = useCallback(async () => {
     const c = codeRef.current;
     if (!c.trim()) { setOutput(""); setConsoleOpen(true); return; }
-    setRunning(true); setConsoleOpen(true); setVerdict(""); setVerdictDetails(""); setOutput("");
+    setRunning(true); setConsoleOpen(true); setVerdict(""); setVerdictDetails(""); setAiUnavailable(false); setOutput("");
 
     try {
       const res = await fetch("/api/execute", {
@@ -106,11 +107,21 @@ function ExercisePageInner({
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [{ role: "user", content: verdictPrompt(mod.title, ex.title, ex.description, mod.type, c, ex) }] }),
       });
-      const t = await aiRes.text();
-      const { verdict: v, details: d } = parseVerdict(parseChatStream(t));
-      setVerdict(v);
-      setVerdictDetails(d);
-    } catch { setVerdict(""); setVerdictDetails(""); }
+      // fetch() only rejects on a network failure, not on a non-2xx status —
+      // an upstream billing/rate-limit/outage error (e.g. a 402 from the AI
+      // provider) resolves normally here and would otherwise get silently
+      // parsed as an empty verdict, which reads as "nothing happened" rather
+      // than "the correctness check failed to run." Surface it instead of
+      // hiding it behind a blank toolbar line.
+      if (!aiRes.ok) {
+        setAiUnavailable(true);
+      } else {
+        const t = await aiRes.text();
+        const { verdict: v, details: d } = parseVerdict(parseChatStream(t));
+        setVerdict(v);
+        setVerdictDetails(d);
+      }
+    } catch { setAiUnavailable(true); }
 
     setRunning(false);
   }, [ex.id, mod.id, mod.title, ex.title, ex.description, mod.type]);
@@ -337,7 +348,12 @@ function ExercisePageInner({
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Output</span>
                 {running && <span className="text-[10px] text-amber-600 dark:text-amber-400 animate-pulse">running...</span>}
                 <div className="flex-1" />
-                {verdict && (
+                {aiUnavailable && (
+                  <span className="text-[11px] truncate max-w-[60%] text-amber-600 dark:text-amber-400">
+                    ⚠ AI check unavailable
+                  </span>
+                )}
+                {!aiUnavailable && verdict && (
                   <span className={`text-[11px] truncate max-w-[60%] ${verdict.trim().startsWith("✅") ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                     {verdict}
                   </span>
@@ -346,7 +362,12 @@ function ExercisePageInner({
               <pre ref={outputRef}
                 className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
                 style={{ height: "calc(100% - 33px)" }}>
-                {verdict && (
+                {aiUnavailable && (
+                  <div className="mb-2 pb-2 border-b border-zinc-200 dark:border-zinc-800 font-sans text-xs font-medium text-amber-600 dark:text-amber-400">
+                    ⚠ AI correctness check is temporarily unavailable — your code still ran above. Try Run again in a bit.
+                  </div>
+                )}
+                {!aiUnavailable && verdict && (
                   <div className={`mb-2 pb-2 border-b border-zinc-200 dark:border-zinc-800 font-sans text-xs font-medium ${verdict.trim().startsWith("✅") ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                     {verdict}
                   </div>
