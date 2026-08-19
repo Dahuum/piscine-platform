@@ -45,8 +45,16 @@ export async function POST(req: NextRequest) {
   }
 
   const body = {
+    // deepseek/deepseek-chat is a paid model and requires a funded OpenRouter
+    // balance — the account backing this had none (confirmed via a live 402
+    // "requires more credits" response). openai/gpt-oss-20b:free is a real,
+    // genuinely zero-cost model on OpenRouter (no balance/payment method
+    // needed at all, just rate-limited), so this keeps every AI feature
+    // (exercise verdicts, explanations, exam chat) working without
+    // requiring anyone to pay anything. Override via OPENROUTER_MODEL if a
+    // funded account/paid model is ever preferred instead.
     model: isOpenRouter
-      ? process.env.OPENROUTER_MODEL || "deepseek/deepseek-chat"
+      ? process.env.OPENROUTER_MODEL || "openai/gpt-oss-20b:free"
       : "deepseek-chat",
     messages: [
       {
