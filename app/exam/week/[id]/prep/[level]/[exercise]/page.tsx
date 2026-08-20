@@ -80,6 +80,15 @@ function PrepPracticeInner({
     const h = localStorage.getItem("console-height");
     return h ? parseInt(h, 10) : 160;
   });
+  // Distinct from resizingOutputRef below: this drives the height
+  // transition's duration, so it has to be state (a ref wouldn't
+  // re-render). While actively dragging, height changes must apply with
+  // zero transition — otherwise framer-motion eases toward each new target
+  // on every mousemove, and since the target keeps moving, the panel edge
+  // perpetually lags behind the cursor instead of tracking it. The eased
+  // 0.2s transition is still exactly what's wanted for the open/close
+  // toggle, so it's only suppressed during a live drag, not removed.
+  const [isResizingOutput, setIsResizingOutput] = useState(false);
   const outputRef = useRef<HTMLPreElement>(null);
   const resizingLeftRef = useRef(false);
   const resizingOutputRef = useRef(false);
@@ -138,13 +147,19 @@ function PrepPracticeInner({
 
   const onOutputResizeMouseDown = (e: React.MouseEvent) => {
     e.preventDefault(); resizingOutputRef.current = true;
+    setIsResizingOutput(true);
     const startY = e.clientY, startH = outputHeight;
     const mm = (ev: MouseEvent) => {
       if (!resizingOutputRef.current) return;
       const h = Math.max(100, Math.min(500, startH + (startY - ev.clientY)));
       setOutputHeight(h); localStorage.setItem("console-height", String(h));
     };
-    const mu = () => { resizingOutputRef.current = false; document.removeEventListener("mousemove", mm); document.removeEventListener("mouseup", mu); };
+    const mu = () => {
+      resizingOutputRef.current = false;
+      setIsResizingOutput(false);
+      document.removeEventListener("mousemove", mm);
+      document.removeEventListener("mouseup", mu);
+    };
     document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu);
   };
 
@@ -390,7 +405,7 @@ function PrepPracticeInner({
                 initial={{ height: 0 }}
                 animate={{ height: `min(${outputHeight}px, 30vh)` }}
                 exit={{ height: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
+                transition={{ duration: isResizingOutput ? 0 : 0.2, ease: "easeInOut" }}
               >
                 <div className="px-3 py-1.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
