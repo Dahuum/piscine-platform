@@ -309,7 +309,7 @@ function PrepPracticeInner({
           </div>
         </motion.div>
         <div
-          className="hidden lg:flex w-1.5 bg-border hover:bg-primary/30 cursor-col-resize flex-shrink-0 items-center justify-center group"
+          className="hidden lg:flex w-2.5 bg-border hover:bg-primary/30 cursor-col-resize flex-shrink-0 items-center justify-center group"
           onMouseDown={onLeftResizeMouseDown}
         >
           <div className="h-10 w-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />
@@ -392,7 +392,7 @@ function PrepPracticeInner({
 
           {outputOpen && (
             <div
-              className="hidden lg:flex h-1.5 bg-border hover:bg-primary/30 cursor-ns-resize flex-shrink-0 items-center justify-center group"
+              className="hidden lg:flex h-2.5 bg-border hover:bg-primary/30 cursor-ns-resize flex-shrink-0 items-center justify-center group"
               onMouseDown={onOutputResizeMouseDown}
             >
               <div className="w-10 h-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />

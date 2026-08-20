@@ -275,7 +275,7 @@ function ExercisePageInner({
             </div>
           </div>
           <div
-            className="hidden lg:flex w-1.5 bg-border hover:bg-primary/30 cursor-col-resize flex-shrink-0 items-center justify-center group"
+            className="hidden lg:flex w-2.5 bg-border hover:bg-primary/30 cursor-col-resize flex-shrink-0 items-center justify-center group"
             onMouseDown={onLeftResizeMouseDown}
           >
             <div className="h-10 w-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />
@@ -364,7 +364,7 @@ function ExercisePageInner({
               still opens/closes via the toolbar toggle and is height-capped
               below so it can't crowd out the editor on a small screen. */}
           {consoleOpen && (
-            <div className="hidden lg:flex h-1.5 bg-border hover:bg-primary/30 cursor-ns-resize flex-shrink-0 items-center justify-center group"
+            <div className="hidden lg:flex h-2.5 bg-border hover:bg-primary/30 cursor-ns-resize flex-shrink-0 items-center justify-center group"
               onMouseDown={onResizeMouseDown}>
               <div className="w-10 h-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />
             </div>
