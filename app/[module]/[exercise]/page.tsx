@@ -54,9 +54,15 @@ function ExercisePageInner({
   });
   const [leftTab, setLeftTab] = useState<"exercise" | "explanation">("exercise");
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
+    if (typeof window === "undefined") return 340;
+    const w = localStorage.getItem("left-panel-width");
+    return w ? parseInt(w, 10) : 340;
+  });
   const [showShortcuts, setShowShortcuts] = useState(false);
   const outputRef = useRef<HTMLPreElement>(null);
   const resizingRef = useRef(false);
+  const resizingLeftRef = useRef(false);
   const codeRef = useRef(code);
 
   useEffect(() => {
@@ -158,6 +164,18 @@ function ExercisePageInner({
     document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu);
   };
 
+  const onLeftResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault(); resizingLeftRef.current = true;
+    const startX = e.clientX, startW = leftPanelWidth;
+    const mm = (ev: MouseEvent) => {
+      if (!resizingLeftRef.current) return;
+      const w = Math.max(240, Math.min(640, startW + (ev.clientX - startX)));
+      setLeftPanelWidth(w); localStorage.setItem("left-panel-width", String(w));
+    };
+    const mu = () => { resizingLeftRef.current = false; document.removeEventListener("mousemove", mm); document.removeEventListener("mouseup", mu); };
+    document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu);
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)]">
       {/* Top bar */}
@@ -196,7 +214,11 @@ function ExercisePageInner({
             editor can have the full width/height on a small screen or when
             you already know the exercise and just want to code. */}
         {leftPanelOpen ? (
-          <div className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
+          <>
+          <div
+            className="w-full h-[32vh] lg:h-full lg:w-[var(--left-panel-w)] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0"
+            style={{ "--left-panel-w": `${leftPanelWidth}px` } as React.CSSProperties}
+          >
             <div className="flex items-center border-b bg-muted/30 flex-shrink-0" style={{ height: 40 }}>
               <TabButton active={leftTab === "exercise"} onClick={() => setLeftTab("exercise")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Exercise" />
               <TabButton active={leftTab === "explanation"} onClick={() => setLeftTab("explanation")} icon={<Lightbulb className="h-3.5 w-3.5" />} label="Explanation" />
@@ -252,6 +274,13 @@ function ExercisePageInner({
               )}
             </div>
           </div>
+          <div
+            className="hidden lg:flex w-1.5 bg-border hover:bg-primary/30 cursor-col-resize flex-shrink-0 items-center justify-center group"
+            onMouseDown={onLeftResizeMouseDown}
+          >
+            <div className="h-10 w-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />
+          </div>
+          </>
         ) : (
           <div className="w-full h-8 lg:h-full lg:w-8 border-b lg:border-b-0 lg:border-r flex-shrink-0 flex lg:flex-col items-center bg-muted/20">
             <button

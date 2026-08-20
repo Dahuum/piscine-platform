@@ -67,7 +67,22 @@ function PrepPracticeInner({
   );
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [outputOpen, setOutputOpen] = useState(true);
+  // Shares localStorage keys with the regular module editor's own resize
+  // handles (app/[module]/[exercise]/page.tsx) so a size preference set in
+  // one IDE carries over to the other, instead of each remembering its own.
+  const [leftPanelWidth, setLeftPanelWidth] = useState(() => {
+    if (typeof window === "undefined") return 340;
+    const w = localStorage.getItem("left-panel-width");
+    return w ? parseInt(w, 10) : 340;
+  });
+  const [outputHeight, setOutputHeight] = useState(() => {
+    if (typeof window === "undefined") return 160;
+    const h = localStorage.getItem("console-height");
+    return h ? parseInt(h, 10) : 160;
+  });
   const outputRef = useRef<HTMLPreElement>(null);
+  const resizingLeftRef = useRef(false);
+  const resizingOutputRef = useRef(false);
 
   const markAsSeen = () => {
     localStorage.setItem(prepKey, "done");
@@ -109,6 +124,30 @@ function PrepPracticeInner({
     setRunning(false);
   };
 
+  const onLeftResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault(); resizingLeftRef.current = true;
+    const startX = e.clientX, startW = leftPanelWidth;
+    const mm = (ev: MouseEvent) => {
+      if (!resizingLeftRef.current) return;
+      const w = Math.max(240, Math.min(640, startW + (ev.clientX - startX)));
+      setLeftPanelWidth(w); localStorage.setItem("left-panel-width", String(w));
+    };
+    const mu = () => { resizingLeftRef.current = false; document.removeEventListener("mousemove", mm); document.removeEventListener("mouseup", mu); };
+    document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu);
+  };
+
+  const onOutputResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault(); resizingOutputRef.current = true;
+    const startY = e.clientY, startH = outputHeight;
+    const mm = (ev: MouseEvent) => {
+      if (!resizingOutputRef.current) return;
+      const h = Math.max(100, Math.min(500, startH + (startY - ev.clientY)));
+      setOutputHeight(h); localStorage.setItem("console-height", String(h));
+    };
+    const mu = () => { resizingOutputRef.current = false; document.removeEventListener("mousemove", mm); document.removeEventListener("mouseup", mu); };
+    document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu);
+  };
+
   return (
     <motion.div
       className="flex flex-col h-[calc(100vh-3.5rem)]"
@@ -136,8 +175,10 @@ function PrepPracticeInner({
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
         {leftPanelOpen ? (
+        <>
         <motion.div
-          className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0"
+          className="w-full h-[32vh] lg:h-full lg:w-[var(--left-panel-w)] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0"
+          style={{ "--left-panel-w": `${leftPanelWidth}px` } as React.CSSProperties}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.15 }}
@@ -252,6 +293,13 @@ function PrepPracticeInner({
             </AnimatePresence>
           </div>
         </motion.div>
+        <div
+          className="hidden lg:flex w-1.5 bg-border hover:bg-primary/30 cursor-col-resize flex-shrink-0 items-center justify-center group"
+          onMouseDown={onLeftResizeMouseDown}
+        >
+          <div className="h-10 w-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />
+        </div>
+        </>
         ) : (
           <div className="w-full h-8 lg:h-full lg:w-8 border-b lg:border-b-0 lg:border-r flex-shrink-0 flex lg:flex-col items-center bg-muted/20">
             <button
@@ -327,12 +375,20 @@ function PrepPracticeInner({
             />
           </div>
 
+          {outputOpen && (
+            <div
+              className="hidden lg:flex h-1.5 bg-border hover:bg-primary/30 cursor-ns-resize flex-shrink-0 items-center justify-center group"
+              onMouseDown={onOutputResizeMouseDown}
+            >
+              <div className="w-10 h-0.5 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" />
+            </div>
+          )}
           <AnimatePresence initial={false}>
             {outputOpen && (
               <motion.div
                 className="flex-shrink-0 border-t bg-white dark:bg-zinc-950 overflow-hidden"
                 initial={{ height: 0 }}
-                animate={{ height: "min(160px, 30vh)" }}
+                animate={{ height: `min(${outputHeight}px, 30vh)` }}
                 exit={{ height: 0 }}
                 transition={{ duration: 0.2, ease: "easeInOut" }}
               >
