@@ -14,6 +14,8 @@ import {
   Clock,
   Trophy,
   CheckCircle2,
+  PanelTopClose,
+  PanelTopOpen,
 } from "lucide-react";
 import { getExamWeekOrNull, lockedWeeks, getExercise } from "@/lib/exam-data";
 import type { ExamExercise } from "@/lib/exam-data";
@@ -102,6 +104,7 @@ function ExamInner({ weekId }: { weekId: string }) {
   const week = getExamWeekOrNull(weekId)!;
   const [stage, setStage] = useState<Stage>("select");
   const [mode, setMode] = useState<"editor" | "terminal">("editor");
+  const [promptOpen, setPromptOpen] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const [exercise, setExercise] = useState<{
     name: string;
@@ -781,12 +784,24 @@ function ExamInner({ weekId }: { weekId: string }) {
             );
           })}
         </div>
+        {exercise && (
+          <Button
+            isIconOnly
+            variant="ghost"
+            size="sm"
+            onPress={() => setPromptOpen((o) => !o)}
+            className="ml-1"
+            aria-label={promptOpen ? "Hide exercise prompt" : "Show exercise prompt"}
+          >
+            {promptOpen ? <PanelTopClose className="h-4 w-4" /> : <PanelTopOpen className="h-4 w-4" />}
+          </Button>
+        )}
         <Button
           isIconOnly
           variant="ghost"
           size="sm"
           onPress={finishExam}
-          className="ml-2"
+          className="ml-1"
           aria-label="Finish exam"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -805,14 +820,14 @@ function ExamInner({ weekId }: { weekId: string }) {
 
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <AnimatePresence mode="wait">
-          {exercise && (
+          {exercise && promptOpen && (
             <motion.div
               key={`${exercise.level}-${exercise.name}`}
               className="border-b px-5 py-4 bg-muted/20 flex-shrink-0 max-h-[35%] overflow-y-auto scrollbar-thin"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.1 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.18, ease: "easeInOut" }}
             >
               <h2 className="text-base font-semibold mb-2">
                 {exercise.name}

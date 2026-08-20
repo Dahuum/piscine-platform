@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, RotateCcw, ChevronLeft, BookOpen, Lightbulb } from "lucide-react";
+import { Play, RotateCcw, ChevronLeft, BookOpen, Lightbulb, PanelLeftClose, PanelLeftOpen, PanelBottomClose, PanelBottomOpen } from "lucide-react";
 import { getExamWeekOrNull, lockedWeeks } from "@/lib/exam-data";
 import type { ExamExercise } from "@/lib/exam-data";
 import CodeEditor from "@/components/CodeEditor";
@@ -65,6 +65,8 @@ function PrepPracticeInner({
   const [leftTab, setLeftTab] = useState<"exercise" | "explanation">(
     "exercise",
   );
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [outputOpen, setOutputOpen] = useState(true);
   const outputRef = useRef<HTMLPreElement>(null);
 
   const markAsSeen = () => {
@@ -86,6 +88,7 @@ function PrepPracticeInner({
     if (!code.trim()) return;
     setRunning(true);
     setOutput("");
+    setOutputOpen(true);
     markAsSeen();
 
     try {
@@ -132,9 +135,15 @@ function PrepPracticeInner({
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-        <div className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0">
+        {leftPanelOpen ? (
+        <motion.div
+          className="w-full h-[32vh] lg:h-full lg:w-[340px] border-b lg:border-b-0 lg:border-r flex flex-col flex-shrink-0 overflow-hidden min-h-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+        >
           <div
-            className="flex border-b bg-muted/30 flex-shrink-0"
+            className="flex items-center border-b bg-muted/30 flex-shrink-0"
             style={{ height: 40 }}
           >
             {[
@@ -158,6 +167,14 @@ function PrepPracticeInner({
                 <tab.icon className="h-3.5 w-3.5" /> {tab.label}
               </motion.button>
             ))}
+            <button
+              onClick={() => setLeftPanelOpen(false)}
+              aria-label="Hide exercise panel"
+              title="Hide panel"
+              className="h-full px-2.5 flex-shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <PanelLeftClose className="h-3.5 w-3.5" />
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 scrollbar-thin min-h-0">
@@ -234,7 +251,22 @@ function PrepPracticeInner({
               )}
             </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
+        ) : (
+          <div className="w-full h-8 lg:h-full lg:w-8 border-b lg:border-b-0 lg:border-r flex-shrink-0 flex lg:flex-col items-center bg-muted/20">
+            <button
+              onClick={() => setLeftPanelOpen(true)}
+              aria-label="Show exercise panel"
+              title="Show panel"
+              className="h-8 w-8 flex-shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <PanelLeftOpen className="h-3.5 w-3.5" />
+            </button>
+            <span className="hidden lg:block text-[10px] text-muted-foreground uppercase tracking-wider [writing-mode:vertical-rl] mt-2 select-none">
+              Exercise
+            </span>
+          </div>
+        )}
 
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <div
@@ -270,6 +302,17 @@ function PrepPracticeInner({
             <span className="text-[10px] text-muted-foreground/50 hidden sm:inline">
               Runs against {exercise.testCases.length} test case{exercise.testCases.length === 1 ? "" : "s"} — see output only, no pass/fail
             </span>
+            <div className="flex-1" />
+            <Button
+              isIconOnly
+              variant="ghost"
+              size="sm"
+              onPress={() => setOutputOpen((o) => !o)}
+              aria-label={outputOpen ? "Hide output" : "Show output"}
+              className="hover:bg-muted transition-colors"
+            >
+              {outputOpen ? <PanelBottomClose className="h-3.5 w-3.5" /> : <PanelBottomOpen className="h-3.5 w-3.5" />}
+            </Button>
           </div>
 
           <div className="flex-1 relative bg-white dark:bg-[#1e1e1e] min-h-[120px]">
@@ -284,36 +327,43 @@ function PrepPracticeInner({
             />
           </div>
 
-          <div
-            className="flex-shrink-0 border-t bg-white dark:bg-zinc-950 overflow-hidden"
-            style={{ height: "min(160px, 30vh)" }}
-          >
-            <div className="px-3 py-1.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                Output
-              </span>
-              {running && (
-                <motion.span
-                  className="text-[10px] text-amber-600 dark:text-amber-400 ml-2"
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ repeat: Infinity, duration: 1 }}
+          <AnimatePresence initial={false}>
+            {outputOpen && (
+              <motion.div
+                className="flex-shrink-0 border-t bg-white dark:bg-zinc-950 overflow-hidden"
+                initial={{ height: 0 }}
+                animate={{ height: "min(160px, 30vh)" }}
+                exit={{ height: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                <div className="px-3 py-1.5 border-b border-zinc-200 dark:border-zinc-800 flex items-center">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                    Output
+                  </span>
+                  {running && (
+                    <motion.span
+                      className="text-[10px] text-amber-600 dark:text-amber-400 ml-2"
+                      animate={{ opacity: [1, 0.5, 1] }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                    >
+                      running...
+                    </motion.span>
+                  )}
+                </div>
+                <pre
+                  ref={outputRef}
+                  className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
+                  style={{ height: "calc(100% - 33px)" }}
                 >
-                  running...
-                </motion.span>
-              )}
-            </div>
-            <pre
-              ref={outputRef}
-              className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
-              style={{ height: "calc(100% - 33px)" }}
-            >
-              {output || (
-                <span className="text-zinc-400 dark:text-zinc-600">
-                  Write your code and press Run
-                </span>
-              )}
-            </pre>
-          </div>
+                  {output || (
+                    <span className="text-zinc-400 dark:text-zinc-600">
+                      Write your code and press Run
+                    </span>
+                  )}
+                </pre>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </motion.div>
