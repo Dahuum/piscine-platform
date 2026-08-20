@@ -9,7 +9,7 @@ import {
   ChevronRight, ChevronLeft, BookOpen, CheckCircle2, Circle, Code2, Terminal,
 } from "lucide-react";
 import { getExamWeekOrNull, getAvailableLevels, lockedWeeks } from "@/lib/exam-data";
-import { savePrepReview, savePrepExercise, getPrepReview, getPrepExercises } from "@/lib/db";
+import { savePrepReview, getPrepReview, getPrepExercises } from "@/lib/db";
 
 const cardHover = { scale: 1.01, transition: { duration: 0.15 } };
 const cardTap = { scale: 0.98 };
@@ -74,13 +74,6 @@ function PrepInner({ weekId }: { weekId: string }) {
     if (newVal) {
       savePrepReview(weekId).catch(() => {});
     }
-  };
-
-  const markExerciseDone = (lvl: number, name: string) => {
-    const key = `${lvl}:${name}`;
-    localStorage.setItem(`exam:prep:${weekId}:${key}`, "done");
-    setDone((prev) => new Set(prev).add(key));
-    savePrepExercise(weekId, lvl, name).catch(() => {});
   };
 
   const exercisesByLevel = week.exercisesByLevel;
@@ -162,7 +155,6 @@ function PrepInner({ weekId }: { weekId: string }) {
                           <motion.div key={ex.name} whileHover={cardHover} whileTap={cardTap}>
                             <Link
                               href={`/exam/week/${weekId}/prep/${lvl}/${ex.name}`}
-                              onClick={() => markExerciseDone(lvl, ex.name)}
                               className="flex items-center gap-3 px-3 py-2.5 rounded-lg border hover:border-primary/30 hover:bg-muted/30 transition-colors no-underline text-foreground group"
                             >
                               <motion.div className="flex-shrink-0" animate={{ scale: isDone ? [1, 1.2, 1] : 1 }} transition={{ duration: 0.12 }}>

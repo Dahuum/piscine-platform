@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, RotateCcw, ChevronLeft, BookOpen, Lightbulb, PanelLeftClose, PanelLeftOpen, PanelBottomClose, PanelBottomOpen } from "lucide-react";
+import { Play, RotateCcw, ChevronLeft, BookOpen, Lightbulb, PanelLeftClose, PanelLeftOpen, PanelBottomClose, PanelBottomOpen, CheckCircle2 } from "lucide-react";
 import { getExamWeekOrNull, lockedWeeks } from "@/lib/exam-data";
 import type { ExamExercise } from "@/lib/exam-data";
 import CodeEditor from "@/components/CodeEditor";
 import { ExplanationPanel, buildExplanationPrompt } from "@/components/ExplanationPanel";
+import { savePrepExercise } from "@/lib/db";
 
 export default function ExamPrepExercisePage() {
   const params = useParams<{
@@ -61,6 +62,8 @@ function PrepPracticeInner({
 
   const [code, setCode] = useState(() => (typeof window !== "undefined" && localStorage.getItem(codeKey)) || "");
   const [output, setOutput] = useState("");
+  const [passed, setPassed] = useState<boolean | null>(null);
+  const [isDone, setIsDone] = useState(() => typeof window !== "undefined" && localStorage.getItem(prepKey) === "done");
   const [running, setRunning] = useState(false);
   const [leftTab, setLeftTab] = useState<"exercise" | "explanation">(
     "exercise",
@@ -93,14 +96,18 @@ function PrepPracticeInner({
   const resizingLeftRef = useRef(false);
   const resizingOutputRef = useRef(false);
 
-  const markAsSeen = () => {
+  // Only ever called after a genuine pass from /api/exam/prep-grade (see
+  // handleRun) — this used to fire on mount just from opening the exercise,
+  // which meant "done" tracked "viewed" rather than "solved." A real
+  // reference-code + test-case comparison is available here (the same one
+  // the live timed exam uses, see lib/exam-corrector.ts), unlike the
+  // regular module editor which has no reference implementation to check
+  // against and has to fall back to an AI opinion.
+  const markDone = () => {
     localStorage.setItem(prepKey, "done");
+    setIsDone(true);
+    savePrepExercise(weekId, exercise.level, exercise.name).catch(() => {});
   };
-
-  useEffect(() => {
-    markAsSeen();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prepKey]);
 
   useEffect(() => {
     if (output && outputRef.current) {
@@ -112,23 +119,35 @@ function PrepPracticeInner({
     if (!code.trim()) return;
     setRunning(true);
     setOutput("");
+    setPassed(null);
     setOutputOpen(true);
-    markAsSeen();
 
     try {
-      const res = await fetch("/api/execute", {
+      const res = await fetch("/api/exam/prep-grade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code,
-          exerciseId: exercise.name,
-          moduleId: weekId,
-        }),
+        body: JSON.stringify({ weekId, exerciseName: exercise.name, code }),
       });
       const data = await res.json();
-      setOutput(data.output || data.error || "(no output)");
+      if (!res.ok) {
+        setOutput(data.error || "Grading failed");
+        setPassed(false);
+      } else if (data.passed) {
+        setOutput("All test cases passed.");
+        setPassed(true);
+        markDone();
+      } else if (data.systemError) {
+        // Ours, not the student's — E2B down or a broken reference
+        // implementation. Neutral styling, and definitely not a mark
+        // against them, so passed stays null rather than false.
+        setOutput(data.error || "System error while grading — please try again.");
+      } else {
+        setOutput(data.traceback || data.compilationError || "Some test cases failed.");
+        setPassed(false);
+      }
     } catch {
       setOutput("Execution failed");
+      setPassed(false);
     }
     setRunning(false);
   };
@@ -363,8 +382,17 @@ function PrepPracticeInner({
               )}
             </Button>
             <span className="text-[10px] text-muted-foreground/50 hidden sm:inline">
-              Runs against {exercise.testCases.length} test case{exercise.testCases.length === 1 ? "" : "s"} — see output only, no pass/fail
+              Runs against {exercise.testCases.length} test case{exercise.testCases.length === 1 ? "" : "s"} — must pass all to mark done
             </span>
+            {isDone && (
+              <motion.span
+                className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <CheckCircle2 className="h-3 w-3" /> Done
+              </motion.span>
+            )}
             <div className="flex-1" />
             <Button
               isIconOnly
@@ -420,13 +448,23 @@ function PrepPracticeInner({
                       running...
                     </motion.span>
                   )}
+                  <div className="flex-1" />
+                  {passed !== null && (
+                    <span className={`text-[11px] font-medium ${passed ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+                      {passed ? "✅ Passed" : "❌ Failed"}
+                    </span>
+                  )}
                 </div>
                 <pre
                   ref={outputRef}
                   className="p-3 font-mono text-[13px] leading-relaxed overflow-y-auto scrollbar-thin whitespace-pre-wrap break-all"
                   style={{ height: "calc(100% - 33px)" }}
                 >
-                  {output || (
+                  {output ? (
+                    <span className={passed === true ? "text-emerald-600 dark:text-emerald-400 font-sans font-medium" : passed === false ? "text-zinc-600 dark:text-zinc-400" : undefined}>
+                      {output}
+                    </span>
+                  ) : (
                     <span className="text-zinc-400 dark:text-zinc-600">
                       Write your code and press Run
                     </span>
