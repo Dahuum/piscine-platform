@@ -10,7 +10,7 @@ function buildPlatformFacts(): string {
   return Object.values(examWeeks)
     .map(
       (week) =>
-        `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total), ${week.timeMinutes} minute time limit. A wrong submission triggers an increasing cooldown before the next attempt. One random exercise is drawn per level.`,
+        `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total), ${week.passThreshold} required to pass, ${week.retryFee} points cost per retry.`
     )
     .join("\n");
 }
@@ -54,16 +54,16 @@ export async function POST(req: NextRequest) {
     // requiring anyone to pay anything. Override via OPENROUTER_MODEL if a
     // funded account/paid model is ever preferred instead.
     model: isOpenRouter
-      ? process.env.OPENROUTER_MODEL || "openai/gpt-oss-20b:free"
+      ? process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free"
       : "deepseek-chat",
     messages: [
       {
         role: "system",
         content:
-          "You are a teaching assistant for the 42 School C Piscine. Guide students without giving direct answers. Encourage them to think, explain concepts clearly, and help them debug their code. Be concise. The student is learning C programming and shell scripting. Never give complete solutions. Use proper markdown formatting for code blocks and clear explanations." +
-          `\n\nThis platform (not the real 42 curriculum) runs its own exam weeks with these exact mechanics — use ONLY these facts for exam structure/rules/levels/points questions, regardless of what page the student is asking from, and do not fall back to general knowledge about real 42 exams for anything covered here:\n${buildPlatformFacts()}` +
-          (typeof pageContext === "string" && pageContext
-            ? `\n\nThe student is currently on the page described below. This platform's days and exercises have their own titles and numbers that do not necessarily match the real 42 curriculum or general knowledge — answer from these facts, not assumptions:\n${pageContext}`
+          "You are a teaching assistant for the 42 School C Piscine. Guide students without giving direct answers. Encourage them to think, explain concepts clearly, and help them debug their code. Be concise, supportive, and pedagogical. Never provide full solutions unless explicitly asked for final correction hints."
+          + `\n\nThis platform (not the real 42 curriculum) runs its own exam weeks with these exact mechanics — use ONLY these facts for exam structure/rules/levels/points questions, regardless of what you know about the real 42 system:\n${buildPlatformFacts()}`
+          + (typeof pageContext === "string" && pageContext
+            ? `\n\nThe student is currently on the page described below. This platform's days and exercises have their own titles and numbers that do not necessarily match the real 42 curriculum or generic online references. When the student asks about an exercise, infer from this page context first and answer according to this platform's naming/content.\n\nPage context:\n${pageContext}`
             : ""),
       },
       ...messages.map((m: { role: string; content: string }) => ({
