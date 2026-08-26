@@ -10,7 +10,7 @@ function buildPlatformFacts(): string {
   return Object.values(examWeeks)
     .map(
       (week) =>
-        `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total), ${week.passThreshold} required to pass, ${week.retryFee} points cost per retry.`
+        `${week.title} (id: ${week.id}): ${week.levelCount} levels (0 through ${week.levelCount - 1}), ${week.gradePerLevel} points per level (${week.gradePerLevel * week.levelCount} points total).`
     )
     .join("\n");
 }
