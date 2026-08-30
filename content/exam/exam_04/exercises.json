@@ -1,5 +1,607 @@
 [
   {
+    "name": "add_prime_sum",
+    "level": 0,
+    "type": "program",
+    "subject": {
+      "assignment": "add_prime_sum",
+      "files": [
+        "add_prime_sum.c"
+      ],
+      "allowed": [
+        "write",
+        "exit"
+      ],
+      "description": "Write a program that takes a positive integer as argument and displays the sum\nof all prime numbers inferior or equal to it followed by a newline.\n\nIf the number of arguments is not 1, or the argument is not a positive number,\njust display 0 followed by a newline."
+    },
+    "referenceCode": "#include <unistd.h>\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\nvoid\tft_putposnbr(int n)\n{\n\tif (n > 9)\n\t\tft_putposnbr(n / 10);\n\tft_putchar(n % 10 + '0');\n}\nint\t\tft_atoi_nc(char *s)\n{\n\tint\t\tr;\n\tr = 0;\n\twhile (*s >= '0' && *s <= '9')\n\t\tr = r * 10 + *s++ - '0';\n\treturn (r);\n}\nint is_prime(int n)\n{\n\tint i;\n\ti = 2;\n\twhile (i < n)\n\t\tif (!(n % i++))\n\t\t\treturn (0);\n\treturn (1);\n}\nvoid\tadd_prime_sum(int n)\n{\n\tint\ti;\n\tint\tcount;\n\tcount = 0;\n\tif (n == 1)\n\t\tcount = 1;\n\ti = 1;\n\twhile (++i <= n)\n\t\tif (is_prime(i))\n\t\t\tcount += i;\n\tft_putposnbr(count);\n}\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2 && ft_atoi_nc(av[1]) > 0)\n\t\tadd_prime_sum(ft_atoi_nc(av[1]));\n\telse\n\t\twrite(1, \"0\", 1);\n\twrite(1, \"\\n\", 1);\n\treturn (1);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "5"
+        ]
+      },
+      {
+        "args": [
+          "7"
+        ]
+      },
+      {
+        "args": [
+          "17",
+          "23",
+          "42"
+        ]
+      },
+      {
+        "args": [
+          "-1932"
+        ]
+      },
+      {
+        "args": [
+          "1"
+        ]
+      },
+      {
+        "args": [
+          "46"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "epur_str",
+    "level": 0,
+    "type": "program",
+    "subject": {
+      "assignment": "epur_str",
+      "files": [
+        "epur_str.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string, and displays this string with exactly one\nspace between words, with no spaces or tabs either at the beginning or the end,\nfollowed by a \\n.\n\nA \"word\" is defined as a part of a string delimited either by spaces/tabs, or\nby the start/end of the string.\n\nIf the number of arguments is not 1, or if there are no words to display, the\nprogram displays \\n."
+    },
+    "referenceCode": "#include <unistd.h>\nint\t\tft_strlen(char *s)\n{\n\tint i;\n\ti = 0;\n\twhile (s[i])\n\t\ti++;\n\treturn (i);\n}\nint\t\tft_isblank(char c)\n{\n\tif (c == ' ' || c == '\\t')\n\t\treturn (1);\n\tif (c >= 9 && c <= 13)\n\t\treturn (1);\n\treturn (0);\n}\nvoid\tepurstr(char *s)\n{\n\tint len = ft_strlen(s);\n\twhile (len && ft_isblank(s[len - 1]))\n\t\t--len;\n\twhile (len && ft_isblank(*s) && *s++)\n\t\t--len;\n\twhile (len--)\n\t{\n\t\tif (!ft_isblank(*s) || (*(s + 1) && !ft_isblank(*(s + 1))))\n\t\t\twrite(1, s, 1);\n\t\ts++;\n\t}\n}\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2 && *av[1])\n\t\tepurstr(av[1]);\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "vous voyez c'est facile d'afficher la meme chose"
+        ]
+      },
+      {
+        "args": [
+          " seulement          la c'est      plus dur "
+        ]
+      },
+      {
+        "args": [
+          "comme c'est cocasse",
+          "vous avez entendu, Mathilde ?"
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "   "
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_rrange",
+    "level": 0,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_rrange",
+      "files": [
+        "ft_rrange.c"
+      ],
+      "allowed": [
+        "malloc"
+      ],
+      "description": "Write the following function:\n\nint     *ft_rrange(int start, int end);\n\nIt must allocate (with malloc()) an array of integers, fill it with consecutive\nvalues that begin at end and end at start (Including start and end !), then\nreturn a pointer to the first value of the array.\n\nExamples:\n\n- With (1, 3) you will return an array containing 3, 2 and 1\n- With (-1, 2) you will return an array containing 2, 1, 0 and -1.\n- With (0, 0) you will return an array containing 0.\n- With (0, -3) you will return an array containing -3, -2, -1 and 0."
+    },
+    "referenceCode": "#include <stdlib.h>\nint     *ft_rrange(int start, int end)\n{\n\tint\t*r;\n\tint\tlen;\n\tlen = (end >= start) ? end - start + 1 : start - end + 1;\n\tif (!(r = (int*)malloc(sizeof(int) * len)))\n\t\treturn (NULL);\n\t while (len--)\n\t\t r[len] = (end >= start) ? start++ : start--;\n\treturn (r);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nint     *ft_rrange(int start, int end);\n\nint main(int argc, char **argv)\n{\n\tint start;\n\tint end;\n\tint *r;\n\tint len;\n\tint i;\n\n\tif (argc != 3)\n\t\treturn (0);\n\tstart = atoi(argv[1]);\n\tend = atoi(argv[2]);\n\tlen = (end >= start) ? end - start + 1 : start - end + 1;\n\tr = ft_rrange(start, end);\n\tif (!r)\n\t\treturn (1);\n\ti = 0;\n\twhile (i < len)\n\t{\n\t\tprintf(\"%d \", r[i]);\n\t\ti++;\n\t}\n\tprintf(\"\\n\");\n\tfree(r);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "1",
+          "3"
+        ]
+      },
+      {
+        "args": [
+          "-1",
+          "2"
+        ]
+      },
+      {
+        "args": [
+          "0",
+          "0"
+        ]
+      },
+      {
+        "args": [
+          "0",
+          "-3"
+        ]
+      },
+      {
+        "args": [
+          "10",
+          "1"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "hidenp",
+    "level": 0,
+    "type": "program",
+    "subject": {
+      "assignment": "hidenp",
+      "files": [
+        "hidenp.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program named hidenp that takes two strings and displays 1\nfollowed by a newline if the first string is hidden in the second one,\notherwise displays 0 followed by a newline.\n\nLet s1 and s2 be strings. We say that s1 is hidden in s2 if it's possible to\nfind each character from s1 in s2, in the same order as they appear in s1.\nAlso, the empty string is hidden in any string.\n\nIf the number of parameters is not 2, the program displays a newline."
+    },
+    "referenceCode": "#include <unistd.h>\nvoid\thidenp(char *s1, char *s2)\n{\n\twhile (*s2)\n\t\tif (*s1 == *s2++)\n\t\t\ts1++;\n\t(*s1 == '\\0') ? write(1, \"1\", 1) : write(1, \"0\", 1);\n}\nint\tmain(int argc, char **argv)\n{\n\tif (argc == 3)\n\t\thidenp(argv[1], argv[2]);\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "fgex.;",
+          "tyf34gdgf;'ektufjhgdgex.;.;rtjynur6"
+        ]
+      },
+      {
+        "args": [
+          "abc",
+          "2altrb53c.sse"
+        ]
+      },
+      {
+        "args": [
+          "abc",
+          "btarc"
+        ]
+      },
+      {
+        "args": [
+          "",
+          "anything"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pgcd",
+    "level": 0,
+    "type": "program",
+    "subject": {
+      "assignment": "pgcd",
+      "files": [
+        "pgcd.c"
+      ],
+      "allowed": [
+        "printf",
+        "atoi",
+        "malloc",
+        "free"
+      ],
+      "description": "Write a program that takes two strings representing two strictly positive\nintegers that fit in an int.\n\nDisplay their highest common denominator followed by a newline (It's always a\nstrictly positive integer).\n\nIf the number of parameters is not 2, display a newline."
+    },
+    "referenceCode": "#include <stdio.h>\n#include <stdlib.h>\nint\t\tpgcd(unsigned int nb, unsigned int nb2)\n{\n\tint i;\n\ti = nb;\n\twhile (i > 0)\n\t{\n\t\tif (nb % i == 0 && nb2 % i == 0)\n\t\t\treturn (i);\n\t\ti--;\n\t}\n\treturn (1);\n}\nint\tmain(int argc, char **argv)\n{\n\tif (argc == 3)\n\t\tprintf(\"%d\", pgcd(atoi(argv[1]), atoi(argv[2])));\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "42",
+          "10"
+        ]
+      },
+      {
+        "args": [
+          "42",
+          "12"
+        ]
+      },
+      {
+        "args": [
+          "14",
+          "77"
+        ]
+      },
+      {
+        "args": [
+          "17",
+          "3"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "print_hex",
+    "level": 0,
+    "type": "program",
+    "subject": {
+      "assignment": "print_hex",
+      "files": [
+        "print_hex.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a positive (or zero) number expressed in base 10,\nand displays it in base 16 (lowercase letters) followed by a newline.\n\nIf the number of parameters is not 1, the program displays a newline."
+    },
+    "referenceCode": "#include <unistd.h>\nint\t\tft_atoi(char *s)\n{\n\tlong\tr;\n\tint\t\tsign;\n\twhile (*s == 32 || (*s >= 9 && *s <= 13))\n\t\ts++;\n\tsign = (*s == '-') ? -1 : 1;\n\t(*s == '-' || *s == '+') ? s++ : s;\n\tr = 0;\n\twhile (*s >= '0' && *s <= '9')\n\t\tr = r * 10 + *s++ - '0';\n\treturn ((int)r * sign);\n}\nvoid\tprint_hex(int n)\n{\n\tif (n >= 16)\n\t\tprint_hex(n / 16);\n\tn = n % 16;\n\tn += n < 10 ? '0' : 'a' - 10;\n\twrite(1, &n, 1);\n}\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t\tprint_hex(ft_atoi(av[1]));\n\twrite(1, \"\\n\", 1);\n\treturn (1);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "10"
+        ]
+      },
+      {
+        "args": [
+          "255"
+        ]
+      },
+      {
+        "args": [
+          "5156454"
+        ]
+      },
+      {
+        "args": [
+          "0"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "expand_str",
+    "level": 1,
+    "type": "program",
+    "subject": {
+      "assignment": "expand_str",
+      "files": [
+        "expand_str.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes a string and displays it with exactly three spaces\nbetween each word, with no spaces or tabs either at the beginning or the end,\nfollowed by a newline.\n\nA word is a section of string delimited either by spaces/tabs, or by the\nstart/end of the string.\n\nIf the number of parameters is not 1, or if there are no words, simply display\na newline."
+    },
+    "referenceCode": "#include <unistd.h>\n\nint\t\tft_isblank(char c)\n{\n\treturn ((c == ' ' || c == '\\t') ? 1 : 0);\n}\n\nvoid\texpand_str(char *s)\n{\n\tint\ti = 0;\n\tint\twc = 0;\n\n\twhile (s[i])\n\t\tif (!ft_isblank(s[i++]) && (!wc || ft_isblank(s[i - 2])))\n\t\t\t++wc;\n\ti = 0;\n\twhile (s[i])\n\t{\n\t\tif (!ft_isblank(s[i++]) && wc--)\n\t\t{\n\t\t\twrite (1, &s[i - 1], 1);\n\t\t\twhile (s[i] && !ft_isblank(s[i]) && write(1, &s[i++], 1));\n\t\t\t(wc) ? write(1, \"   \", 3) : 0;\n\t\t}\n\t}\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t\texpand_str(av[1]);\n\twrite(1, \"\\n\", 1);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "vous   voyez   c'est   facile   d'afficher   la   meme   chose"
+        ]
+      },
+      {
+        "args": [
+          " seulement          la c'est      plus dur "
+        ]
+      },
+      {
+        "args": [
+          "comme c'est cocasse",
+          "vous avez entendu, Mathilde ?"
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_atoi_base",
+    "level": 1,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_atoi_base",
+      "files": [
+        "ft_atoi_base.c"
+      ],
+      "allowed": [],
+      "description": "Write a function that converts the string argument str (base N <= 16)\nto an integer (base 10) and returns it.\n\nThe characters recognized in the input are: 0123456789abcdef\nThose are, of course, to be trimmed according to the requested base. For\nexample, base 4 recognizes \"0123\" and base 16 recognizes \"0123456789abcdef\".\n\nUppercase letters must also be recognized: \"12fdb3\" is the same as \"12FDB3\".\n\nMinus signs ('-') are interpreted only if they are the first character of the\nstring.\n\nYour function must be declared as follows:\n\nint\tft_atoi_base(const char *str, int str_base);"
+    },
+    "referenceCode": "int is_ft_blank(char c)\n{\n\tif (c <= 32)\n\t\treturn (1);\n\treturn (0);\n}\n\nint\t\tisvalid(char c, int base)\n{\n\tchar digits[17] = \"0123456789abcdef\";\n\tchar digits2[17] = \"0123456789ABCDEF\";\n\n\twhile (base--)\n\t\tif (digits[base] == c || digits2[base] == c)\n\t\t\treturn (1);\n\treturn (0);\n}\n\nint\t\tvalue_of(char c)\n{\n\tif (c >= '0' && c <= '9')\n\t\treturn (c - '0');\n\telse if (c >= 'a' && c <= 'f')\n\t\treturn (c - 'a' + 10);\n\telse if (c >= 'A' && c <= 'F')\n\t\treturn (c - 'A' + 10);\n\treturn (0);\n}\n\nint\t\tft_atoi_base(const char *str, int str_base)\n{\n\tint result;\n\tint sign;\n\n\tresult = 0;\n\twhile (is_ft_blank(*str))\n\t\tstr++;\n\tsign = (*str == '-') ? -1 : 1;\n\t(*str == '-' || *str == '+') ? ++str : 0;\n\twhile (isvalid(*str, str_base))\n\t\tresult = result * str_base + value_of(*str++);\n\treturn (result * sign);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nint\tft_atoi_base(const char *str, int str_base);\n\nint\tmain(int ac, char **av)\n{\n\tif (ac == 3)\n\t\tprintf(\"%d\", ft_atoi_base(av[1], atoi(av[2])));\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "101",
+          "2"
+        ]
+      },
+      {
+        "args": [
+          "ff",
+          "16"
+        ]
+      },
+      {
+        "args": [
+          "FF",
+          "16"
+        ]
+      },
+      {
+        "args": [
+          "-2a",
+          "16"
+        ]
+      },
+      {
+        "args": [
+          "123",
+          "4"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_range",
+    "level": 1,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_range",
+      "files": [
+        "ft_range.c"
+      ],
+      "allowed": [
+        "malloc"
+      ],
+      "description": "Write the following function:\n\nint     *ft_range(int start, int end);\n\nIt must allocate (with malloc()) an array of integers, fill it with consecutive\nvalues that begin at start and end at end (Including start and end !), then\nreturn a pointer to the first value of the array.\n\nExamples:\n\n- With (1, 3) you will return an array containing 1, 2 and 3.\n- With (-1, 2) you will return an array containing -1, 0, 1 and 2.\n- With (0, 0) you will return an array containing 0.\n- With (0, -3) you will return an array containing 0, -1, -2 and -3."
+    },
+    "referenceCode": "#include <stdlib.h>\n\nint\t\t*ft_range(int min, int max)\n{\n\tint\t\tn;\n\tint\t\t*s;\n\tint\t\t*start;\n\n\tn = max >= min ? max - min + 1 : min - max + 1;\n\tif (!(s = (int *)malloc(sizeof(int) * n)))\n\t\treturn (NULL);\n\tstart = s;\n\twhile (max != min)\n\t\t*s++ = max > min ? min++ : min--;\n\t*s = min;\n\treturn (start);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nint     *ft_range(int start, int end);\n\nint main(int argc, char **argv)\n{\n\tint start;\n\tint end;\n\tint *r;\n\tint len;\n\tint i;\n\n\tif (argc != 3)\n\t\treturn (0);\n\tstart = atoi(argv[1]);\n\tend = atoi(argv[2]);\n\tlen = (end >= start) ? end - start + 1 : start - end + 1;\n\tr = ft_range(start, end);\n\tif (!r)\n\t\treturn (1);\n\ti = 0;\n\twhile (i < len)\n\t{\n\t\tprintf(\"%d \", r[i]);\n\t\ti++;\n\t}\n\tprintf(\"\\n\");\n\tfree(r);\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "1",
+          "3"
+        ]
+      },
+      {
+        "args": [
+          "-1",
+          "2"
+        ]
+      },
+      {
+        "args": [
+          "0",
+          "0"
+        ]
+      },
+      {
+        "args": [
+          "0",
+          "-3"
+        ]
+      },
+      {
+        "args": [
+          "-5",
+          "5"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "lcm",
+    "level": 1,
+    "type": "function",
+    "subject": {
+      "assignment": "lcm",
+      "files": [
+        "lcm.c"
+      ],
+      "allowed": [],
+      "description": "Write a function who takes two unsigned int as parameters and returns the\ncomputed LCM of those parameters.\n\nLCM (Lowest Common Multiple) of two non-zero integers is the smallest postive\ninteger divisible by the both integers.\n\nA LCM can be calculated in two ways:\n\n- You can calculate every multiples of each integers until you have a common\nmultiple other than 0\n\n- You can use the HCF (Highest Common Factor) of these two integers and\ncalculate as follows:\n\n    LCM(x, y) = | x * y | / HCF(x, y)\n\n | x * y | means \"Absolute value of the product of x by y\"\n\nIf at least one integer is null, LCM is equal to 0.\n\nYour function must be prototyped as follows:\n\n unsigned int    lcm(unsigned int a, unsigned int b);"
+    },
+    "referenceCode": "unsigned int\tgcd(unsigned int a, unsigned int b)\n{\n\tunsigned int\tt;\n\n\twhile (b)\n\t{\n\t\tt = b;\n\t\tb = a % b;\n\t\ta = t;\n\t}\n\treturn (a);\n}\n\nunsigned int\tlcm(unsigned int a, unsigned int b)\n{\n\tif (!a || !b)\n\t\treturn (0);\n\treturn (a / gcd(a, b) * b);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nunsigned int lcm(unsigned int a, unsigned int b);\n\nint main(int ac, char **av)\n{\n\tif (ac == 3)\n\t\tprintf(\"%u\", lcm((unsigned int)atoi(av[1]), (unsigned int)atoi(av[2])));\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "4",
+          "6"
+        ]
+      },
+      {
+        "args": [
+          "21",
+          "6"
+        ]
+      },
+      {
+        "args": [
+          "0",
+          "5"
+        ]
+      },
+      {
+        "args": [
+          "7",
+          "7"
+        ]
+      },
+      {
+        "args": [
+          "12",
+          "18"
+        ]
+      },
+      {
+        "args": [
+          "100",
+          "75"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "paramsum",
+    "level": 1,
+    "type": "program",
+    "subject": {
+      "assignment": "paramsum",
+      "files": [
+        "paramsum.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that displays the number of arguments passed to it, followed by\na newline.\n\nIf there are no arguments, just display a 0 followed by a newline."
+    },
+    "referenceCode": "#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\nvoid\tft_putnbr(int n)\n{\n\tif (n > 9)\n\t\tft_putnbr(n / 10);\n\tft_putchar(n % 10 +'0');\n}\n\nint\t\tmain(int ac, char **av)\n{\n\t(void)av;\n\tft_putnbr(ac - 1);\n\twrite(1, \"\\n\", 1);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "1",
+          "2",
+          "3",
+          "5",
+          "7",
+          "24"
+        ]
+      },
+      {
+        "args": [
+          "6",
+          "12",
+          "24"
+        ]
+      },
+      {
+        "args": [
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "str_capitalizer",
+    "level": 1,
+    "type": "program",
+    "subject": {
+      "assignment": "str_capitalizer",
+      "files": [
+        "str_capitalizer.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes one or several strings and, for each argument,\ncapitalizes the first character of each word (If it's a letter, obviously),\nputs the rest in lowercase, and displays the result on the standard output,\nfollowed by a \\n.\n\nA \"word\" is defined as a part of a string delimited either by spaces/tabs, or\nby the start/end of the string. If a word only has one letter, it must be\ncapitalized.\n\nIf there are no arguments, the progam must display \\n."
+    },
+    "referenceCode": "#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\nint\t\tft_isspace(char c)\n{\n\tif (c == ' ' || c == '\\t')\n\t\treturn (1);\n\treturn (0);\n}\n\nint\t\tft_char_tolower(char c)\n{\n\treturn (c += (c >= 'A' && c <= 'Z') ? 32 : 0);\n}\n\nint\t\tft_char_toupper(char c)\n{\n\treturn (c -= (c >= 'a' && c <= 'z') ? 32 : 0);\n}\n\nvoid\tstr_capitaliser(char *s)\n{\n\twhile (*s)\n\t{\n\t\twhile (ft_isspace(*s))\n\t\t\tft_putchar(*s++);\n\t\tif (*s && !ft_isspace(*s))\n\t\t\tft_putchar(ft_char_toupper(*s++));\n\t\twhile (*s && !ft_isspace(*s))\n\t\t\tft_putchar(ft_char_tolower(*s++));\n\t}\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac > 1)\n\t{\n\t\t++av;\n\t\twhile (*av)\n\t\t{\n\t\t\tstr_capitaliser(*av++);\n\t\t\twrite(1, \"\\n\", 1);\n\t\t}\n\t}\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "Premier PETIT TesT"
+        ]
+      },
+      {
+        "args": [
+          "DeuxiEmE tEST uN PEU moinS  facile",
+          "   attention C'EST pas dur QUAND mEmE",
+          "ALLer UN DeRNier 0123456789pour LA rouTE    E "
+        ]
+      }
+    ]
+  },
+  {
+    "name": "tab_mult",
+    "level": 1,
+    "type": "program",
+    "subject": {
+      "assignment": "tab_mult",
+      "files": [
+        "tab_mult.c"
+      ],
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that displays a number's multiplication table.\n\nThe parameter will always be a strictly positive number that fits in an int,\nand said number times 9 will also fit in an int.\n\nIf there are no parameters, the program displays \\n."
+    },
+    "referenceCode": "#include <unistd.h>\n\nvoid\tft_putchar(char c)\n{\n\twrite(1, &c, 1);\n}\n\nvoid\tft_putposnbr(int n)\n{\n\tif (n > 9)\n\t\tft_putposnbr(n / 10);\n\tft_putchar(n % 10 + '0');\n}\n\nint\t\tft_atoi_osefvalid(char *s)\n{\n\tint\t\tr;\n\n\tr = 0;\n\twhile (*s >= '0' && *s <= '9')\n\t\tr = r * 10 + *s++ - '0';\n\treturn (r);\n}\n\nvoid\ttab_mult(int n)\n{\n\tint i = 1;\n\twhile (i < 10)\n\t{\n\t\tft_putposnbr(i);\n\t\twrite(1,\" x \", 3);\n\t\tft_putposnbr(n);\n\t\twrite(1, \" = \", 3);\n\t\tft_putposnbr(i++ * n);\n\t\twrite(1, \"\\n\", 1);\n\t}\n}\n\nint\t\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t\ttab_mult(ft_atoi_osefvalid(av[1]));\n\telse\n\t\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "9"
+        ]
+      },
+      {
+        "args": [
+          "19"
+        ]
+      },
+      {
+        "args": [
+          "1"
+        ]
+      }
+    ]
+  },
+  {
     "name": "ft_list_size",
     "level": 0,
     "type": "function",
@@ -42,22 +644,94 @@
     ]
   },
   {
-    "name": "ft_list_last",
+    "name": "rstr_capitalizer",
     "level": 0,
-    "type": "function",
+    "type": "program",
     "subject": {
-      "assignment": "ft_list_last",
+      "assignment": "rstr_capitalizer",
       "files": [
-        "ft_list_last.c"
+        "rstr_capitalizer.c"
       ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that returns a pointer to the last element of a linked list. Return NULL if the list is empty.\n\nPrototype: t_list *ft_list_last(t_list *begin_list);"
+      "allowed": [
+        "write"
+      ],
+      "description": "Write a program that takes one or more strings and, for each argument, puts the last character of each word (if it's a letter) in uppercase and the rest in lowercase, then displays the result followed by a newline.\n\nA word is a section of string delimited by spaces/tabs or the start/end of the string. If a word has a single letter, it must be capitalized.\n\nIf there are no parameters, display a newline."
     },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nt_list\t*ft_list_last(t_list *begin_list)\n{\n\tif (!begin_list)\n\t\treturn (NULL);\n\twhile (begin_list->next)\n\t\tbegin_list = begin_list->next;\n\treturn (begin_list);\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nt_list\t*ft_list_last(t_list *begin_list);\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tt_list\t*last;\n\n\tlist = build_list(argc, argv, 1);\n\tlast = ft_list_last(list);\n\tif (last)\n\t\tprintf(\"%d\\n\", *(int *)last->data);\n\telse\n\t\tprintf(\"NULL\\n\");\n\treturn (0);\n}\n",
+    "referenceCode": "#include <unistd.h>\n\nint\tft_isblank(char c)\n{\n\treturn (c == ' ' || c == '\\t');\n}\n\nchar\tft_tolower_c(char c)\n{\n\tif (c >= 'A' && c <= 'Z')\n\t\treturn (c + 32);\n\treturn (c);\n}\n\nchar\tft_toupper_c(char c)\n{\n\tif (c >= 'a' && c <= 'z')\n\t\treturn (c - 32);\n\treturn (c);\n}\n\nvoid\tprocess(char *s)\n{\n\tint\t\ti;\n\tint\t\twstart;\n\tint\t\twend;\n\tint\t\tj;\n\tchar\tc;\n\n\ti = 0;\n\twstart = -1;\n\twhile (1)\n\t{\n\t\tif (s[i] != '\\0' && !ft_isblank(s[i]))\n\t\t{\n\t\t\tif (wstart == -1)\n\t\t\t\twstart = i;\n\t\t}\n\t\telse\n\t\t{\n\t\t\tif (wstart != -1)\n\t\t\t{\n\t\t\t\twend = i - 1;\n\t\t\t\tj = wstart;\n\t\t\t\twhile (j <= wend)\n\t\t\t\t{\n\t\t\t\t\tc = s[j];\n\t\t\t\t\tif (j == wend)\n\t\t\t\t\t\tc = ft_toupper_c(c);\n\t\t\t\t\telse\n\t\t\t\t\t\tc = ft_tolower_c(c);\n\t\t\t\t\twrite(1, &c, 1);\n\t\t\t\t\tj++;\n\t\t\t\t}\n\t\t\t\twstart = -1;\n\t\t\t}\n\t\t\tif (s[i] != '\\0')\n\t\t\t\twrite(1, &s[i], 1);\n\t\t}\n\t\tif (s[i] == '\\0')\n\t\t\tbreak ;\n\t\ti++;\n\t}\n}\n\nint\tmain(int argc, char **argv)\n{\n\tint\ti;\n\n\tif (argc == 1)\n\t{\n\t\twrite(1, \"\\n\", 1);\n\t\treturn (0);\n\t}\n\ti = 1;\n\twhile (i < argc)\n\t{\n\t\tprocess(argv[i]);\n\t\twrite(1, \"\\n\", 1);\n\t\ti++;\n\t}\n\treturn (0);\n}\n",
+    "mainCode": null,
     "testCases": [
       {
         "args": []
+      },
+      {
+        "args": [
+          "Premier PETIT TesT"
+        ]
+      },
+      {
+        "args": [
+          "DeuxiEmE tEST uN PEU moinS  facile"
+        ]
+      },
+      {
+        "args": [
+          "   attention C'EST pas dur QUAND mEmE"
+        ]
+      },
+      {
+        "args": [
+          "ALLer UN DeRNier 0123456789pour LA rouTE    E "
+        ]
+      },
+      {
+        "args": [
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "fprime",
+    "level": 2,
+    "type": "program",
+    "subject": {
+      "assignment": "fprime",
+      "files": [
+        "fprime.c"
+      ],
+      "allowed": [
+        "printf",
+        "atoi"
+      ],
+      "description": "Write a program that takes a positive int and displays its prime factors on the standard output, followed by a newline.\n\nFactors must be displayed in ascending order and separated by '*', so that the expression in the output gives the right result.\n\nIf the number of parameters is not 1, simply display a newline.\n\nThe input, when there's one, will be valid."
+    },
+    "referenceCode": "#include <stdlib.h>\n#include <stdio.h>\n\nvoid\tfprime(unsigned int nb)\n{\n\tunsigned int\tprime;\n\n\tif (nb == 1)\n\t\tprintf(\"1\");\n\telse\n\t{\n\t\tprime = 2;\n\t\twhile (nb > 1)\n\t\t{\n\t\t\tif (nb % prime == 0)\n\t\t\t{\n\t\t\t\tprintf(\"%d\", prime);\n\t\t\t\tnb /= prime;\n\t\t\t\tif (nb > 1)\n\t\t\t\t\tprintf(\"*\");\n\t\t\t\tprime--;\n\t\t\t}\n\t\t\tprime++;\n\t\t}\n\t}\n}\n\nint\tmain(int ac, char **av)\n{\n\tif (ac == 2 && *av[1])\n\t\tfprime(atoi(av[1]));\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": [
+          "225225"
+        ]
+      },
+      {
+        "args": [
+          "8333325"
+        ]
+      },
+      {
+        "args": [
+          "9539"
+        ]
+      },
+      {
+        "args": [
+          "804577"
+        ]
+      },
+      {
+        "args": [
+          "42"
+        ]
       },
       {
         "args": [
@@ -65,241 +739,342 @@
         ]
       },
       {
-        "args": [
-          "1",
-          "2",
-          "3"
-        ]
+        "args": []
       },
       {
         "args": [
-          "-8",
-          "0",
-          "42"
+          "42",
+          "21"
         ]
       }
     ]
   },
   {
-    "name": "ft_list_push_front",
-    "level": 0,
+    "name": "rev_wstr",
+    "level": 2,
+    "type": "program",
+    "subject": {
+      "assignment": "rev_wstr",
+      "files": [
+        "rev_wstr.c"
+      ],
+      "allowed": [
+        "write",
+        "malloc",
+        "free"
+      ],
+      "description": "Write a program that takes a string as a parameter, and prints its words in reverse order.\n\nA word is a part of the string bounded by spaces and/or tabs, or the begin/end of the string.\n\nIf the number of parameters is different from 1, the program will display a newline.\n\nIn the parameters that are going to be tested, there won't be any additional spaces (no leading/trailing spaces, and words always separated by exactly one space)."
+    },
+    "referenceCode": "#include <unistd.h>\n\nint\tstr_length(char *str)\n{\n\tint\tlen;\n\n\tlen = 0;\n\twhile (*str)\n\t{\n\t\tstr++;\n\t\tlen++;\n\t}\n\treturn (len);\n}\n\nint\tiswhitespace(char chr)\n{\n\treturn (chr == ' ' || chr == '\\t');\n}\n\nvoid\tprint_reverse(char *str)\n{\n\tint\tfast;\n\tint\tslow;\n\tint\tcurr;\n\n\tfast = str_length(str) - 1;\n\twhile (fast >= 0)\n\t{\n\t\twhile (fast >= 0 && iswhitespace(str[fast]))\n\t\t\tfast--;\n\t\tif (fast < 0)\n\t\t\tbreak ;\n\t\tslow = fast;\n\t\twhile (fast >= 0 && !iswhitespace(str[fast]))\n\t\t\tfast--;\n\t\tcurr = fast + 1;\n\t\twhile (curr <= slow)\n\t\t{\n\t\t\twrite(1, &str[curr], 1);\n\t\t\tcurr++;\n\t\t}\n\t\tif (fast >= 0)\n\t\t\twrite(1, \" \", 1);\n\t}\n}\n\nint\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t\tprint_reverse(av[1]);\n\twrite(1, \"\\n\", 1);\n\treturn (1);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": [
+          "le temps du mepris precede celui de l'indifference"
+        ]
+      },
+      {
+        "args": [
+          "abcdefghijklm"
+        ]
+      },
+      {
+        "args": [
+          "il contempla le mont"
+        ]
+      },
+      {
+        "args": []
+      }
+    ]
+  },
+  {
+    "name": "rostring",
+    "level": 3,
+    "type": "program",
+    "subject": {
+      "assignment": "rostring",
+      "files": [
+        "rostring.c"
+      ],
+      "allowed": [
+        "write",
+        "malloc",
+        "free"
+      ],
+      "description": "Write a program that takes a string and displays this string after rotating it one word to the left.\n\nThus, the first word becomes the last, and others stay in the same order.\n\nA word is defined as a part of a string delimited either by spaces/tabs, or by the start/end of the string.\n\nWords will be separated by only one space in the output.\n\nIf there's less than one argument, the program displays a newline."
+    },
+    "referenceCode": "#include <unistd.h>\n\nint\tft_isblank(char c)\n{\n\treturn (c == ' ' || c == '\\t');\n}\n\nvoid\trostring(char *s)\n{\n\tint\ti;\n\tint\tfirst_word_length;\n\n\ti = 0;\n\tfirst_word_length = 0;\n\twhile (s[i])\n\t{\n\t\twhile (ft_isblank(s[i]))\n\t\t\ti++;\n\t\tif (s[i] && !ft_isblank(s[i]))\n\t\t{\n\t\t\tif (first_word_length == 0)\n\t\t\t\twhile (s[i] && !ft_isblank(s[i++]))\n\t\t\t\t\tfirst_word_length++;\n\t\t\telse\n\t\t\t{\n\t\t\t\twhile (s[i] && !ft_isblank(s[i]) && write(1, &s[i++], 1))\n\t\t\t\t\t;\n\t\t\t\twrite(1, \" \", 1);\n\t\t\t}\n\t\t}\n\t}\n\ti = 0;\n\twhile (ft_isblank(s[i]))\n\t\ti++;\n\twhile (first_word_length--)\n\t\twrite(1, &s[i++], 1);\n}\n\nint\tmain(int ac, char **av)\n{\n\tif (ac > 1 && *av[1])\n\t\trostring(av[1]);\n\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": [
+          "abc   "
+        ]
+      },
+      {
+        "args": [
+          "Que la      lumiere soit et la lumiere fut"
+        ]
+      },
+      {
+        "args": [
+          "     AkjhZ zLKIJz , 23y"
+        ]
+      },
+      {
+        "args": []
+      }
+    ]
+  },
+  {
+    "name": "brainfuck",
+    "level": 3,
+    "type": "program",
+    "subject": {
+      "assignment": "brainfuck",
+      "files": [
+        "brainfuck.c"
+      ],
+      "allowed": [
+        "write",
+        "malloc",
+        "free"
+      ],
+      "description": "Write a Brainfuck interpreter program. The source code will be given as first parameter. The code will always be valid, with no more than 4096 operations.\n\nBrainfuck is a minimalist language. It consists of an array of bytes (2048 bytes) initialized to zero, and a pointer to its first byte.\n\nEvery operator consists of a single character:\n- '>' increment the pointer\n- '<' decrement the pointer\n- '+' increment the pointed byte\n- '-' decrement the pointed byte\n- '.' print the pointed byte on standard output\n- '[' go to the matching ']' if the pointed byte is 0 (while start)\n- ']' go to the matching '[' if the pointed byte is not 0 (while end)\n\nAny other character is a comment."
+    },
+    "referenceCode": "#include <unistd.h>\n\nint\tgo_to_matching(char *operations, int curr)\n{\n\tint\tbalance;\n\n\tbalance = 0;\n\tif (operations[curr] == '[')\n\t{\n\t\tcurr++;\n\t\twhile (!(operations[curr] == ']' && balance == 0))\n\t\t{\n\t\t\tif (operations[curr] == '[')\n\t\t\t\tbalance++;\n\t\t\telse if (operations[curr] == ']')\n\t\t\t\tbalance--;\n\t\t\tcurr++;\n\t\t}\n\t\tcurr--;\n\t}\n\telse if (operations[curr] == ']')\n\t{\n\t\tcurr--;\n\t\twhile (!(operations[curr] == '[' && balance == 0))\n\t\t{\n\t\t\tif (operations[curr] == ']')\n\t\t\t\tbalance++;\n\t\t\telse if (operations[curr] == '[')\n\t\t\t\tbalance--;\n\t\t\tcurr--;\n\t\t}\n\t\tcurr--;\n\t}\n\treturn (curr);\n}\n\nvoid\tfuck_brain(char *operations)\n{\n\tint\t\tcurr;\n\tint\t\tpointer;\n\tchar\tbytes[2048];\n\n\tcurr = 0;\n\twhile (curr < 2048)\n\t\tbytes[curr++] = 0;\n\tpointer = 0;\n\tcurr = 0;\n\twhile (operations[curr])\n\t{\n\t\tif (operations[curr] == '>')\n\t\t\tpointer++;\n\t\telse if (operations[curr] == '<')\n\t\t\tpointer--;\n\t\telse if (operations[curr] == '+')\n\t\t\tbytes[pointer]++;\n\t\telse if (operations[curr] == '-')\n\t\t\tbytes[pointer]--;\n\t\telse if (operations[curr] == '.')\n\t\t\twrite(1, &bytes[pointer], 1);\n\t\telse if (operations[curr] == '[')\n\t\t{\n\t\t\tif (bytes[pointer] == 0)\n\t\t\t\tcurr = go_to_matching(operations, curr);\n\t\t}\n\t\telse if (operations[curr] == ']')\n\t\t{\n\t\t\tif (bytes[pointer] != 0)\n\t\t\t\tcurr = go_to_matching(operations, curr);\n\t\t}\n\t\tcurr++;\n\t}\n}\n\nint\tmain(int ac, char **av)\n{\n\tif (ac == 2)\n\t\tfuck_brain(av[1]);\n\telse\n\t\twrite(1, \"\\n\", 1);\n\treturn (0);\n}\n",
+    "mainCode": null,
+    "testCases": [
+      {
+        "args": [
+          "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>."
+        ]
+      },
+      {
+        "args": []
+      },
+      {
+        "args": [
+          "++++++++[>++++++++<-]>+."
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_itoa",
+    "level": 2,
     "type": "function",
     "subject": {
-      "assignment": "ft_list_push_front",
+      "assignment": "ft_itoa",
       "files": [
-        "ft_list_push_front.c"
+        "ft_itoa.c"
       ],
       "allowed": [
         "malloc"
       ],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that inserts a new element at the beginning of a linked list.\n\nPrototype: void ft_list_push_front(t_list **begin_list, void *data);"
+      "description": "Write a function that takes an int and converts it to a null-terminated string.\n\nThe function returns the result in a char array that you must allocate.\n\nPrototype: char *ft_itoa(int nbr);"
     },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_push_front(t_list **begin_list, void *data)\n{\n\tt_list\t*node;\n\n\tnode = malloc(sizeof(t_list));\n\tnode->data = data;\n\tnode->next = *begin_list;\n\t*begin_list = node;\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_push_front(t_list **begin_list, void *data);\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tint\t\tvalue;\n\n\tvalue = atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tft_list_push_front(&list, &value);\n\tprint_list(list);\n\treturn (0);\n}\n",
+    "referenceCode": "#include <stdlib.h>\n\nstatic int\tft_strlen_i(const char *s)\n{\n\tint\ti;\n\n\ti = 0;\n\twhile (s[i])\n\t\ti++;\n\treturn (i);\n}\n\nstatic char\t*ft_strrev_i(char *str)\n{\n\tint\ti;\n\tint\tj;\n\tint\ttmp;\n\n\ti = 0;\n\tj = ft_strlen_i(str);\n\twhile (j > i)\n\t{\n\t\tj--;\n\t\ttmp = str[i];\n\t\tstr[i] = str[j];\n\t\tstr[j] = tmp;\n\t\ti++;\n\t}\n\treturn (str);\n}\n\nchar\t*ft_itoa(int nbr)\n{\n\tlong\tn;\n\tint\t\ti;\n\tint\t\tneg;\n\tchar\t*tmp;\n\n\ti = 0;\n\tneg = 0;\n\tn = nbr;\n\ttmp = malloc(sizeof(char) * 13);\n\tif (tmp == NULL)\n\t\treturn (NULL);\n\tif (n == 0)\n\t{\n\t\ttmp[0] = '0';\n\t\ttmp[1] = '\\0';\n\t\treturn (tmp);\n\t}\n\tif (n < 0)\n\t{\n\t\tneg = 1;\n\t\tn = -n;\n\t}\n\twhile (n)\n\t{\n\t\ttmp[i++] = (n % 10) + '0';\n\t\tn /= 10;\n\t}\n\tif (neg)\n\t\ttmp[i++] = '-';\n\ttmp[i] = '\\0';\n\treturn (ft_strrev_i(tmp));\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nchar\t*ft_itoa(int nbr);\n\nint\tmain(int ac, char **av)\n{\n\tint\t\tn;\n\tchar\t*s;\n\n\tif (ac != 2)\n\t\treturn (1);\n\tn = atoi(av[1]);\n\ts = ft_itoa(n);\n\tprintf(\"%s\\n\", s);\n\treturn (0);\n}\n",
     "testCases": [
       {
         "args": [
-          "5"
+          "-2147483648"
         ]
       },
       {
         "args": [
-          "5",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "-1",
-          "10",
-          "20"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_list_push_back",
-    "level": 0,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_list_push_back",
-      "files": [
-        "ft_list_push_back.c"
-      ],
-      "allowed": [
-        "malloc"
-      ],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that inserts a new element at the end of a linked list.\n\nPrototype: void ft_list_push_back(t_list **begin_list, void *data);"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_push_back(t_list **begin_list, void *data)\n{\n\tt_list\t*node;\n\tt_list\t*last;\n\n\tnode = malloc(sizeof(t_list));\n\tnode->data = data;\n\tnode->next = NULL;\n\tif (!*begin_list)\n\t{\n\t\t*begin_list = node;\n\t\treturn ;\n\t}\n\tlast = *begin_list;\n\twhile (last->next)\n\t\tlast = last->next;\n\tlast->next = node;\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_push_back(t_list **begin_list, void *data);\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tint\t\tvalue;\n\n\tvalue = atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tft_list_push_back(&list, &value);\n\tprint_list(list);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": [
-          "5"
-        ]
-      },
-      {
-        "args": [
-          "5",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "-1",
-          "10",
-          "20"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_list_at",
-    "level": 1,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_list_at",
-      "files": [
-        "ft_list_at.c"
-      ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that returns a pointer to the element at index nbr (0-indexed). Return NULL if out of range.\n\nPrototype: t_list *ft_list_at(t_list *begin_list, unsigned int nbr);"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nt_list\t*ft_list_at(t_list *begin_list, unsigned int nbr)\n{\n\tunsigned int\ti;\n\n\ti = 0;\n\twhile (begin_list && i < nbr)\n\t{\n\t\tbegin_list = begin_list->next;\n\t\ti++;\n\t}\n\treturn (begin_list);\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nt_list\t*ft_list_at(t_list *begin_list, unsigned int nbr);\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tt_list\t*node;\n\tunsigned int\tnbr;\n\n\tnbr = (unsigned int)atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tnode = ft_list_at(list, nbr);\n\tif (node)\n\t\tprintf(\"%d\\n\", *(int *)node->data);\n\telse\n\t\tprintf(\"NULL\\n\");\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": [
-          "0",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "2",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "5",
-          "1",
-          "2",
-          "3"
+          "-42"
         ]
       },
       {
         "args": [
           "0"
         ]
-      }
-    ]
-  },
-  {
-    "name": "ft_list_reverse",
-    "level": 1,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_list_reverse",
-      "files": [
-        "ft_list_reverse.c"
-      ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that reverses a linked list in place (by relinking the nodes, not by swapping data).\n\nPrototype: void ft_list_reverse(t_list **begin_list);"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_reverse(t_list **begin_list)\n{\n\tt_list\t*prev;\n\tt_list\t*current;\n\tt_list\t*next;\n\n\tprev = NULL;\n\tcurrent = *begin_list;\n\twhile (current)\n\t{\n\t\tnext = current->next;\n\t\tcurrent->next = prev;\n\t\tprev = current;\n\t\tcurrent = next;\n\t}\n\t*begin_list = prev;\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_reverse(t_list **begin_list);\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\n\tlist = build_list(argc, argv, 1);\n\tft_list_reverse(&list);\n\tprint_list(list);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": []
       },
       {
         "args": [
-          "1"
+          "42"
         ]
       },
       {
         "args": [
-          "1",
-          "2",
-          "3"
+          "2147483647"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ft_itoa_base",
+    "level": 2,
+    "type": "function",
+    "subject": {
+      "assignment": "ft_itoa_base",
+      "files": [
+        "ft_itoa_base.c"
+      ],
+      "allowed": [
+        "malloc"
+      ],
+      "description": "Write a function that converts an integer value to a null-terminated string using the specified base and stores the result in a char array that you must allocate.\n\nThe base is expressed as an integer, from 2 to 16. The characters comprising the base are the digits from 0 to 9, followed by uppercase letters from A to F.\n\nFor example, base 4 would be \"0123\" and base 16 \"0123456789ABCDEF\".\n\nIf base is 10 and value is negative, the resulting string is preceded with a minus sign (-). With any other base, value is always considered unsigned.\n\nPrototype: char *ft_itoa_base(int value, int base);"
+    },
+    "referenceCode": "#include <stdlib.h>\n\nchar\t*ft_itoa_base(int value, int base)\n{\n\tunsigned int\tn;\n\tunsigned int\ttmp;\n\tint\t\t\t\tsign;\n\tint\t\t\t\ti;\n\tchar\t\t\t*s;\n\n\tsign = (value < 0 && base == 10) ? -1 : 0;\n\tn = (sign == -1) ? (unsigned int)(-(long)value) : (unsigned int)value;\n\ti = (sign == -1) ? 1 : 0;\n\ttmp = n;\n\tif (tmp == 0)\n\t\ti++;\n\twhile (tmp)\n\t{\n\t\ttmp /= base;\n\t\ti++;\n\t}\n\ts = (char *)malloc(sizeof(char) * (i + 1));\n\tif (!s)\n\t\treturn (NULL);\n\ts[i] = '\\0';\n\tif (n == 0)\n\t\ts[--i] = '0';\n\telse\n\t{\n\t\twhile (n)\n\t\t{\n\t\t\ti--;\n\t\t\ts[i] = (n % base < 10) ? (n % base) + '0' : (n % base) + 'A' - 10;\n\t\t\tn /= base;\n\t\t}\n\t}\n\tif (sign == -1)\n\t\ts[0] = '-';\n\treturn (s);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nchar\t*ft_itoa_base(int value, int base);\n\nint\tmain(int ac, char **av)\n{\n\tif (ac != 3)\n\t\treturn (1);\n\tprintf(\"%s\\n\", ft_itoa_base(atoi(av[1]), atoi(av[2])));\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "255",
+          "16"
         ]
       },
       {
         "args": [
           "4",
-          "3",
-          "2",
-          "1",
-          "0"
+          "4"
+        ]
+      },
+      {
+        "args": [
+          "-42",
+          "10"
+        ]
+      },
+      {
+        "args": [
+          "-1",
+          "2"
+        ]
+      },
+      {
+        "args": [
+          "-1",
+          "16"
+        ]
+      },
+      {
+        "args": [
+          "0",
+          "16"
+        ]
+      },
+      {
+        "args": [
+          "2147483647",
+          "16"
         ]
       }
     ]
   },
   {
-    "name": "ft_list_clear",
-    "level": 1,
+    "name": "ft_split",
+    "level": 2,
     "type": "function",
     "subject": {
-      "assignment": "ft_list_clear",
+      "assignment": "ft_split",
       "files": [
-        "ft_list_clear.c"
+        "ft_split.c"
       ],
       "allowed": [
-        "free"
+        "malloc"
       ],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that frees every element of a linked list. free_fct is called on each element's data (in list order, head to tail) before that element itself is freed.\n\nPrototype: void ft_list_clear(t_list *begin_list, void (*free_fct)(void *));"
+      "description": "Write a function that takes a string, splits it into words, and returns them as a NULL-terminated array of strings.\n\nA word is defined as a part of a string delimited either by spaces/tabs/newlines, or by the start/end of the string.\n\nPrototype: char **ft_split(char *str);"
     },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_clear(t_list *begin_list, void (*free_fct)(void *))\n{\n\tt_list\t*next;\n\n\twhile (begin_list)\n\t{\n\t\tnext = begin_list->next;\n\t\tfree_fct(begin_list->data);\n\t\tfree(begin_list);\n\t\tbegin_list = next;\n\t}\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_clear(t_list *begin_list, void (*free_fct)(void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tft_free(void *data)\n{\n\tprintf(\"freed:%d\\n\", *(int *)data);\n\tfree(data);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\n\tlist = build_list(argc, argv, 1);\n\tft_list_clear(list, &ft_free);\n\tprintf(\"done\\n\");\n\treturn (0);\n}\n",
+    "referenceCode": "#include <stdlib.h>\n\nint\tft_isspace(char c)\n{\n\treturn (c == ' ' || c == '\\n' || c == '\\t');\n}\n\nint\tcount_words(char *str)\n{\n\tint\tcount;\n\n\tcount = 0;\n\twhile (*str)\n\t{\n\t\twhile (*str && ft_isspace(*str))\n\t\t\tstr++;\n\t\tif (*str && !ft_isspace(*str))\n\t\t{\n\t\t\tcount++;\n\t\t\twhile (*str && !ft_isspace(*str))\n\t\t\t\tstr++;\n\t\t}\n\t}\n\treturn (count);\n}\n\nstatic char\t*malloc_word(char *str)\n{\n\tchar\t*word;\n\tint\t\ti;\n\n\ti = 0;\n\twhile (str[i] && !ft_isspace(str[i]))\n\t\ti++;\n\tword = (char *)malloc(sizeof(char) * (i + 1));\n\ti = 0;\n\twhile (str[i] && !ft_isspace(str[i]))\n\t{\n\t\tword[i] = str[i];\n\t\ti++;\n\t}\n\tword[i] = '\\0';\n\treturn (word);\n}\n\nchar\t**ft_split(char *str)\n{\n\tchar\t**arr;\n\tint\t\ti;\n\n\tarr = (char **)malloc(sizeof(char *) * (count_words(str) + 1));\n\ti = 0;\n\twhile (*str)\n\t{\n\t\twhile (*str && ft_isspace(*str))\n\t\t\tstr++;\n\t\tif (*str && !ft_isspace(*str))\n\t\t{\n\t\t\tarr[i] = malloc_word(str);\n\t\t\ti++;\n\t\t\twhile (*str && !ft_isspace(*str))\n\t\t\t\tstr++;\n\t\t}\n\t}\n\tarr[i] = NULL;\n\treturn (arr);\n}\n",
+    "mainCode": "#include <stdio.h>\n\nchar\t**ft_split(char *str);\n\nint\tmain(int ac, char **av)\n{\n\tchar\t**r;\n\tint\t\ti;\n\n\tif (ac != 2)\n\t\treturn (1);\n\tr = ft_split(av[1]);\n\ti = 0;\n\twhile (r[i])\n\t{\n\t\tprintf(\"%s\\n\", r[i]);\n\t\ti++;\n\t}\n\treturn (0);\n}\n",
     "testCases": [
       {
-        "args": []
+        "args": [
+          "   Hello,   Flavio\tWuensche!  "
+        ]
+      },
+      {
+        "args": [
+          ""
+        ]
+      },
+      {
+        "args": [
+          "oneword"
+        ]
+      },
+      {
+        "args": [
+          "a b c d"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "sort_int_tab",
+    "level": 2,
+    "type": "function",
+    "subject": {
+      "assignment": "sort_int_tab",
+      "files": [
+        "sort_int_tab.c"
+      ],
+      "allowed": [],
+      "description": "Write the following function:\n\nvoid sort_int_tab(int *tab, unsigned int size);\n\nIt must sort (in-place) the 'tab' int array, that contains exactly 'size' members, in ascending order.\n\nDoubles must be preserved.\n\nInput is always coherent."
+    },
+    "referenceCode": "void\tswap_elements(int *tab, unsigned int p1, unsigned int p2)\n{\n\tint\ttmp;\n\n\ttmp = tab[p1];\n\ttab[p1] = tab[p2];\n\ttab[p2] = tmp;\n}\n\nvoid\tbubble_sort(int *tab, unsigned int size)\n{\n\tunsigned int\ti;\n\tunsigned int\tj;\n\n\ti = 0;\n\twhile (i < size)\n\t{\n\t\tj = 0;\n\t\twhile (j < size - 1)\n\t\t{\n\t\t\tif (tab[j] > tab[j + 1])\n\t\t\t\tswap_elements(tab, j, j + 1);\n\t\t\tj++;\n\t\t}\n\t\ti++;\n\t}\n}\n\nvoid\tsort_int_tab(int *tab, unsigned int size)\n{\n\tif (size <= 1)\n\t\treturn ;\n\tbubble_sort(tab, size);\n}\n",
+    "mainCode": "#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tsort_int_tab(int *tab, unsigned int size);\n\nint\tmain(int ac, char **av)\n{\n\tint\t\t\t\ttab[64];\n\tunsigned int\tsize;\n\tunsigned int\ti;\n\n\tif (ac < 2)\n\t{\n\t\tprintf(\"\\n\");\n\t\treturn (0);\n\t}\n\tsize = ac - 1;\n\ti = 0;\n\twhile (i < size)\n\t{\n\t\ttab[i] = atoi(av[i + 1]);\n\t\ti++;\n\t}\n\tsort_int_tab(tab, size);\n\ti = 0;\n\twhile (i < size)\n\t{\n\t\tprintf(\"%d \", tab[i]);\n\t\ti++;\n\t}\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
+    "testCases": [
+      {
+        "args": [
+          "-1",
+          "6",
+          "7",
+          "3",
+          "-6",
+          "7",
+          "2",
+          "4",
+          "5",
+          "2147483647",
+          "-2147483648"
+        ]
+      },
+      {
+        "args": [
+          "5",
+          "5",
+          "5"
+        ]
       },
       {
         "args": [
           "1"
         ]
-      },
-      {
-        "args": [
-          "1",
-          "2",
-          "3"
-        ]
       }
     ]
   },
   {
-    "name": "ft_list_find",
-    "level": 1,
+    "name": "ft_list_remove_if",
+    "level": 3,
     "type": "function",
     "subject": {
-      "assignment": "ft_list_find",
+      "assignment": "ft_list_remove_if",
       "files": [
-        "ft_list_find.c"
+        "ft_list_remove_if.c",
+        "ft_list.h"
       ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that returns a pointer to the first element whose data compares equal to data_ref via cmp (cmp returns 0 on a match, like memcmp). Return NULL if nothing matches.\n\nPrototype: t_list *ft_list_find(t_list *begin_list, void *data_ref, int (*cmp)(void *, void *));"
+      "allowed": [
+        "free"
+      ],
+      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function called ft_list_remove_if that removes from the passed list any element the data of which is \"equal\" to the reference data.\n\ncmp takes two void* and returns 0 when both parameters are equal.\n\nPrototype: void ft_list_remove_if(t_list **begin_list, void *data_ref, int (*cmp)());"
     },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nt_list\t*ft_list_find(t_list *begin_list, void *data_ref, int (*cmp)(void *, void *))\n{\n\twhile (begin_list)\n\t{\n\t\tif (cmp(begin_list->data, data_ref) == 0)\n\t\t\treturn (begin_list);\n\t\tbegin_list = begin_list->next;\n\t}\n\treturn (NULL);\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nt_list\t*ft_list_find(t_list *begin_list, void *data_ref, int (*cmp)(void *, void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic int\tft_cmp(void *a, void *b)\n{\n\treturn (*(int *)a - *(int *)b);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tt_list\t*found;\n\tint\t\ttarget;\n\n\ttarget = atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tfound = ft_list_find(list, &target, &ft_cmp);\n\tif (found)\n\t\tprintf(\"%d\\n\", *(int *)found->data);\n\telse\n\t\tprintf(\"NULL\\n\");\n\treturn (0);\n}\n",
+    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\tt_list;\n\nvoid\tft_list_remove_if(t_list **begin_list, void *data_ref, int (*cmp)())\n{\n\tt_list\t*curr;\n\tt_list\t*tmp;\n\n\twhile (*begin_list && cmp((*begin_list)->data, data_ref) == 0)\n\t{\n\t\tcurr = *begin_list;\n\t\t*begin_list = (*begin_list)->next;\n\t\tfree(curr);\n\t}\n\tcurr = *begin_list;\n\twhile (curr && curr->next)\n\t{\n\t\tif (cmp(curr->next->data, data_ref) == 0)\n\t\t{\n\t\t\ttmp = curr->next;\n\t\t\tcurr->next = tmp->next;\n\t\t\tfree(tmp);\n\t\t}\n\t\tcurr = curr->next;\n\t}\n}\n",
+    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_remove_if(t_list **begin_list, void *data_ref, int (*cmp)());\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic int\tft_cmp(void *a, void *b)\n{\n\treturn (*(int *)a - *(int *)b);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tint\t\ttarget;\n\n\tif (argc < 2)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn (0);\n\t}\n\ttarget = atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tft_list_remove_if(&list, &target, &ft_cmp);\n\tprint_list(list);\n\treturn (0);\n}\n",
     "testCases": [
       {
         "args": [
           "2",
+          "2",
           "1",
           "2",
-          "3"
+          "3",
+          "2"
         ]
       },
       {
@@ -313,48 +1088,42 @@
       {
         "args": [
           "1",
+          "1",
           "1"
         ]
       },
       {
         "args": [
-          "4",
-          "4",
-          "4",
-          "4"
+          "5"
         ]
       }
     ]
   },
   {
     "name": "ft_list_foreach",
-    "level": 2,
+    "level": 3,
     "type": "function",
     "subject": {
       "assignment": "ft_list_foreach",
       "files": [
-        "ft_list_foreach.c"
+        "ft_list_foreach.c",
+        "ft_list.h"
       ],
       "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that calls f on the data of every element of a linked list, in order.\n\nPrototype: void ft_list_foreach(t_list *begin_list, void (*f)(void *));"
+      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that takes a list and a function pointer, and applies this function to each element of the list.\n\nThe function pointed to by f will be used as follows: (*f)(list_ptr->data);\n\nPrototype: void ft_list_foreach(t_list *begin_list, void (*f)(void *));"
     },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_foreach(t_list *begin_list, void (*f)(void *))\n{\n\twhile (begin_list)\n\t{\n\t\tf(begin_list->data);\n\t\tbegin_list = begin_list->next;\n\t}\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_foreach(t_list *begin_list, void (*f)(void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic void\tft_double(void *data)\n{\n\t*(int *)data *= 2;\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\n\tlist = build_list(argc, argv, 1);\n\tft_list_foreach(list, &ft_double);\n\tprint_list(list);\n\treturn (0);\n}\n",
+    "referenceCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\tt_list;\n\nvoid\tft_list_foreach(t_list *begin_list, void (*f)(void *))\n{\n\tt_list\t*curr;\n\n\tcurr = begin_list;\n\twhile (curr)\n\t{\n\t\t(*f)(curr->data);\n\t\tcurr = curr->next;\n\t}\n}\n",
+    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_foreach(t_list *begin_list, void (*f)(void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic void\tft_double(void *data)\n{\n\t*(int *)data *= 2;\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\n\tlist = build_list(argc, argv, 1);\n\tft_list_foreach(list, &ft_double);\n\tprint_list(list);\n\treturn (0);\n}\n",
     "testCases": [
-      {
-        "args": []
-      },
-      {
-        "args": [
-          "1"
-        ]
-      },
       {
         "args": [
           "1",
           "2",
           "3"
         ]
+      },
+      {
+        "args": []
       },
       {
         "args": [
@@ -366,318 +1135,45 @@
     ]
   },
   {
-    "name": "ft_list_foreach_if",
-    "level": 2,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_list_foreach_if",
-      "files": [
-        "ft_list_foreach_if.c"
-      ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that calls f on the data of every element whose data compares equal to data_ref via cmp.\n\nPrototype: void ft_list_foreach_if(t_list *begin_list, void (*f)(void *), void *data_ref, int (*cmp)(void *, void *));"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_foreach_if(t_list *begin_list, void (*f)(void *), void *data_ref,\n\t\tint (*cmp)(void *, void *))\n{\n\twhile (begin_list)\n\t{\n\t\tif (cmp(begin_list->data, data_ref) == 0)\n\t\t\tf(begin_list->data);\n\t\tbegin_list = begin_list->next;\n\t}\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_foreach_if(t_list *begin_list, void (*f)(void *), void *data_ref,\n\t\tint (*cmp)(void *, void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic int\tft_cmp(void *a, void *b)\n{\n\treturn (*(int *)a - *(int *)b);\n}\n\nstatic void\tft_double(void *data)\n{\n\t*(int *)data *= 2;\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tint\t\ttarget;\n\n\ttarget = atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tft_list_foreach_if(list, &ft_double, &target, &ft_cmp);\n\tprint_list(list);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": [
-          "2",
-          "1",
-          "2",
-          "3",
-          "2"
-        ]
-      },
-      {
-        "args": [
-          "9",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "1",
-          "1",
-          "1"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_list_remove_if",
-    "level": 2,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_list_remove_if",
-      "files": [
-        "ft_list_remove_if.c"
-      ],
-      "allowed": [
-        "free"
-      ],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that removes every element whose data compares equal to data_ref via cmp, freeing its data with free_fct and the element itself.\n\nPrototype: void ft_list_remove_if(t_list **begin_list, void *data_ref, int (*cmp)(void *, void *), void (*free_fct)(void *));"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_remove_if(t_list **begin_list, void *data_ref,\n\t\tint (*cmp)(void *, void *), void (*free_fct)(void *))\n{\n\tt_list\t*current;\n\tt_list\t*prev;\n\tt_list\t*next;\n\n\tcurrent = *begin_list;\n\tprev = NULL;\n\twhile (current)\n\t{\n\t\tnext = current->next;\n\t\tif (cmp(current->data, data_ref) == 0)\n\t\t{\n\t\t\tif (prev)\n\t\t\t\tprev->next = next;\n\t\t\telse\n\t\t\t\t*begin_list = next;\n\t\t\tfree_fct(current->data);\n\t\t\tfree(current);\n\t\t}\n\t\telse\n\t\t\tprev = current;\n\t\tcurrent = next;\n\t}\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_remove_if(t_list **begin_list, void *data_ref,\n\t\tint (*cmp)(void *, void *), void (*free_fct)(void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic int\tft_cmp(void *a, void *b)\n{\n\treturn (*(int *)a - *(int *)b);\n}\n\nstatic void\tft_free(void *data)\n{\n\tfree(data);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tint\t\ttarget;\n\n\ttarget = atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tft_list_remove_if(&list, &target, &ft_cmp, &ft_free);\n\tprint_list(list);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": [
-          "2",
-          "1",
-          "2",
-          "3",
-          "2"
-        ]
-      },
-      {
-        "args": [
-          "9",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "1",
-          "1",
-          "1"
-        ]
-      },
-      {
-        "args": [
-          "1",
-          "1"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_list_sort",
-    "level": 2,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_list_sort",
-      "files": [
-        "ft_list_sort.c"
-      ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that sorts a linked list in place by swapping the data of its elements, using cmp (cmp(a, b) > 0 means a should come after b), like a simple bubble sort.\n\nPrototype: void ft_list_sort(t_list **begin_list, int (*cmp)(void *, void *));"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_sort(t_list **begin_list, int (*cmp)(void *, void *))\n{\n\tt_list\t*current;\n\tvoid\t*tmp;\n\tint\t\tswapped;\n\n\tif (!*begin_list)\n\t\treturn ;\n\tswapped = 1;\n\twhile (swapped)\n\t{\n\t\tswapped = 0;\n\t\tcurrent = *begin_list;\n\t\twhile (current->next)\n\t\t{\n\t\t\tif (cmp(current->data, current->next->data) > 0)\n\t\t\t{\n\t\t\t\ttmp = current->data;\n\t\t\t\tcurrent->data = current->next->data;\n\t\t\t\tcurrent->next->data = tmp;\n\t\t\t\tswapped = 1;\n\t\t\t}\n\t\t\tcurrent = current->next;\n\t\t}\n\t}\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_sort(t_list **begin_list, int (*cmp)(void *, void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic int\tft_cmp(void *a, void *b)\n{\n\treturn (*(int *)a - *(int *)b);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\n\tlist = build_list(argc, argv, 1);\n\tft_list_sort(&list, &ft_cmp);\n\tprint_list(list);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": []
-      },
-      {
-        "args": [
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "3",
-          "1",
-          "2"
-        ]
-      },
-      {
-        "args": [
-          "15",
-          "-3",
-          "0",
-          "-178",
-          "986",
-          "9"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_list_reverse_fun",
+    "name": "sort_list",
     "level": 3,
     "type": "function",
     "subject": {
-      "assignment": "ft_list_reverse_fun",
+      "assignment": "sort_list",
       "files": [
-        "ft_list_reverse_fun.c"
+        "sort_list.c"
       ],
       "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that reverses the order of a linked list's values WITHOUT changing any next pointer: only the data of the elements is exchanged.\n\nPrototype: void ft_list_reverse_fun(t_list *begin_list);"
+      "description": "Write the following function:\n\nt_list *sort_list(t_list *lst, int (*cmp)(int, int));\n\nThe list is defined with an int data field (not void*):\n\ntypedef struct s_list\n{\n\tint data;\n\tstruct s_list *next;\n}\tt_list;\n\nThis function must sort the list given as a parameter, using the function pointer cmp to select the order to apply, and returns a pointer to the first element of the sorted list.\n\nDuplications must remain.\n\nInputs will always be consistent.\n\nFunctions passed as cmp will always return a value different from 0 if a and b are in the right order, 0 otherwise. For example, the following function used as cmp will sort the list in ascending order:\n\nint ascending(int a, int b)\n{\n\treturn (a <= b);\n}"
     },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nstatic t_list\t*node_at(t_list *list, int idx)\n{\n\twhile (idx-- > 0)\n\t\tlist = list->next;\n\treturn (list);\n}\n\nstatic int\tlist_len(t_list *list)\n{\n\tint\tn;\n\n\tn = 0;\n\twhile (list)\n\t{\n\t\tn++;\n\t\tlist = list->next;\n\t}\n\treturn (n);\n}\n\nvoid\tft_list_reverse_fun(t_list *begin_list)\n{\n\tint\t\tlen;\n\tint\t\ti;\n\tt_list\t*a;\n\tt_list\t*b;\n\tvoid\t*tmp;\n\n\tlen = list_len(begin_list);\n\ti = 0;\n\twhile (i < len / 2)\n\t{\n\t\ta = node_at(begin_list, i);\n\t\tb = node_at(begin_list, len - 1 - i);\n\t\ttmp = a->data;\n\t\ta->data = b->data;\n\t\tb->data = tmp;\n\t\ti++;\n\t}\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_reverse_fun(t_list *begin_list);\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\n\tlist = build_list(argc, argv, 1);\n\tft_list_reverse_fun(list);\n\tprint_list(list);\n\treturn (0);\n}\n",
+    "referenceCode": "typedef struct s_list\n{\n\tint\t\t\t\tdata;\n\tstruct s_list\t*next;\n}\tt_list;\n\nvoid\tswap(int *a, int *b)\n{\n\tint\ttmp;\n\n\ttmp = *a;\n\t*a = *b;\n\t*b = tmp;\n}\n\nt_list\t*sort_list(t_list *lst, int (*cmp)(int, int))\n{\n\tt_list\t*begin;\n\tt_list\t*p;\n\n\tbegin = lst;\n\twhile (lst)\n\t{\n\t\tp = lst->next;\n\t\twhile (p)\n\t\t{\n\t\t\tif (!(*cmp)(lst->data, p->data))\n\t\t\t\tswap(&lst->data, &p->data);\n\t\t\tp = p->next;\n\t\t}\n\t\tlst = lst->next;\n\t}\n\treturn (begin);\n}\n",
+    "mainCode": "typedef struct s_list\n{\n\tint\t\t\t\tdata;\n\tstruct s_list\t*next;\n}\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nt_list\t*sort_list(t_list *lst, int (*cmp)(int, int));\n\nstatic int\tascending(int a, int b)\n{\n\treturn (a <= b);\n}\n\nstatic t_list\t*build(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = atoi(argv[i]);\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*l;\n\n\tl = build(argc, argv, 1);\n\tl = sort_list(l, ascending);\n\twhile (l)\n\t{\n\t\tprintf(\"%d \", l->data);\n\t\tl = l->next;\n\t}\n\tprintf(\"\\n\");\n\treturn (0);\n}\n",
     "testCases": [
       {
-        "args": []
-      },
-      {
         "args": [
-          "1"
-        ]
-      },
-      {
-        "args": [
-          "1",
-          "2",
           "3",
-          "4"
-        ]
-      },
-      {
-        "args": [
-          "9",
           "1",
-          "5"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_sorted_list_insert",
-    "level": 3,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_sorted_list_insert",
-      "files": [
-        "ft_sorted_list_insert.c"
-      ],
-      "allowed": [
-        "malloc"
-      ],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nGiven a list already sorted in ascending order according to cmp, write a function that inserts a new element containing data at the correct position to keep the list sorted.\n\nPrototype: void ft_sorted_list_insert(t_list **begin_list, void *data, int (*cmp)(void *, void *));"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_sorted_list_insert(t_list **begin_list, void *data, int (*cmp)(void *, void *))\n{\n\tt_list\t*node;\n\tt_list\t*current;\n\n\tnode = malloc(sizeof(t_list));\n\tnode->data = data;\n\tnode->next = NULL;\n\tif (!*begin_list || cmp(data, (*begin_list)->data) < 0)\n\t{\n\t\tnode->next = *begin_list;\n\t\t*begin_list = node;\n\t\treturn ;\n\t}\n\tcurrent = *begin_list;\n\twhile (current->next && cmp(data, current->next->data) >= 0)\n\t\tcurrent = current->next;\n\tnode->next = current->next;\n\tcurrent->next = node;\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_sorted_list_insert(t_list **begin_list, void *data, int (*cmp)(void *, void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic int\tft_cmp(void *a, void *b)\n{\n\treturn (*(int *)a - *(int *)b);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list;\n\tint\t\tvalue;\n\n\tvalue = atoi(argv[1]);\n\tlist = build_list(argc, argv, 2);\n\tft_sorted_list_insert(&list, &value, &ft_cmp);\n\tprint_list(list);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": [
-          "0",
-          "-3",
-          "15",
-          "986"
-        ]
-      },
-      {
-        "args": [
-          "100",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "-5",
-          "1",
-          "2",
-          "3"
-        ]
-      },
-      {
-        "args": [
-          "1"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_list_merge",
-    "level": 3,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_list_merge",
-      "files": [
-        "ft_list_merge.c"
-      ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nWrite a function that appends begin_list2 to the end of begin_list1 (simple concatenation, no ordering).\n\nPrototype: void ft_list_merge(t_list **begin_list1, t_list *begin_list2);"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_list_merge(t_list **begin_list1, t_list *begin_list2)\n{\n\tt_list\t*current;\n\n\tif (!*begin_list1)\n\t{\n\t\t*begin_list1 = begin_list2;\n\t\treturn ;\n\t}\n\tcurrent = *begin_list1;\n\twhile (current->next)\n\t\tcurrent = current->next;\n\tcurrent->next = begin_list2;\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_list_merge(t_list **begin_list1, t_list *begin_list2);\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list1;\n\tt_list\t*list2;\n\tint\t\ti;\n\tint\t\tsplit;\n\n\tsplit = argc;\n\ti = 1;\n\twhile (i < argc)\n\t{\n\t\tif (argv[i][0] == '-' && argv[i][1] == '-' && argv[i][2] == '\\0')\n\t\t{\n\t\t\tsplit = i;\n\t\t\tbreak ;\n\t\t}\n\t\ti++;\n\t}\n\tlist1 = build_list(split, argv, 1);\n\tlist2 = build_list(argc, argv, split + 1);\n\tft_list_merge(&list1, list2);\n\tprint_list(list1);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": [
-          "1",
-          "2",
-          "3",
-          "--",
-          "7",
-          "8",
-          "9"
-        ]
-      },
-      {
-        "args": [
-          "--",
-          "1",
-          "2"
-        ]
-      },
-      {
-        "args": [
-          "1",
-          "2",
-          "--"
-        ]
-      },
-      {
-        "args": [
-          "--"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "ft_sorted_list_merge",
-    "level": 3,
-    "type": "function",
-    "subject": {
-      "assignment": "ft_sorted_list_merge",
-      "files": [
-        "ft_sorted_list_merge.c"
-      ],
-      "allowed": [],
-      "description": "The list is defined as:\n\ntypedef struct s_list\n{\n\tstruct s_list *next;\n\tvoid *data;\n}\tt_list;\n\nGiven two lists already sorted in ascending order according to cmp, write a function that merges them into begin_list1 while keeping the result sorted.\n\nPrototype: void ft_sorted_list_merge(t_list **begin_list1, t_list *begin_list2, int (*cmp)(void *, void *));"
-    },
-    "referenceCode": "#include <stdlib.h>\n\ntypedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\nvoid\tft_sorted_list_merge(t_list **begin_list1, t_list *begin_list2,\n\t\tint (*cmp)(void *, void *))\n{\n\tt_list\t*result;\n\tt_list\t**tail;\n\tt_list\t*l1;\n\n\tl1 = *begin_list1;\n\tresult = NULL;\n\ttail = &result;\n\twhile (l1 && begin_list2)\n\t{\n\t\tif (cmp(l1->data, begin_list2->data) <= 0)\n\t\t{\n\t\t\t*tail = l1;\n\t\t\tl1 = l1->next;\n\t\t}\n\t\telse\n\t\t{\n\t\t\t*tail = begin_list2;\n\t\t\tbegin_list2 = begin_list2->next;\n\t\t}\n\t\ttail = &(*tail)->next;\n\t}\n\tif (l1)\n\t\t*tail = l1;\n\telse\n\t\t*tail = begin_list2;\n\t*begin_list1 = result;\n}\n",
-    "mainCode": "typedef struct s_list\n{\n\tstruct s_list\t*next;\n\tvoid\t\t\t*data;\n}\t\t\t\t\tt_list;\n\n#include <stdio.h>\n#include <stdlib.h>\n\nvoid\tft_sorted_list_merge(t_list **begin_list1, t_list *begin_list2,\n\t\tint (*cmp)(void *, void *));\n\nstatic t_list\t*build_list(int argc, char **argv, int start)\n{\n\tt_list\t*head;\n\tt_list\t*tail;\n\tt_list\t*node;\n\tint\t\ti;\n\tint\t\t*val;\n\n\thead = NULL;\n\ttail = NULL;\n\ti = start;\n\twhile (i < argc)\n\t{\n\t\tval = malloc(sizeof(int));\n\t\t*val = atoi(argv[i]);\n\t\tnode = malloc(sizeof(t_list));\n\t\tnode->data = val;\n\t\tnode->next = NULL;\n\t\tif (!head)\n\t\t\thead = node;\n\t\telse\n\t\t\ttail->next = node;\n\t\ttail = node;\n\t\ti++;\n\t}\n\treturn (head);\n}\n\nstatic void\tprint_list(t_list *list)\n{\n\tint\tfirst;\n\n\tif (!list)\n\t{\n\t\tprintf(\"(empty)\\n\");\n\t\treturn ;\n\t}\n\tfirst = 1;\n\twhile (list)\n\t{\n\t\tif (!first)\n\t\t\tprintf(\" \");\n\t\tprintf(\"%d\", *(int *)list->data);\n\t\tfirst = 0;\n\t\tlist = list->next;\n\t}\n\tprintf(\"\\n\");\n}\n\nstatic int\tft_cmp(void *a, void *b)\n{\n\treturn (*(int *)a - *(int *)b);\n}\n\nint\tmain(int argc, char **argv)\n{\n\tt_list\t*list1;\n\tt_list\t*list2;\n\tint\t\ti;\n\tint\t\tsplit;\n\n\tsplit = argc;\n\ti = 1;\n\twhile (i < argc)\n\t{\n\t\tif (argv[i][0] == '-' && argv[i][1] == '-' && argv[i][2] == '\\0')\n\t\t{\n\t\t\tsplit = i;\n\t\t\tbreak ;\n\t\t}\n\t\ti++;\n\t}\n\tlist1 = build_list(split, argv, 1);\n\tlist2 = build_list(argc, argv, split + 1);\n\tft_sorted_list_merge(&list1, list2, &ft_cmp);\n\tprint_list(list1);\n\treturn (0);\n}\n",
-    "testCases": [
-      {
-        "args": [
-          "1",
-          "3",
-          "5",
-          "--",
-          "2",
           "4",
+          "1",
+          "5",
+          "9",
+          "2",
           "6"
         ]
       },
       {
         "args": [
-          "--",
-          "1",
-          "2"
+          "1"
         ]
       },
       {
-        "args": [
-          "1",
-          "2",
-          "--"
-        ]
+        "args": []
       },
       {
         "args": [
           "-3",
           "0",
           "9",
-          "--",
           "-178",
           "15",
           "986"

@@ -64,7 +64,7 @@ const rawExams: Record<string, Omit<ExamWeek, "exercisesByLevel">> = {
     id: "exam_04",
     title: "Exam Week 04",
     description:
-      "Piscine exam week 4. Linked lists (t_list): traversal, insertion, callbacks, sorting, and merging.",
+      "Piscine exam week 4. Recursion, string/array algorithms, string-to-int conversions, and linked lists.",
     levelCount: 4,
     gradePerLevel: ((0 + 1) / 4) * 100,
     timeMinutes: 240,
