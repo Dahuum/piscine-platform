@@ -178,7 +178,9 @@ export default function RncpGate() {
   const [levelReached, toggleLevel] = usePersisted(`rncp:level:${certId}`)
   const [eventsAttended, toggleEvents] = usePersisted(`rncp:events:${certId}`)
 
-  const gateMet = commonCore && groupProjects && levelReached && eventsAttended && proExp.met && Boolean(suiteHit) && optionProgress.met
+  const checks = [commonCore, groupProjects, levelReached, eventsAttended, proExp.met, Boolean(suiteHit), optionProgress.met]
+  const metCount = checks.filter(Boolean).length
+  const gateMet = metCount === checks.length
 
   const missing = useMemo(() => {
     const list: string[] = []
@@ -219,6 +221,49 @@ export default function RncpGate() {
           ))}
         </div>
         <p className="rncp-lede">Both are optional diplomas layered on top of the cursus — clearing one adds a legal credential, it doesn&apos;t replace alumni status.</p>
+      </section>
+
+      <section className="content-panel">
+        <div className="panel-heading">
+          <div>
+            <p className="eyebrow">{cert.label}</p>
+            <h2>Choose your specialty</h2>
+          </div>
+        </div>
+        <div className="choice-grid">
+          {cert.options.map((o) => (
+            <ChoiceCard
+              key={o.key}
+              on={o.key === optKey}
+              title={o.name}
+              sub={`${o.categories.length} categories to clear`}
+              onPick={() => setOptKey(o.key)}
+            />
+          ))}
+        </div>
+        <p className="rncp-lede">Two independent routes to the same title — clear every category in one, you never need both.</p>
+      </section>
+
+      <section className="rncp-summary">
+        <div className="rncp-summary-head">
+          <div className="rncp-summary-frac">
+            <b>{metCount}</b><span>/{checks.length}</span>
+          </div>
+          <div>
+            <p className="eyebrow">{cert.label} · {option.name}</p>
+            <h2 className={gateMet ? 'text-good' : ''}>{gateMet ? `${cert.label} gate cleared` : 'Requirements met so far'}</h2>
+          </div>
+        </div>
+        <div className="meter rncp-summary-meter"><i className="filled" style={{ '--pct': metCount / checks.length } as CSSProperties} /></div>
+        {missing.length > 0 ? (
+          <ul className="rncp-missing">
+            {missing.map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="rncp-lede text-good" style={{ margin: '16px 0 0' }}>Every requirement below is either confirmed or matched from your project snapshot.</p>
+        )}
       </section>
 
       <section className="content-panel">
@@ -280,27 +325,6 @@ export default function RncpGate() {
       <section className="content-panel">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">{cert.label}</p>
-            <h2>Choose your specialty</h2>
-          </div>
-        </div>
-        <div className="choice-grid">
-          {cert.options.map((o) => (
-            <ChoiceCard
-              key={o.key}
-              on={o.key === optKey}
-              title={o.name}
-              sub={`${o.categories.length} categories to clear`}
-              onPick={() => setOptKey(o.key)}
-            />
-          ))}
-        </div>
-        <p className="rncp-lede">Two independent routes to the same title — clear every category in one, you never need both.</p>
-      </section>
-
-      <section className="content-panel">
-        <div className="panel-heading">
-          <div>
             <p className="eyebrow">{option.name}</p>
             <h2>Category requirements</h2>
           </div>
@@ -319,7 +343,7 @@ export default function RncpGate() {
               </div>
               <Meter pct={cp.xpPct} />
               <div className="rncp-card-meta">
-                <span>{fmt(cp.doneXp)} / {fmt(cp.category.minXp)} XP</span>
+                <span>{cp.doneXp.toLocaleString('en-US')} / {fmt(cp.category.minXp)} XP</span>
                 <span>{cp.doneCount}/{cp.category.minProjects} projects</span>
               </div>
               <div className="rncp-proj-chips">
@@ -330,23 +354,6 @@ export default function RncpGate() {
             </article>
           ))}
         </div>
-      </section>
-
-      <section className="content-panel rncp-result">
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">So, where does that leave you?</p>
-            <h2 className={gateMet ? 'text-good' : ''}>{gateMet ? `${cert.label} gate cleared` : `${cert.label}: not yet eligible`}</h2>
-          </div>
-          <span>for {option.name}</span>
-        </div>
-        {missing.length > 0 && (
-          <ul className="rncp-missing">
-            {missing.map((m) => (
-              <li key={m}>{m}</li>
-            ))}
-          </ul>
-        )}
       </section>
 
       <details className="rncp-legacy">

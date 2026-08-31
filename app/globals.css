@@ -1113,7 +1113,16 @@ kbd.hint {
 .lg-sw-open { border: 1px solid var(--rule) }
 .lg-sw-muted { border: 1px dashed var(--soft) }
 
-.rncp-result { border-top: 2px solid var(--ink) }
+/* the one boxed panel on the page — deliberately distinct from the plain
+   full-bleed sections around it, so the eye has a clear "here's where you
+   stand" anchor instead of six identical-looking panels in a row */
+.rncp-summary { margin: 34px 0; padding: 26px 28px 28px; border: 1px solid var(--ink); border-radius: 12px; background: var(--paper) }
+.rncp-summary-head { display: flex; align-items: center; gap: 22px }
+.rncp-summary-frac { display: flex; align-items: baseline; flex: none; font: 800 44px/1 var(--font-mono); letter-spacing: -.03em }
+.rncp-summary-frac span { font-size: 19px; color: var(--soft); font-weight: 600 }
+.rncp-summary-head h2 { margin: 4px 0 0; font-size: 25px; line-height: 1 }
+.rncp-summary-head .eyebrow { margin: 0 }
+.rncp-summary-meter { margin-top: 18px }
 .rncp-missing { display: grid; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none }
 .rncp-missing li { position: relative; padding-left: 16px; color: var(--soft); font-size: 12px; line-height: 1.55 }
 .rncp-missing li::before { content: '—'; position: absolute; left: 0; color: var(--coral) }
@@ -1193,6 +1202,7 @@ kbd.hint {
 @media (max-width: 800px) {
   .rncp-grid { grid-template-columns: 1fr }
   .choice-grid { grid-template-columns: 1fr }
+  .rncp-summary-head { flex-wrap: wrap }
 }
 
 /* ============ piscine: auth widget + modal ============ */
