@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  AnimatePresence,
   animate,
   motion,
   useMotionValue,
@@ -10,6 +11,7 @@ import {
   useTransform,
   type AnimationPlaybackControls,
 } from 'motion/react'
+import { Menu, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -35,6 +37,7 @@ export default function NavIsland() {
   const navRef = useRef<HTMLElement>(null)
   const [mode, setMode] = useState<'expanded' | 'compact'>('expanded')
   const [active, setActive] = useState('top')
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const activeId = pathname === '/projects' ? 'directory' : pathname === '/rncp' ? 'rncp' : pathname.startsWith('/piscine') ? 'piscine' : active
   const modeRef = useRef<'expanded' | 'compact'>('expanded')
   const lastY = useRef(0)
@@ -170,6 +173,17 @@ export default function NavIsland() {
     return () => clearTimeout(t)
   }, [pop])
 
+  /* mobile menu: close on navigation, and on Escape */
+  useEffect(() => {
+    setMobileNavOpen(false)
+  }, [pathname])
+  useEffect(() => {
+    if (!mobileNavOpen) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMobileNavOpen(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mobileNavOpen])
+
   /* scrollspy */
   useEffect(() => {
     const els = SECTIONS.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
@@ -182,6 +196,7 @@ export default function NavIsland() {
   }, [])
 
   return (
+    <>
     <motion.nav
       ref={navRef}
       className={`floating-nav ${mode === 'compact' ? 'is-compact' : ''}`}
@@ -240,8 +255,65 @@ export default function NavIsland() {
         <AuthWidget />
       </div>
       <div className="isl-actions">
+        <button
+          type="button"
+          className="isl-menu-btn"
+          aria-label={mobileNavOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileNavOpen}
+          onClick={() => setMobileNavOpen((v) => !v)}
+        >
+          {mobileNavOpen ? <X size={17} /> : <Menu size={17} />}
+        </button>
         <ThemeToggle />
       </div>
     </motion.nav>
+
+    <AnimatePresence>
+      {mobileNavOpen && (
+        <>
+          <motion.div
+            className="isl-mobile-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setMobileNavOpen(false)}
+          />
+          <motion.div
+            className="isl-mobile-menu"
+            role="menu"
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+          >
+            <a
+              href={onHome ? '#top' : '/'}
+              className={activeId === 'top' ? 'active' : ''}
+              onClick={(e) => { e.preventDefault(); setMobileNavOpen(false); onHome ? go('top') : (window.location.href = '/') }}
+            >
+              Overview
+            </a>
+            <a
+              href={onHome ? '#routes' : '/#routes'}
+              className={activeId === 'routes' ? 'active' : ''}
+              onClick={(e) => { e.preventDefault(); setMobileNavOpen(false); onHome ? go('routes') : (window.location.href = '/#routes') }}
+            >
+              Paths
+            </a>
+            <Link href="/projects" className={activeId === 'directory' ? 'active' : ''} onClick={() => { setActive('directory'); setMobileNavOpen(false) }}>
+              Projects
+            </Link>
+            <Link href="/rncp" className={activeId === 'rncp' ? 'active' : ''} onClick={() => { setActive('rncp'); setMobileNavOpen(false) }}>
+              RNCP
+            </Link>
+            <Link href="/piscine" className={activeId === 'piscine' ? 'active' : ''} onClick={() => { setActive('piscine'); setMobileNavOpen(false) }}>
+              Piscine
+            </Link>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+    </>
   )
 }

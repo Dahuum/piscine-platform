@@ -231,7 +231,19 @@ a { text-decoration: none; color: inherit }
   z-index: 2;
   display: flex;
   align-items: center;
+  gap: 6px;
 }
+.isl-menu-btn {
+  display: none;
+  width: 34px; height: 34px;
+  place-items: center;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  transition: background .3s ease, border-color .3s ease;
+}
+.isl-menu-btn:hover { background: var(--wash-hover) }
 .isl-mid {
   position: absolute;
   left: 50px; right: 48px; top: 0; bottom: 0;
@@ -268,6 +280,35 @@ a { text-decoration: none; color: inherit }
 /* island content morph: swallowed fast on shrink, staggered back on open */
 .is-compact .isl-mid { opacity: 0; transform: scale(.86) translateX(-6px); pointer-events: none }
 .floating-nav:not(.is-compact) .isl-mid { transition: opacity .3s ease .12s, transform .5s var(--spring) .12s }
+
+/* mobile nav menu: .nav-links disappears below 800px (see the max-width:800px
+   block), so this is the only way to reach Paths/Projects/RNCP/Piscine on a
+   phone — .isl-menu-btn's toggle button lives in .isl-actions above */
+.isl-mobile-backdrop { position: fixed; inset: 0; z-index: 25; background: rgba(0, 0, 0, .4) }
+.isl-mobile-menu {
+  position: fixed;
+  top: 78px;
+  left: 50%;
+  z-index: 26;
+  width: min(100% - 28px, 400px);
+  translate: -50% 0;
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid var(--nav-border);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 0 24px 60px var(--shadow-soft);
+}
+.isl-mobile-menu a {
+  padding: 13px 14px;
+  border-radius: 10px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.isl-mobile-menu a:active { background: var(--wash-hover) }
+.isl-mobile-menu a.active { background: var(--ink); color: var(--paper) }
 
 /* ============ hero ============ */
 .hero-grid {
@@ -759,6 +800,8 @@ footer {
   .floating-nav { margin-bottom: 45px }
   .floating-nav:before { width: calc(100vw - 28px) }
   .nav-links { display: none }
+  .isl-menu-btn { display: grid }
+  .isl-mid { right: 92px }
   .hero-grid { grid-template-columns: 1fr; gap: 35px; padding: 0 10px 40px }
   .hero-copy h1 { font-size: 72px }
   .hero-art { width: 270px; margin-right: 0 }
@@ -770,10 +813,19 @@ footer {
   .path-grid { grid-template-columns: 1fr }
   .search { margin-bottom: 12px }
   .project-list { max-height: none }
-  .project-main { grid-template-columns: 25px 8px minmax(0, 1fr) 18px }
-  .project-xp, .project-state { display: none }
-  .project-detail { display: block; padding-left: 43px }
-  .project-detail span { display: block; margin-top: 7px }
+  /* .dir-sort (A-Z/XP/Status) has no explicit basis, so nowrap flex was
+     shrinking it to a ~2px sliver to make room for search+count — the sort
+     buttons were still in the DOM and still "displayed", just invisible
+     and unusable. Give search its own full-width row and let the rest wrap
+     below at their natural size instead of fighting for the same row. */
+  .dir-controls { flex-wrap: wrap }
+  .dir-search { flex: 1 1 100% }
+  .dir-sort { flex: 1 1 auto }
+  /* .pxp (the raw XP figure) drops out — the status pill already tells you
+     done/available/locked, and reclaiming that column is what stops the
+     topic line truncating to almost nothing on a phone-width name column */
+  .project-main { grid-template-columns: minmax(0, 1fr) auto 20px; gap: 10px }
+  .pxp { display: none }
   footer { gap: 10px; flex-wrap: wrap }
 }
 
@@ -1033,9 +1085,18 @@ kbd.hint {
   .detail-grid { grid-template-columns: 1fr }
   .detail-side { border-left: 0; border-top: 1px solid var(--rule); padding-top: 14px }
   .stat-cell { padding: 13px 2px }
-  .xp-row { grid-template-columns: 108px 1fr; gap: 10px }
-  .xp-row-meta { display: none }
   .prevnext { grid-template-columns: 1fr }
+  /* label+meta squeezed into a fixed 170px/140px column each (the desktop
+     layout) is how long category names — "Cryptography & Maths",
+     "Professional Experience" — end up truncated to a couple of letters on
+     a phone. Stack label+meta on their own row above the bar instead, both
+     free to take the full width. Shared by the homepage XP-by-specialty
+     chart and the Piscine module list — must come after their base .xp-row
+     rule above so the cascade actually picks it up on narrow viewports. */
+  .xp-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label meta" "track track"; row-gap: 6px }
+  .xp-row-label { grid-area: label; text-align: left }
+  .xp-row-meta { grid-area: meta; text-align: right }
+  .xp-track { grid-area: track }
 }
 
 /* ============ detail page extras ============ */
